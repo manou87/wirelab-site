@@ -1,11 +1,11 @@
 # Brancher wirelab.pro (GoDaddy → GitHub Pages)
 
-Repo : `manou87/wirelab-pro` · dossier publié : `/docs`
+Repo public : **https://github.com/manou87/wirelab-site** (racine = site)
 
-## 1. GitHub (déjà prévu dans ce dépôt)
+## 1. GitHub
 
-Settings → Pages → Source = Deploy from branch · Branch `main` · Folder `/docs`  
-Custom domain = `wirelab.pro` · Enforce HTTPS quand le certificat est prêt.
+Settings → Pages → Branch `main` · Folder `/`  
+Custom domain = `wirelab.pro` (déjà dans `CNAME`) · coche **Enforce HTTPS** quand le certificat est prêt.
 
 ## 2. GoDaddy DNS
 
