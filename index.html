@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WireLab Pro — Simulateur de câblage électrique</title>
+  <meta name="description" content="WireLab Pro by SwissDZ : câble un tableau réel, simule le courant, apprend les protections. App iOS & Android." />
+  <link rel="canonical" href="https://wirelab.pro/" />
+  <link rel="icon" href="assets/favicon.png" type="image/png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="WireLab Pro" />
+  <meta property="og:title" content="WireLab Pro — Simulateur de câblage électrique" />
+  <meta property="og:description" content="Câble un tableau réel, simule le courant, apprend les protections. By SwissDZ." />
+  <meta property="og:url" content="https://wirelab.pro/" />
+  <meta property="og:image" content="https://wirelab.pro/assets/hero-logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0b1018;
+      --panel: #141b27;
+      --mist: #c5d0e0;
+      --white: #f4f7fb;
+      --amber: #f5c518;
+      --amber-deep: #d4a017;
+      --line: rgba(245, 197, 24, 0.28);
+      --soft: rgba(255, 255, 255, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "IBM Plex Sans", sans-serif;
+      color: var(--white);
+      background: var(--ink);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; height: auto; }
+
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      min-height: 100svh;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .hero__bg {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background:
+        linear-gradient(180deg, rgba(11, 16, 24, 0.25) 0%, rgba(11, 16, 24, 0.55) 45%, rgba(11, 16, 24, 0.96) 100%),
+        url("assets/hero-logo.png") center / cover no-repeat;
+      transform: scale(1.02);
+      animation: heroDrift 18s ease-in-out infinite alternate;
+    }
+    .hero__glow {
+      position: absolute;
+      inset: auto -10% -20% -10%;
+      height: 55%;
+      z-index: -1;
+      background: radial-gradient(ellipse at 50% 0%, rgba(245, 197, 24, 0.22), transparent 65%);
+      pointer-events: none;
+      animation: glowPulse 5s ease-in-out infinite;
+    }
+    @keyframes heroDrift {
+      from { transform: scale(1.02) translateY(0); }
+      to { transform: scale(1.06) translateY(-1.5%); }
+    }
+    @keyframes glowPulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+    .hero__inner {
+      width: min(1120px, calc(100% - 2.5rem));
+      margin: 0 auto;
+      padding: 5.5rem 0 3.25rem;
+    }
+    .brand {
+      font-family: Sora, sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.6rem, 8vw, 5.4rem);
+      letter-spacing: -0.04em;
+      line-height: 0.95;
+      margin-bottom: 0.85rem;
+    }
+    .brand span { color: var(--amber); }
+    .hero h1 {
+      font-family: Sora, sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.25rem, 3.2vw, 1.85rem);
+      letter-spacing: -0.02em;
+      max-width: 18ch;
+      margin-bottom: 0.75rem;
+    }
+    .hero p.lead {
+      color: var(--mist);
+      font-size: clamp(1rem, 2.2vw, 1.15rem);
+      max-width: 38ch;
+      margin-bottom: 1.6rem;
+    }
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.1rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      min-height: 48px;
+      padding: 0.8rem 1.2rem;
+      border-radius: 999px;
+      font-family: Sora, sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      border: 1px solid transparent;
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: var(--amber);
+      color: #14110a;
+    }
+    .btn-primary:hover { background: #ffd84a; }
+    .btn-ghost {
+      background: rgba(20, 27, 39, 0.55);
+      border-color: var(--line);
+      color: var(--white);
+      backdrop-filter: blur(8px);
+    }
+    .btn-ghost:hover { border-color: var(--amber); }
+    .byline {
+      color: var(--mist);
+      font-size: 0.92rem;
+    }
+    .byline strong { color: var(--white); font-weight: 600; }
+
+    section {
+      width: min(1120px, calc(100% - 2.5rem));
+      margin: 0 auto;
+      padding: 4.5rem 0;
+    }
+    .section-head {
+      max-width: 36rem;
+      margin-bottom: 2rem;
+    }
+    .section-head h2 {
+      font-family: Sora, sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      letter-spacing: -0.03em;
+      margin-bottom: 0.55rem;
+    }
+    .section-head p { color: var(--mist); }
+
+    .shots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .shots figure {
+      margin: 0;
+      border-radius: 1.1rem;
+      overflow: hidden;
+      border: 1px solid var(--soft);
+      background: var(--panel);
+      transform: translateY(12px);
+      opacity: 0;
+      animation: riseIn 0.8s ease forwards;
+    }
+    .shots figure:nth-child(2) { animation-delay: 0.12s; }
+    .shots figure:nth-child(3) { animation-delay: 0.24s; }
+    .shots img {
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      object-fit: cover;
+      object-position: top;
+    }
+    @keyframes riseIn {
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .links {
+      display: grid;
+      gap: 0.85rem;
+      max-width: 36rem;
+    }
+    .link-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.15rem;
+      border-radius: 0.9rem;
+      border: 1px solid var(--soft);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    .link-row:hover {
+      border-color: var(--line);
+      transform: translateX(3px);
+    }
+    .link-row strong {
+      font-family: Sora, sans-serif;
+      font-size: 1rem;
+      display: block;
+    }
+    .link-row span {
+      color: var(--mist);
+      font-size: 0.9rem;
+    }
+    .link-row em {
+      font-style: normal;
+      color: var(--amber);
+      font-family: Sora, sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    footer {
+      border-top: 1px solid var(--soft);
+      padding: 2rem 0 2.75rem;
+    }
+    .footer-inner {
+      width: min(1120px, calc(100% - 2.5rem));
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--mist);
+      font-size: 0.92rem;
+    }
+    .footer-inner a:hover { color: var(--amber); }
+
+    @media (max-width: 820px) {
+      .shots { grid-template-columns: 1fr; max-width: 320px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__bg" aria-hidden="true"></div>
+    <div class="hero__glow" aria-hidden="true"></div>
+    <div class="hero__inner">
+      <p class="brand">WireLab <span>Pro</span></p>
+      <h1>Le câblage électrique, comme sur le terrain.</h1>
+      <p class="lead">Place les modules, tire les fils, lance Play — le courant circule. Formation et atelier, by SwissDZ.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#liens">Télécharger / liens</a>
+        <a class="btn btn-ghost" href="privacy/confidentialite-fr.html">Confidentialité</a>
+      </div>
+      <p class="byline">By <strong>SwissDZ</strong> · wirelab.pro</p>
+    </div>
+  </header>
+
+  <section aria-labelledby="apercu-title">
+    <div class="section-head">
+      <h2 id="apercu-title">Aperçu dans l’app</h2>
+      <p>Bibliothèque pro, protections, couleurs de conducteurs IEC — prêt pour la formation.</p>
+    </div>
+    <div class="shots">
+      <figure><img src="assets/shot-cablage.png" alt="Écran câblage WireLab Pro" width="1080" height="1920" loading="lazy" /></figure>
+      <figure><img src="assets/shot-biblio.png" alt="Bibliothèque de composants" width="1080" height="1920" loading="lazy" /></figure>
+      <figure><img src="assets/shot-protections.png" alt="Protections et tableau" width="1080" height="1920" loading="lazy" /></figure>
+    </div>
+  </section>
+
+  <section id="liens" aria-labelledby="liens-title">
+    <div class="section-head">
+      <h2 id="liens-title">Liens</h2>
+      <p>Stores, code et contact. Les boutons Play / App Store se mettent à jour dès la publication.</p>
+    </div>
+    <div class="links">
+      <a class="link-row" href="https://play.google.com/store/apps/details?id=com.wirelab.pro" rel="noopener">
+        <span>
+          <strong>Google Play</strong>
+          <span>Android · com.wirelab.pro</span>
+        </span>
+        <em>Bientôt</em>
+      </a>
+      <a class="link-row" href="https://apps.apple.com/" rel="noopener">
+        <span>
+          <strong>App Store</strong>
+          <span>iPhone &amp; iPad</span>
+        </span>
+        <em>Bientôt</em>
+      </a>
+      <a class="link-row" href="https://github.com/manou87/wirelab-pro" rel="noopener">
+        <span>
+          <strong>GitHub</strong>
+          <span>Code &amp; page vitrine (ce site)</span>
+        </span>
+        <em>Ouvrir</em>
+      </a>
+      <a class="link-row" href="mailto:contact.electrodz@gmail.com">
+        <span>
+          <strong>Contact SwissDZ</strong>
+          <span>contact.electrodz@gmail.com</span>
+        </span>
+        <em>Écrire</em>
+      </a>
+      <a class="link-row" href="privacy/">
+        <span>
+          <strong>Confidentialité</strong>
+          <span>FR · EN · AR</span>
+        </span>
+        <em>Lire</em>
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <p>© <span id="y"></span> WireLab Pro by SwissDZ</p>
+      <p>
+        <a href="https://electro-dz.com/" rel="noopener">Electro DZ</a>
+        ·
+        <a href="https://github.com/manou87/wirelab-pro" rel="noopener">Modifier sur GitHub</a>
+      </p>
+    </div>
+  </footer>
+  <script>document.getElementById("y").textContent = new Date().getFullYear();</script>
+</body>
+</html>
