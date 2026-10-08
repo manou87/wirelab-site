@@ -1,0 +1,613 @@
+/* Labo terre V1 — piquets (scène photo réaliste + mesure) */
+.labo-terre {
+  position: fixed;
+  left: 3vw;
+  top: 4vh;
+  width: min(1100px, 94vw);
+  height: min(720px, 92vh);
+  z-index: 240;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #1a2332;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(148, 163, 184, 0.25);
+  color: #e2e8f0;
+  font: 600 13px/1.35 system-ui, sans-serif;
+}
+.labo-terre[hidden] { display: none !important; }
+.labo-terre-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, #243044, #1c2636);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  cursor: grab;
+  user-select: none;
+}
+.labo-terre-bar:active { cursor: grabbing; }
+.labo-terre-bar strong { flex: 1; font-size: 14px; letter-spacing: 0.02em; }
+.labo-terre-bar button {
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: #334155;
+  color: #f1f5f9;
+  cursor: pointer;
+  font: inherit;
+}
+.labo-terre-bar button:hover { background: #475569; }
+.labo-terre-bar button.primary { background: #0ea5e9; color: #0f172a; }
+.labo-terre-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 200px 1fr 220px;
+  min-height: 0;
+}
+@media (max-width: 720px) {
+  .labo-terre-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
+}
+.labo-terre-side {
+  padding: 10px;
+  background: #151c28;
+  border-right: 1px solid rgba(148, 163, 184, 0.15);
+  overflow: auto;
+}
+.labo-terre-side.right { border-right: 0; border-left: 1px solid rgba(148, 163, 184, 0.15); }
+.labo-terre-side h3 {
+  margin: 0 0 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+}
+.labo-step {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 8px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  background: rgba(51, 65, 85, 0.35);
+  border: 1px solid transparent;
+  cursor: default;
+}
+.labo-step.is-active {
+  border-color: #38bdf8;
+  background: rgba(14, 165, 233, 0.12);
+}
+.labo-step.is-done {
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(34, 197, 94, 0.1);
+}
+.labo-step .n {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #334155;
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+.labo-step.is-done .n { background: #16a34a; }
+.labo-step.is-active .n { background: #0284c7; }
+.labo-step .txt { font-size: 12px; font-weight: 600; }
+.labo-step .hint { display: block; margin-top: 2px; font-size: 11px; font-weight: 500; color: #94a3b8; }
+
+.labo-stage {
+  position: relative;
+  overflow: hidden;
+  background: #1a2a18 url("media/real/scene_bg.webp") center / cover no-repeat;
+}
+.labo-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 70%, transparent 40%, rgba(0, 0, 0, 0.28) 100%);
+  z-index: 1;
+}
+.labo-house,
+.labo-garden { display: none !important; }
+.labo-panel {
+  position: absolute;
+  left: 62%;
+  top: 46%;
+  width: 10%;
+  height: 12%;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  z-index: 2;
+}
+.labo-panel.is-pe {
+  box-shadow: 0 0 18px 4px rgba(234, 179, 8, 0.55);
+  border-radius: 50%;
+}
+.labo-panel.is-fx-pe {
+  animation: laboPeConnect 1.15s ease-in-out;
+}
+@keyframes laboPeConnect {
+  0%, 100% { box-shadow: 0 0 10px 2px rgba(234, 179, 8, 0.35); }
+  35% { box-shadow: 0 0 28px 10px rgba(234, 179, 8, 0.85); }
+  70% { box-shadow: 0 0 16px 6px rgba(34, 197, 94, 0.7); }
+}
+
+/* Zones = hitboxes invisibles (pas de cercles jaunes) */
+.labo-zone {
+  position: absolute;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: transparent;
+  font-size: 0;
+  z-index: 3;
+}
+.labo-zone.is-target {
+  background: transparent;
+  animation: none;
+  box-shadow: none;
+}
+.labo-zone[data-zone="stock"] { left: 72%; top: 18%; width: 20%; height: 22%; }
+.labo-zone[data-zone="drill"] { left: 10%; top: 58%; width: 18%; height: 20%; }
+.labo-zone[data-zone="plant"] { left: 14%; top: 62%; width: 16%; height: 20%; }
+.labo-zone[data-zone="barrette"] { left: 56%; top: 48%; width: 14%; height: 14%; }
+.labo-zone[data-zone="pe"] { left: 60%; top: 50%; width: 12%; height: 12%; }
+.labo-zone[data-zone="measure-e"] { left: 12%; top: 60%; width: 14%; height: 16%; }
+.labo-zone[data-zone="measure-s"] { left: 36%; top: 64%; width: 12%; height: 14%; }
+.labo-zone[data-zone="measure-h"] { left: 58%; top: 68%; width: 12%; height: 14%; }
+.labo-zone[data-zone="prise"] { left: 78%; top: 44%; width: 14%; height: 14%; }
+
+/* Flèches de guidage — remplacent les cercles jaune clair */
+.labo-guides {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.labo-guide {
+  position: absolute;
+  transform: translate(-50%, -90%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: laboArrowBounce 0.85s ease-in-out infinite;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.55));
+}
+.labo-guide-label {
+  margin-bottom: 2px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.88);
+  color: #fde68a;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.labo-guide-shaft {
+  fill: none;
+  stroke: #f59e0b;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.labo-guide-head {
+  fill: #f59e0b;
+  stroke: #78350f;
+  stroke-width: 1.2;
+}
+@keyframes laboArrowBounce {
+  0%, 100% { transform: translate(-50%, -96%); }
+  50% { transform: translate(-50%, -78%); }
+}
+@keyframes laboPulse {
+  50% { opacity: 0.65; }
+}
+
+.labo-prop {
+  position: absolute;
+  pointer-events: none;
+  z-index: 4;
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+  transition: opacity 0.25s ease;
+}
+.labo-prop.is-draggable {
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  z-index: 9;
+}
+.labo-prop.is-draggable:active,
+.labo-prop.is-dragging {
+  cursor: grabbing;
+  z-index: 11;
+}
+.labo-prop.piquet {
+  width: 36px;
+  height: 110px;
+  background: url("media/real/prop_piquet.png") center bottom / contain no-repeat;
+}
+.labo-prop.piquet.is-planted {
+  height: 64px;
+  transform: translateY(8px);
+}
+/* Pressage piquet — enfoncement visible */
+.labo-prop.piquet.is-fx-plant {
+  animation: laboPlantPress 1.05s ease-in-out;
+}
+@keyframes laboPlantPress {
+  0% { transform: translateY(-28px) scaleY(1.08); }
+  35% { transform: translateY(14px) scaleY(0.92); }
+  55% { transform: translateY(4px) scaleY(1.04); }
+  100% { transform: translateY(8px) scaleY(1); }
+}
+.labo-prop.hole {
+  width: 48px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(40, 24, 10, 0.75) 0%, rgba(40, 24, 10, 0.2) 70%, transparent 100%) !important;
+  filter: none;
+}
+.labo-prop.conductor {
+  width: 120px;
+  height: 70px;
+  background: url("media/real/prop_cable.png") center / contain no-repeat;
+  transform-origin: left center;
+}
+.labo-prop.conductor.is-fx-wire {
+  animation: laboWireDraw 1.15s ease-out;
+}
+@keyframes laboWireDraw {
+  0% { opacity: 0.2; transform: scaleX(0.15); filter: drop-shadow(0 0 8px #38bdf8); }
+  60% { opacity: 1; transform: scaleX(1.05); filter: drop-shadow(0 0 12px #38bdf8); }
+  100% { opacity: 1; transform: scaleX(1); filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35)); }
+}
+.labo-prop.barrette {
+  width: 72px;
+  height: 40px;
+  background: url("media/real/prop_barrette.png") center / contain no-repeat;
+}
+.labo-prop.barrette.is-open {
+  filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.85)) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+}
+.labo-prop.barrette.is-fx-connect {
+  animation: laboConnectPulse 0.9s ease-in-out;
+}
+@keyframes laboConnectPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35)); }
+  40% { transform: scale(1.12); filter: drop-shadow(0 0 16px #22c55e) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35)); }
+}
+.labo-prop.drill {
+  width: 88px;
+  height: 60px;
+  background: url("media/real/prop_drill.png") center / contain no-repeat;
+}
+.labo-prop.drill.is-fx-drill {
+  animation: laboDrillPress 1s ease-in-out;
+}
+@keyframes laboDrillPress {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  15% { transform: translate(2px, 6px) rotate(-4deg); }
+  30% { transform: translate(-2px, 10px) rotate(3deg); }
+  45% { transform: translate(2px, 8px) rotate(-2deg); }
+  60% { transform: translate(-1px, 12px) rotate(2deg); }
+  80% { transform: translate(0, 4px) rotate(0deg); }
+}
+.labo-prop.stake-aux {
+  width: 28px;
+  height: 90px;
+  background: url("media/real/prop_piquet.png") center bottom / contain no-repeat;
+}
+.labo-prop.stake-aux.s { filter: drop-shadow(0 0 6px #38bdf8) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35)); }
+.labo-prop.stake-aux.h { filter: drop-shadow(0 0 6px #f87171) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35)); }
+.labo-prop.stake-aux.is-dragging,
+.labo-prop.piquet.is-dragging {
+  filter: drop-shadow(0 0 10px #fbbf24) drop-shadow(0 8px 14px rgba(0, 0, 0, 0.45));
+}
+.labo-prop.fiche-choco {
+  width: 56px;
+  height: 56px;
+  background: url("media/real/prop_fiche.png") center / contain no-repeat;
+}
+.labo-prop.croco {
+  width: 70px;
+  height: 48px;
+  background: url("media/real/prop_croco.png") center / contain no-repeat;
+}
+.labo-prop.pointes {
+  width: 54px;
+  height: 40px;
+  background: url("media/real/prop_croco.png") center / contain no-repeat;
+  opacity: 0.9;
+}
+
+.labo-tech {
+  position: absolute;
+  width: min(38vw, 200px);
+  height: min(64vw, 340px);
+  left: 58%;
+  top: 10%;
+  z-index: 12; /* v87: devant instructions / overlays */
+  cursor: grab;
+  touch-action: none;
+  /* Pas de transition left/top : le glissement + sprite « mid-stride » donnait un faux effet de marche. */
+  transition: none;
+  background: url("media/real/tech_idle.png") center bottom / contain no-repeat;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.45));
+}
+.labo-tech:active { cursor: grabbing; }
+.labo-tech .head,
+.labo-tech .body,
+.labo-tech .legs,
+.labo-tech .fluke-hand { display: none !important; }
+.labo-tech.pose-idle { background-image: url("media/real/tech_idle.png"); }
+/* Ancien tech_carry.png = personnage en train de marcher — remplacé par pose debout (idle). */
+.labo-tech.pose-carry { background-image: url("media/real/tech_idle.png"); }
+.labo-tech.pose-drill { background-image: url("media/real/tech_drill.png"); }
+.labo-tech.pose-plant { background-image: url("media/real/tech_plant.png"); }
+.labo-tech.pose-kneel { background-image: url("media/real/tech_kneel.png"); }
+.labo-tech.has-fluke { filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 8px rgba(234, 179, 8, 0.35)); }
+/* Travail utile (pressage / raccord) — pas de marche */
+.labo-tech.is-fx-work {
+  animation: laboTechWork 0.95s ease-in-out;
+}
+@keyframes laboTechWork {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(6px); }
+  55% { transform: translateY(2px); }
+  75% { transform: translateY(8px); }
+}
+
+/* Fluke + cordons — visibles dès l’étape Mesurer */
+.labo-fluke-dock {
+  position: absolute;
+  right: 1%;
+  bottom: 2%;
+  width: 44%;
+  max-width: 300px;
+  aspect-ratio: 400 / 214;
+  z-index: 10;
+  border-radius: 0;
+  overflow: hidden;
+  background: transparent;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px) scale(0.96);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.labo-fluke-dock.is-on {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+.labo-fluke-dock .labo-fluke-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #111827;
+}
+.labo-fluke-dock iframe.labo-fluke-live {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 400px;
+  height: 214px;
+  border: 0;
+  background: transparent;
+  transform-origin: 0 0;
+  pointer-events: auto;
+}
+.labo-fluke-dock .labo-fluke-wait {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #0f172a;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+  z-index: 1;
+}
+.labo-fluke-dock.is-ready .labo-fluke-wait { display: none; }
+.labo-fluke-label {
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  z-index: 2;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #e2e8f0;
+  text-shadow: 0 1px 2px #000;
+  pointer-events: none;
+}
+
+.labo-cords {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 7;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.labo-cords.is-on { opacity: 1; }
+.labo-cords path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3.6;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
+  stroke-dasharray: 140;
+  animation: laboCordFlow 1.4s linear infinite;
+}
+@keyframes laboCordFlow {
+  to { stroke-dashoffset: -140; }
+}
+.labo-cords path.cord-l { stroke: #92400e; }
+.labo-cords path.cord-n { stroke: #0088ce; }
+.labo-cords path.cord-pe { stroke: #c4d600; stroke-width: 4; }
+.labo-cords path.cord-h { stroke: #ef4444; stroke-width: 4; }
+.labo-cords path.cord-s { stroke: #0ea5e9; stroke-width: 4; }
+.labo-cords path.cord-es { stroke: #a78bfa; }
+
+.labo-kit-hint {
+  position: absolute;
+  left: 2%;
+  bottom: 3%;
+  z-index: 9;
+  max-width: 46%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #f8fafc;
+  font-size: 11px;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.labo-kit-hint.is-on { opacity: 1; }
+.labo-fluke-dock { z-index: 10; }
+.labo-cords { z-index: 8; }
+
+.labo-inventory {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.labo-inv {
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  font-size: 11px;
+  cursor: pointer;
+}
+.labo-inv.is-have { border-color: #22c55e; color: #bbf7d0; }
+.labo-inv.is-need {
+  border-color: #fbbf24;
+  animation: laboInvPulse 1.1s ease-in-out infinite;
+}
+@keyframes laboInvPulse {
+  50% { border-color: #fde68a; background: rgba(251, 191, 36, 0.12); }
+}
+
+.labo-coach {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  font-size: 12px;
+  font-weight: 600;
+  min-height: 64px;
+}
+.labo-coach .score {
+  display: block;
+  margin-top: 8px;
+  color: #86efac;
+  font-size: 12px;
+}
+.labo-methods {
+  display: grid;
+  gap: 6px;
+}
+.labo-methods button {
+  text-align: left;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+.labo-methods button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.labo-methods button.is-on {
+  border-color: #38bdf8;
+  background: rgba(14, 165, 233, 0.15);
+}
+.labo-readout {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #052e16;
+  border: 1px solid #16a34a;
+  font-family: ui-monospace, monospace;
+  font-size: 18px;
+  font-weight: 800;
+  color: #bbf7d0;
+  text-align: center;
+}
+.labo-readout small {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #86efac;
+}
+.labo-acc-list {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+}
+.labo-acc {
+  font-size: 11px;
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: #0f172a;
+  border: 1px solid #334155;
+}
+.labo-acc.is-on { border-color: #22c55e; color: #bbf7d0; }
+.labo-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.labo-footer-actions button {
+  flex: 1;
+  min-width: 90px;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px;
+  background: #334155;
+  color: #f8fafc;
+  cursor: pointer;
+  font: inherit;
+}
+.labo-footer-actions button.primary { background: #16a34a; color: #052e16; }
+
+/* v87-labo-person : scène + technicien en premier (pas le tableau d’instructions). */
+@media (max-width: 720px) {
+  .labo-terre-body {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: minmax(52vh, 1fr) auto auto !important;
+  }
+  .labo-stage { order: 0; min-height: 52vh; }
+  .labo-terre-side:not(.right) { order: 2; max-height: 28vh; }
+  .labo-terre-side.right { order: 1; max-height: 22vh; }
+  .labo-tech {
+    width: min(46vw, 220px) !important;
+    height: min(78vw, 380px) !important;
+    left: 50% !important;
+    top: 8% !important;
+    transform: translateX(-40%);
+    z-index: 14 !important;
+  }
+}
