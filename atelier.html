@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Atelier — WireLab Pro</title>
+  <meta name="description" content="Atelier WireLab Pro : tableau électrique pédagogique pour composer et comprendre un câblage. Accès par code." />
+  <link rel="canonical" href="https://wirelab.pro/atelier.html" />
+  <link rel="icon" href="assets/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0b1018;
+      --panel: #141b27;
+      --mist: #c5d0e0;
+      --white: #f4f7fb;
+      --amber: #f5c518;
+      --line: rgba(245, 197, 24, 0.28);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      font-family: "IBM Plex Sans", sans-serif;
+      color: var(--white);
+      background:
+        radial-gradient(ellipse 70% 40% at 50% -10%, rgba(245, 197, 24, 0.16), transparent 60%),
+        var(--ink);
+    }
+    a { color: inherit; text-decoration: none; }
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.85rem 1.1rem;
+    }
+    .brand {
+      font-family: Sora, sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .brand span { color: var(--amber); }
+    .langs { display: flex; gap: 0.35rem; }
+    .langs button {
+      background: transparent;
+      color: var(--mist);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px;
+      padding: 0.25rem 0.55rem;
+      font-family: Sora, sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .langs button.active { color: #14110a; background: var(--amber); border-color: var(--amber); }
+    .gate {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem 2.5rem;
+    }
+    .gate[hidden], .stage[hidden] { display: none !important; }
+    .card {
+      width: min(420px, 100%);
+      padding: 1.7rem 1.5rem 1.6rem;
+      border-radius: 1.15rem;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+      border: 1px solid var(--line);
+    }
+    .badge {
+      display: inline-block;
+      margin-bottom: 0.7rem;
+      padding: 0.22rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(245, 197, 24, 0.16);
+      color: var(--amber);
+      font-family: Sora, sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    h1 {
+      font-family: Sora, sans-serif;
+      font-size: clamp(1.6rem, 4vw, 2rem);
+      letter-spacing: -0.03em;
+      margin-bottom: 0.45rem;
+    }
+    .lead { color: var(--mist); margin-bottom: 1.2rem; }
+    label { display: block; font-weight: 600; margin-bottom: 0.4rem; }
+    input {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 0.8rem;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: #0f1622;
+      color: var(--white);
+      text-align: center;
+      letter-spacing: 0.08em;
+      font-size: 1.05rem;
+      padding: 0.7rem 0.8rem;
+    }
+    input:focus { outline: 2px solid rgba(245, 197, 24, 0.45); border-color: var(--amber); }
+    button[type="submit"] {
+      width: 100%;
+      margin-top: 0.8rem;
+      min-height: 48px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--amber);
+      color: #14110a;
+      font-family: Sora, sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .err { margin-top: 0.7rem; color: #f87171; font-weight: 600; }
+    .err[hidden] { display: none; }
+    .stage {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .stage iframe { flex: 1; width: 100%; border: 0; background: #0b1018; min-height: 70vh; }
+    .loading {
+      text-align: center;
+      color: var(--mist);
+      padding: 0.6rem;
+    }
+    html[dir="rtl"] .lead, html[dir="rtl"] label { text-align: right; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/">WireLab <span>Pro</span></a>
+    <div class="langs" role="group" aria-label="Langue">
+      <button type="button" class="active" data-lang="fr">FR</button>
+      <button type="button" data-lang="ar">AR</button>
+      <button type="button" data-lang="en">EN</button>
+    </div>
+  </header>
+
+  <main class="gate" id="gate">
+    <form class="card" id="gateForm" autocomplete="off">
+      <p class="badge" data-i18n="badge">WireLab</p>
+      <h1 data-i18n="title">Atelier</h1>
+      <p class="lead" data-i18n="lead">Compose un tableau, tire les fils, lance Play. Accès par code.</p>
+      <label for="code" data-i18n="codeLabel">Code d’accès</label>
+      <input id="code" name="code" type="password" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="••••••••" required />
+      <button type="submit" data-i18n="enter">Entrer</button>
+      <p class="err" id="err" hidden data-i18n="err">Code incorrect. Réessayez.</p>
+    </form>
+  </main>
+
+  <div class="stage" id="stage" hidden>
+    <p class="loading" id="loading" data-i18n="loading">Chargement du tableau…</p>
+    <iframe id="panel" title="Atelier WireLab Pro" allow="fullscreen" allowfullscreen></iframe>
+  </div>
+
+  <script>
+    (function () {
+      var ACCESS_CODE = "athmano";
+      var UNLOCK_KEY = "wirelab-atelier-unlocked";
+      var LANG_KEY = "wirelab-atelier-lang";
+      var PANEL_SRC = "https://electro-dz.com/swissdz-panel/index.html?ecole=1";
+      var T = {
+        fr: {
+          title: "Atelier",
+          badge: "WireLab",
+          lead: "Compose un tableau, tire les fils, lance Play. Accès par code.",
+          codeLabel: "Code d’accès",
+          enter: "Entrer",
+          err: "Code incorrect. Réessayez.",
+          loading: "Chargement du tableau…",
+          meta: "Atelier — WireLab Pro"
+        },
+        ar: {
+          title: "الورشة",
+          badge: "WireLab",
+          lead: "ركّب اللوحة، اسحب الأسلاك، شغّل المحاكاة. الدخول برمز.",
+          codeLabel: "رمز الدخول",
+          enter: "دخول",
+          err: "رمز غير صحيح. أعد المحاولة.",
+          loading: "جاري تحميل اللوحة…",
+          meta: "الورشة — WireLab Pro"
+        },
+        en: {
+          title: "Workshop",
+          badge: "WireLab",
+          lead: "Build a board, pull the wires, hit Play. Access code required.",
+          codeLabel: "Access code",
+          enter: "Enter",
+          err: "Incorrect code. Try again.",
+          loading: "Loading the board…",
+          meta: "Workshop — WireLab Pro"
+        }
+      };
+      var lang = "fr";
+      try { lang = localStorage.getItem(LANG_KEY) || "fr"; } catch (e) {}
+      if (!T[lang]) lang = "fr";
+
+      function t(k) { return T[lang][k]; }
+      function applyLang(next) {
+        lang = T[next] ? next : "fr";
+        try { localStorage.setItem(LANG_KEY, lang); } catch (e) {}
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+        document.title = t("meta");
+        document.querySelectorAll("[data-i18n]").forEach(function (el) {
+          el.textContent = t(el.getAttribute("data-i18n"));
+        });
+        document.querySelectorAll("[data-lang]").forEach(function (btn) {
+          btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
+        });
+      }
+      function unlocked() {
+        try { return sessionStorage.getItem(UNLOCK_KEY) === "1"; } catch (e) { return false; }
+      }
+      function openPanel() {
+        document.getElementById("gate").hidden = true;
+        document.getElementById("stage").hidden = false;
+        var frame = document.getElementById("panel");
+        if (!frame.getAttribute("src")) frame.src = PANEL_SRC;
+      }
+      document.querySelectorAll("[data-lang]").forEach(function (btn) {
+        btn.addEventListener("click", function () { applyLang(btn.getAttribute("data-lang")); });
+      });
+      document.getElementById("gateForm").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var input = document.getElementById("code");
+        var err = document.getElementById("err");
+        var value = String(input.value || "").trim().toLowerCase().replace(/\s+/g, "");
+        if (value === ACCESS_CODE) {
+          err.hidden = true;
+          try { sessionStorage.setItem(UNLOCK_KEY, "1"); } catch (e) {}
+          openPanel();
+          return;
+        }
+        err.hidden = false;
+        err.textContent = t("err");
+        input.value = "";
+        input.focus();
+      });
+      document.getElementById("panel").addEventListener("load", function () {
+        document.getElementById("loading").hidden = true;
+      });
+      applyLang(lang);
+      if (unlocked()) openPanel();
+    })();
+  </script>
+</body>
+</html>
