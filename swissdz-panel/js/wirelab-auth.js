@@ -1,5 +1,5 @@
 /**
- * WireLab — auth Supabase (projet WireLab, séparé d’electro-dz.com).
+ * WireLab — auth Supabase (projet WireLab dédié).
  * URL + clé publishable publiques ; pas de secrets serveur.
  *
  * Env / inject optionnels (sinon défauts ci-dessous) :
@@ -75,8 +75,8 @@
     var s = String(url || '');
     if (!s) return true;
     if (/\/login\.html/i.test(s)) return true;
-    // Site marketing OK seulement si callback panel sous /swissdz-panel/
-    if (/electro-dz\.com/i.test(s) && !/\/swissdz-panel\//i.test(s)) return true;
+    // Jamais rediriger vers un autre site (WireLab reste autonome).
+    if (/electro-dz\.com/i.test(s)) return true;
     return false;
   }
 
