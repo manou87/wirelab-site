@@ -162,7 +162,7 @@
       } else {
         btn.setAttribute('data-i18n', 'btnSignIn');
         btn.textContent = t('btnSignIn', 'Connexion');
-        btn.title = t('btnSignInTitle', 'Connexion Google ou e-mail');
+        btn.title = t('btnSignInTitle', 'Connexion Google');
         btn.setAttribute('data-i18n-title', 'btnSignInTitle');
       }
     }
@@ -286,14 +286,14 @@
         throw new Error(
           t(
             'authExpoGoogleStub',
-            'Google sur Expo : le shell natif doit ouvrir la session OAuth (redirect à autoriser dans Supabase). Utilisez l’e-mail en attendant.'
+            'Google sur Expo : le shell natif doit ouvrir la session OAuth. Réessayez dans l’app.'
           )
         );
       }
       setMsg(
         t(
           'authExpoGoogleWait',
-          'Ouverture Google… Si rien ne se passe, utilisez e-mail / mot de passe.'
+          'Ouverture Google…'
         ),
         'info'
       );
