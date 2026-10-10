@@ -157,7 +157,7 @@
       "btnSignedInTitle": "Compte connecté",
       "authTitle": "Connexion",
       "authLead": "Connectez-vous avec Google pour entrer dans le panneau.",
-      "authSoon": "La connexion arrive bientôt.",
+      "authSoon": "La connexion arrive bientôt. Pas d’auth Google ni e-mail pour l’instant.",
       "authSoonBadge": "bientôt",
       "authEmailLabel": "E-mail",
       "authEmailPlaceholder": "vous@email.com",
@@ -175,7 +175,7 @@
       "authSignedOut": "Déconnecté.",
       "authExpoNote": "Expo Go : Google nécessite un redirect autorisé.",
       "authExpoGoogleStub": "Google sur Expo : redirect à autoriser. Réessayez dans l’app.",
-      "authExpoGoogleWait": "Ouverture Google…",
+      "authExpoGoogleWait": "Ouverture Google… Si rien ne se passe, utilisez e-mail / mot de passe.",
       "brandMenuKnx": "KNX",
       "brandMenuFormation": "Formation",
       "ctxSheet": "Fiche composant",
@@ -650,7 +650,7 @@
       "authSignedOut": "Signed out.",
       "authExpoNote": "Expo Go: Google needs an allowed redirect URL.",
       "authExpoGoogleStub": "Google on Expo: allow the redirect, then try again.",
-      "authExpoGoogleWait": "Opening Google…",
+      "authExpoGoogleWait": "Opening Google… If nothing happens, use email/password.",
       "brandMenuKnx": "KNX",
       "brandMenuFormation": "Training",
       "ctxSheet": "Component sheet",
@@ -1116,9 +1116,9 @@
           "authNeedEmail": "أدخل بريدك الإلكتروني.",
           "authMagicSent": "تم إرسال الرابط. افتح البريد ثم عُد هنا.",
           "authSignedOut": "تم تسجيل الخروج.",
-          "authExpoNote": "Expo Go: Google يحتاج رابط إعادة توجيه مسموحًا.",
-          "authExpoGoogleStub": "Google على Expo: اسمح بإعادة التوجيه ثم أعد المحاولة.",
-          "authExpoGoogleWait": "فتح Google…",
+          "authExpoNote": "Expo Go: البريد/كلمة المرور يعملان هنا. Google يحتاج رابط إعادة توجيه في Supabase.",
+          "authExpoGoogleStub": "Google على Expo: اسمح بإعادة التوجيه في Supabase. استخدم البريد مؤقتًا.",
+          "authExpoGoogleWait": "فتح Google… إن لم يحدث شيء، استخدم البريد/كلمة المرور.",
           "brandMenuKnx": "KNX",
           "brandMenuFormation": "تكوين",
           "ctxSheet": "بطاقة المكون",
@@ -2407,7 +2407,6 @@
   function normalizeLang(raw) {
     var s = String(raw || "").trim().toLowerCase();
     if (s.indexOf("ar") === 0) return "ar";
-    if (s.indexOf("es") === 0) return "en";
     if (s.indexOf("en") === 0) return "en";
     return "fr";
   }
