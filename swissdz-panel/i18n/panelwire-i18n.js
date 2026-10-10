@@ -2404,6 +2404,7 @@
   function normalizeLang(raw) {
     var s = String(raw || "").trim().toLowerCase();
     if (s.indexOf("ar") === 0) return "ar";
+    if (s.indexOf("es") === 0) return "en";
     if (s.indexOf("en") === 0) return "en";
     return "fr";
   }
