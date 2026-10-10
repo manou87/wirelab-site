@@ -1,29 +1,29 @@
 /**
- * WireLab — auth Supabase (même projet que electro-dz.com).
- * Réutilise URL + clé publishable du site ; pas de secrets serveur.
+ * WireLab — auth Supabase (projet WireLab, séparé d’electro-dz.com).
+ * URL + clé publishable publiques ; pas de secrets serveur.
  *
- * Env / inject optionnels (sinon défauts site) :
+ * Env / inject optionnels (sinon défauts ci-dessous) :
  *   window.__WIRELAB_SUPABASE__ = { url, anonKey }
  *   window.__WIRELAB_OAUTH_REDIRECT__  (shell RN : Linking.createURL('auth-callback'))
  *   EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY (injectés par le shell RN)
  *
- * Redirect OAuth (Supabase → Authentication → Redirect URLs) :
- *   wirelab://auth-callback          ← Expo natif / APK (obligatoire)
- *   exp://* /--/auth-callback        (Expo Go)
- *   http://localhost:8777/swissdz-panel/**
- *   http://127.0.0.1:8777/swissdz-panel/**
- *   http://<LAN>:8777/swissdz-panel/**  (web / WebView sans deep link)
- * Ne pas utiliser login.html ni le Site URL marketing comme redirect WireLab.
+ * Redirect OAuth (Supabase → Authentication → URL Configuration) :
+ *   Site URL : https://wirelab.pro
+ *   https://wirelab.pro/swissdz-panel/auth-callback.html
+ *   https://wirelab.pro/swissdz-panel/**
+ *   wirelab://auth-callback
+ *   exp://* /--/auth-callback (Expo Go)
+ * Le retour Google reste sur ce panneau (wirelab.pro).
  *
- * swissdz-rev: v34-auth-stay
+ * swissdz-rev: v36-own-supabase
  */
 (function (g) {
   'use strict';
 
-  var SITE_SUPABASE_URL = 'https://wxiqqcnzcxswdqzubxyt.supabase.co';
-  /** Clé publishable publique (identique website/js/site-config.js). */
+  var SITE_SUPABASE_URL = 'https://wrwnzktssfsffkpzfsgk.supabase.co';
+  /** Clé publishable publique du projet WireLab. */
   var SITE_SUPABASE_ANON =
-    'sb_publishable_kEfm0tZfrZ8xXCx_PyWfhg_R93sPJkR';
+    'sb_publishable_TMXHD1DRNuFwds_se7treg_VKkd1E4W';
 
   var STORAGE_KEY_HINT = 'wirelab-auth-email';
   var client = null;
@@ -42,10 +42,9 @@
 
   function cfg() {
     var inj = g.__WIRELAB_SUPABASE__ || {};
-    var site = (g.ElectroDzSite && g.ElectroDzSite.supabase) || {};
     return {
-      url: String(inj.url || site.url || SITE_SUPABASE_URL).trim(),
-      anonKey: String(inj.anonKey || site.anonKey || SITE_SUPABASE_ANON).trim(),
+      url: String(inj.url || SITE_SUPABASE_URL).trim(),
+      anonKey: String(inj.anonKey || SITE_SUPABASE_ANON).trim(),
     };
   }
 
