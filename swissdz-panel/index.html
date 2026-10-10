@@ -2795,10 +2795,31 @@
       display:flex; flex-direction:column; gap:4px; align-items:center; justify-content:center;
       width:100%; min-width:0; max-width:none; text-align:center;
       margin:0; border:1px solid #eef2f7; border-radius:10px; padding:8px 6px;
-      background:#fafbfc; cursor:pointer;
+      background:#fafbfc; cursor:grab;
       touch-action:manipulation; -webkit-tap-highlight-color:transparent;
     }
+    .item:active { cursor:grabbing; }
     .item:hover { border-color:#bfdbfe; background:#f8fbff; }
+    .lib-ghost {
+      position:fixed; z-index:5800; pointer-events:none;
+      transform:translate(-50%,-55%);
+      width:72px; max-width:22vw; padding:6px; border-radius:10px;
+      border:1.5px solid #2563eb; background:#fff;
+      box-shadow:0 10px 28px rgba(15,23,42,.28);
+      display:flex; flex-direction:column; align-items:center; gap:4px;
+      font-size:10px; font-weight:800; color:#0f172a; text-align:center;
+    }
+    .lib-ghost img, .lib-ghost .thumb {
+      width:100%; max-height:48px; object-fit:contain; display:block;
+    }
+    body.lib-palette-drag #board {
+      outline:2px dashed rgba(37,99,235,.55);
+      outline-offset:-2px;
+    }
+    body.lib-palette-drag #board.lib-drop-hot {
+      outline-color:#2563eb;
+      background-color:rgba(37,99,235,.04);
+    }
     .item > span:not(.thumb) {
       font-size:11px; font-weight:650; color:#475569; line-height:1.2;
       max-width:100%; overflow:hidden;
@@ -5461,7 +5482,7 @@
           <button type="button" id="btnLibClose" class="lib-phone-close" data-i18n-aria="libCloseAria" aria-label="Fermer">×</button>
           <div class="lib-phone-titles">
             <strong data-i18n="libPhoneTitle">Composants</strong>
-            <span data-i18n="libPhoneHint">Toucher pour ajouter · glisser possible</span>
+            <span data-i18n="libPhoneHint">Toucher = fiche · glisser sur le plan</span>
           </div>
         </div>
         <div class="lib-search-row">
@@ -18208,13 +18229,118 @@
       addLab.className = "lib-add";
       addLab.textContent = tOr("libAdd", "Ajouter");
       b.appendChild(addLab);
+      b.dataset.libType = id;
       b.onclick = () => {
+        if (b._libSkipClick) { b._libSkipClick = false; return; }
         if (!isTypeUnlocked(id)) { openTierGate(); return; }
-        /* v87 : 1er clic = fiche technique ; Ajouter (dans la fiche) pose sur le plan. */
+        /* v87 : 1er clic = fiche technique ; glisser sur le plan = pose directe. */
         openLibTechSheet(id);
       };
       target.appendChild(b);
     }
+
+    (function initLibPaletteDrag() {
+      const lib = document.getElementById("libTop");
+      if (!lib || lib.dataset.libDragBound === "1") return;
+      lib.dataset.libDragBound = "1";
+      let drag = null;
+      function overBoard(x, y) {
+        let el = null;
+        try { el = document.elementFromPoint(x, y); } catch (_) {}
+        return !!(el && el.closest && el.closest("#board"));
+      }
+      function setBoardHot(on) {
+        try { board.classList.toggle("lib-drop-hot", !!on); } catch (_) {}
+      }
+      function cleanup() {
+        if (drag && drag.ghost && drag.ghost.parentNode) drag.ghost.parentNode.removeChild(drag.ghost);
+        document.body.classList.remove("lib-palette-drag");
+        setBoardHot(false);
+        drag = null;
+      }
+      function unbindDoc() {
+        document.removeEventListener("pointermove", onMove);
+        document.removeEventListener("pointerup", endDrag);
+        document.removeEventListener("pointercancel", onCancel);
+      }
+      function makeGhost(btn) {
+        const g = document.createElement("div");
+        g.className = "lib-ghost";
+        const img = btn.querySelector("img, .thumb, .fluke-lib-face");
+        if (img) g.appendChild(img.cloneNode(true));
+        const lab = document.createElement("span");
+        const name = btn.querySelector("span:not(.thumb):not(.lib-add):not(.fluke-lib-face)");
+        lab.textContent = (name && name.textContent) || btn.dataset.libType || "";
+        g.appendChild(lab);
+        document.body.appendChild(g);
+        return g;
+      }
+      function onMove(ev) {
+        if (!drag || ev.pointerId !== drag.pointerId) return;
+        const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+        if (!drag.moved) {
+          if (dx * dx + dy * dy < 64) return;
+          /* Scroll vertical dans la biblio → ne pas démarrer le drag. */
+          if (Math.abs(dy) >= Math.abs(dx) * 1.15) {
+            unbindDoc();
+            cleanup();
+            return;
+          }
+          drag.moved = true;
+          drag.btn._libSkipClick = true;
+          document.body.classList.add("lib-palette-drag");
+          drag.ghost = makeGhost(drag.btn);
+          try { drag.btn.setPointerCapture(ev.pointerId); } catch (_) {}
+          try { closeLibTechSheet(); } catch (_) {}
+        }
+        if (drag.ghost) {
+          drag.ghost.style.left = ev.clientX + "px";
+          drag.ghost.style.top = ev.clientY + "px";
+        }
+        setBoardHot(overBoard(ev.clientX, ev.clientY));
+        if (ev.cancelable) ev.preventDefault();
+      }
+      function endDrag(ev) {
+        if (!drag || ev.pointerId !== drag.pointerId) return;
+        const moved = drag.moved;
+        const type = drag.type;
+        const btn = drag.btn;
+        const x = ev.clientX, y = ev.clientY;
+        unbindDoc();
+        cleanup();
+        if (!moved) return;
+        btn._libSkipClick = true;
+        if (!overBoard(x, y)) return;
+        if (!isTypeUnlocked(type)) { openTierGate(); return; }
+        add(type, { x: x, y: y });
+        try { closeMobileLib(); } catch (_) {}
+      }
+      function onCancel(ev) {
+        if (!drag || ev.pointerId !== drag.pointerId) return;
+        unbindDoc();
+        cleanup();
+      }
+      lib.addEventListener("pointerdown", (ev) => {
+        if (ev.button) return;
+        const b = ev.target.closest("button.item[data-lib-type]");
+        if (!b || !lib.contains(b)) return;
+        const type = b.dataset.libType;
+        if (!type || !LIB[type]) return;
+        drag = {
+          type: type,
+          btn: b,
+          x: ev.clientX,
+          y: ev.clientY,
+          moved: false,
+          pointerId: ev.pointerId,
+          ghost: null
+        };
+        document.addEventListener("pointermove", onMove, { passive: false });
+        document.addEventListener("pointerup", endDrag);
+        document.addEventListener("pointercancel", onCancel);
+      });
+    })();
+
     function appendPaletteSection(cat, n, host) {
       const target = host || palette;
       if (!target) return;
@@ -18654,6 +18780,30 @@
       item.x = x0;
       item.y = y0;
     }
+    /** Pose sous le pointeur (drag & drop biblio → plan). */
+    function placeAtClient(item, clientX, clientY) {
+      if (!item || clientX == null || clientY == null) {
+        placeBesideAligned(item);
+        return;
+      }
+      let over = null;
+      try { over = document.elementFromPoint(clientX, clientY); } catch (_) {}
+      if (!over || !over.closest || !over.closest("#board")) {
+        placeBesideAligned(item);
+        return;
+      }
+      const pt = boardPointFromClient(clientX, clientY);
+      const sz = itemSize(item);
+      let x = pt.x - sz.w / 2;
+      let y = pt.y - sz.h / 2;
+      if (!Number.isFinite(x)) x = 8;
+      if (!Number.isFinite(y)) y = 8;
+      x = Math.max(0, x);
+      y = Math.max(0, y);
+      try { x = resolveDinX(item, x, y); } catch (_) {}
+      item.x = x;
+      item.y = y;
+    }
     /**
      * v53-place-beside-align : à l’ajout, si de la place → à côté du composant
      * sélectionné / dernier posé, même alignement Y (haut). Sinon centre viewport.
@@ -18771,10 +18921,12 @@
       if (motorHasSixLeadPlate(def)) applyMotorBarPreset(item, "delta");
       return item;
     }
-    function add(type) {
+    function add(type, atClient) {
       if (!isTypeUnlocked(type)) { openTierGate(); return; }
       const def = LIB[type];
       if (!def) return;
+      const drop = atClient && Number.isFinite(atClient.x) && Number.isFinite(atClient.y)
+        ? atClient : null;
       if (def.kind === "barrette") {
         const host = state.selected && find(state.selected);
         if (host && isMotorDef(host.type, LIB[host.type]) && nextBarTermsOnMotor(host, def.holes || 2)) {
@@ -18794,7 +18946,8 @@
         if (!isTypeUnlocked(kmType) || !isTypeUnlocked(frType)) { openTierGate(); return; }
         pushHistory();
         const km = makeLibBoardItem(kmType);
-        placeBesideAligned(km);
+        if (drop) placeAtClient(km, drop.x, drop.y);
+        else placeBesideAligned(km);
         state.items.push(km);
         const fr = makeLibBoardItem(frType);
         attachFrUnderKm(km, fr);
@@ -18809,8 +18962,9 @@
       }
       pushHistory();
       const item = makeLibBoardItem(type);
-      /* v53 : à côté + même alignement Y si place, sinon centre viewport. */
-      placeBesideAligned(item);
+      /* Drag & drop : sous le doigt/souris. Sinon à côté / centre viewport. */
+      if (drop) placeAtClient(item, drop.x, drop.y);
+      else placeBesideAligned(item);
       state.items.push(item);
       if (isKnxDevice(def)) ensureKnxProgram(item);
       setSelection([item.uid], item.uid);
