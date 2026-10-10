@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="/oibt-trainer/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="SwissDZ OIBT Trainer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="OIBT Trainer">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>SwissDZ · OIBT Trainer</title>
+  <link rel="manifest" href="manifest.json">
+  <!-- Pinch navigateur souvent bloqué par CanvasKit ; zoom in-app via InteractiveViewer.
+       touch-action: none laisse Flutter recevoir le multi-touch pour le pinch in-app. -->
+  <style>
+    html, body {
+      background: transparent;
+      margin: 0;
+    }
+    flutter-view, flt-glass-pane, flt-scene-host, canvas {
+      touch-action: none;
+      background: transparent !important;
+    }
+    /* PanelWire embed #/meter : fond transparent (le canvas Flutter reste opaque). */
+    html.embed-meter, html.embed-meter body {
+      background: transparent !important;
+      overflow: hidden !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+  </style>
+</head>
+<body>
+  <script>
+  (function () {
+    function syncEmbedMeterClass() {
+      var embed = /(?:^|[?&])embed=1(?:&|$)/.test(location.search || "");
+      var meter = (location.hash || "").toLowerCase().indexOf("/meter") !== -1;
+      document.documentElement.classList.toggle("embed-meter", embed && meter);
+      if (embed && meter) {
+        try { document.body.style.background = "transparent"; } catch (_) {}
+      }
+    }
+    syncEmbedMeterClass();
+    window.addEventListener("hashchange", syncEmbedMeterClass);
+  })();
+  // Évite un vieux service worker seulement après une MAJ du trainer.
+  // Le vider à CHAQUE visite forçait ~9 Mo de re-téléchargement (main.dart.js + CanvasKit).
+  (function () {
+    var BUILD = "2026-09-28-meter-embed-device";
+    var KEY = "oibt-trainer-sw-bust";
+    var needBust = false;
+    try { needBust = localStorage.getItem(KEY) !== BUILD; } catch (_) { needBust = true; }
+    if (!needBust) return;
+    try { localStorage.setItem(KEY, BUILD); } catch (_) {}
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        regs.forEach(function (r) { r.unregister(); });
+      });
+    }
+    if (window.caches) {
+      caches.keys().then(function (keys) {
+        keys.forEach(function (k) { caches.delete(k); });
+      });
+    }
+  })();
+
+  // Paysage forcé seulement pour l’atelier OIBT (`#/trainer`).
+  // Fluke `#/meter` : pas de lock (portrait OK).
+  function tryLockLandscapeForTrainer() {
+    try {
+      var hash = (location.hash || '').toLowerCase();
+      if (hash.indexOf('/meter') !== -1) return;
+      if (hash.indexOf('/trainer') === -1 && hash.indexOf('trainer') === -1) {
+        return;
+      }
+      var o = screen.orientation || screen.mozOrientation || screen.msOrientation;
+      if (o && typeof o.lock === 'function') {
+        o.lock('landscape').catch(function () {});
+      }
+    } catch (_) {}
+  }
+  tryLockLandscapeForTrainer();
+  window.addEventListener('hashchange', tryLockLandscapeForTrainer);
+  document.addEventListener('fullscreenchange', tryLockLandscapeForTrainer);
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) tryLockLandscapeForTrainer();
+  });
+</script>
+  <!-- ?v= force le navigateur à recharger le bootstrap (puis main.dart.js)
+       même si un vieux http.server a mis le JS en cache heuristique. -->
+  <script src="flutter_bootstrap.js?v=re2" async></script>
+</body>
+</html>
