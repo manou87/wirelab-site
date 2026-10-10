@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="swissdz-rev" content="v34-auth-stay" />
+  <meta name="swissdz-rev" content="v36-own-supabase" />
   <title>Connexion WireLab…</title>
   <style>
     body {
@@ -28,7 +28,7 @@
     <div id="err"></div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/wirelab-auth.js?v=v34-auth-stay"></script>
+  <script src="js/wirelab-auth.js?v=v36-own-supabase"></script>
   <script>
     (async function () {
       var statusEl = document.getElementById('status');
@@ -61,8 +61,8 @@
           if (!at || !rt) throw new Error('Jetons OAuth incomplets');
           if (!window.supabase || !window.WireLabAuth) throw new Error('Auth non initialisée');
           var cfg = window.__WIRELAB_SUPABASE__ || {};
-          var url = (cfg.url || 'https://wxiqqcnzcxswdqzubxyt.supabase.co').trim();
-          var key = (cfg.anonKey || 'sb_publishable_kEfm0tZfrZ8xXCx_PyWfhg_R93sPJkR').trim();
+          var url = (cfg.url || 'https://wrwnzktssfsffkpzfsgk.supabase.co').trim();
+          var key = (cfg.anonKey || 'sb_publishable_TMXHD1DRNuFwds_se7treg_VKkd1E4W').trim();
           var sb = window.supabase.createClient(url, key, {
             auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
           });
