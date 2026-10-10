@@ -143,6 +143,10 @@
     el.textContent = html;
   }
 
+  function gateBlocks() {
+    return !currentUser;
+  }
+
   function syncUi() {
     var btn = document.getElementById('btnSignIn');
     var signed = document.getElementById('wlAuthSigned');
@@ -173,6 +177,10 @@
 
     var expoNote = document.getElementById('wlAuthExpoNote');
     if (expoNote) expoNote.hidden = !isExpoShell() || !!currentUser;
+    var closeBtn = document.getElementById('wlAuthClose');
+    if (closeBtn) closeBtn.hidden = gateBlocks();
+    var modal = document.getElementById('wlAuthModal');
+    if (modal) modal.classList.toggle('is-gate', gateBlocks() && modal.classList.contains('open'));
   }
 
   function openModal() {
@@ -190,15 +198,23 @@
   }
 
   function closeModal() {
+    if (gateBlocks()) return;
     var modal = document.getElementById('wlAuthModal');
     if (!modal) return;
-    modal.classList.remove('open');
+    modal.classList.remove('open', 'is-gate');
     modal.setAttribute('aria-hidden', 'true');
   }
 
   async function applySession(session) {
     currentUser = (session && session.user) || null;
     syncUi();
+    if (currentUser) {
+      var modal = document.getElementById('wlAuthModal');
+      if (modal) {
+        modal.classList.remove('open', 'is-gate');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+    }
   }
 
   async function refreshSession() {
@@ -314,6 +330,7 @@
     await sb.auth.signOut();
     currentUser = null;
     syncUi();
+    openModal();
   }
 
   function bindUi() {
@@ -455,10 +472,7 @@
       console.warn('[wirelab-auth]', err && err.message ? err.message : err);
       syncUi();
     }
-    try {
-      var qAuth = new URLSearchParams(g.location.search || '');
-      if (qAuth.get('auth') === '1' || g.location.hash === '#connexion') openModal();
-    } catch (_) {}
+    if (!currentUser) openModal();
 
     async function applyTokensFromHashOrSearch(rawUrl) {
       var u;
