@@ -133,6 +133,33 @@
     .btn-ghost:hover { border-color: var(--amber); }
     .byline { color: var(--mist); font-size: 0.92rem; }
     .byline strong { color: var(--white); font-weight: 600; }
+    .langs {
+      position: absolute;
+      top: 1rem;
+      inset-inline-end: 1rem;
+      z-index: 3;
+      display: flex;
+      direction: ltr;
+      gap: 0.35rem;
+    }
+    .langs button {
+      min-width: 42px;
+      min-height: 36px;
+      padding: 0.3rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(11, 16, 24, 0.55);
+      color: var(--white);
+      font-family: Sora, sans-serif;
+      font-weight: 700;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .langs button.active {
+      background: var(--amber);
+      color: #14110a;
+      border-color: var(--amber);
+    }
 
     .try {
       width: min(1120px, calc(100% - 2.5rem));
@@ -356,13 +383,19 @@
   <header class="hero">
     <div class="hero__bg" aria-hidden="true"></div>
     <div class="hero__glow" aria-hidden="true"></div>
+    <nav class="langs" aria-label="Langue">
+      <button type="button" data-set-lang="fr" aria-pressed="true">FR</button>
+      <button type="button" data-set-lang="ar" aria-pressed="false">AR</button>
+      <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+      <button type="button" data-set-lang="es" aria-pressed="false">ES</button>
+    </nav>
     <div class="hero__inner">
       <p class="brand">WireLab Pro <span>by SwissDZ</span></p>
-      <h1>Le câblage électrique, comme sur le terrain.</h1>
-      <p class="lead">Place les modules, tire les fils, lance Play — le courant circule. Bibliothèque pro, KNX, PV, Fluke.</p>
+      <h1 data-i18n="heroTitle">Le câblage électrique, comme sur le terrain.</h1>
+      <p class="lead" data-i18n="heroLead">Place les modules, tire les fils, lance Play — le courant circule. Bibliothèque pro, KNX, PV, Fluke.</p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="swissdz-panel/index.html">Tester WireLab en ligne</a>
-        <a class="btn btn-ghost" href="#offres">Voir les offres</a>
+        <a class="btn btn-primary" data-panel href="swissdz-panel/index.html" data-i18n="testOnline">Tester WireLab en ligne</a>
+        <a class="btn btn-ghost" href="#offres" data-i18n="seeOffers">Voir les offres</a>
       </div>
       <p class="byline"><strong>WireLab Pro by SwissDZ</strong></p>
     </div>
@@ -371,84 +404,84 @@
   <section class="try" id="tester" aria-labelledby="tester-title">
     <div class="try-card">
       <p class="try-kicker">WireLab Pro by SwissDZ</p>
-      <h2 id="tester-title">Tester WireLab en ligne</h2>
-      <p>Ouvre le panneau dans le navigateur. Entre avec Google ou ton e-mail, pose les modules, tire les fils, puis lance Play.</p>
+      <h2 id="tester-title" data-i18n="testOnline">Tester WireLab en ligne</h2>
+      <p data-i18n="tryLead">Ouvre le panneau dans le navigateur. Entre avec Google ou ton e-mail, pose les modules, tire les fils, puis lance Play.</p>
       <div class="try-points">
-        <span>Câblage réel</span>
-        <span>Bibliothèque pro</span>
+        <span data-i18n="chipWire">Câblage réel</span>
+        <span data-i18n="chipLib">Bibliothèque pro</span>
         <span>KNX, PV, Fluke</span>
       </div>
       <div class="cta-row">
-        <a class="btn btn-primary" href="swissdz-panel/index.html">Tester en ligne</a>
+        <a class="btn btn-primary" data-panel href="swissdz-panel/index.html" data-i18n="testShort">Tester en ligne</a>
       </div>
     </div>
   </section>
 
   <section id="apercu" aria-labelledby="apercu-title">
     <div class="section-head">
-      <h2 id="apercu-title">Dans l’application</h2>
-      <p>Captures réelles : câblage, bibliothèque, protections.</p>
+      <h2 id="apercu-title" data-i18n="shotsTitle">Dans l’application</h2>
+      <p data-i18n="shotsLead">Captures réelles : câblage, bibliothèque, protections.</p>
     </div>
     <div class="shots">
-      <figure><img src="assets/shot-cablage.png" alt="Câblage WireLab Pro" width="1080" height="1920" loading="lazy" /></figure>
-      <figure><img src="assets/shot-biblio.png" alt="Bibliothèque de composants" width="1080" height="1920" loading="lazy" /></figure>
-      <figure><img src="assets/shot-protections.png" alt="Protections et tableau" width="1080" height="1920" loading="lazy" /></figure>
+      <figure><img src="assets/shot-cablage.png" data-i18n-alt="altWire" alt="Câblage WireLab Pro" width="1080" height="1920" loading="lazy" /></figure>
+      <figure><img src="assets/shot-biblio.png" data-i18n-alt="altLib" alt="Bibliothèque de composants" width="1080" height="1920" loading="lazy" /></figure>
+      <figure><img src="assets/shot-protections.png" data-i18n-alt="altProt" alt="Protections et tableau" width="1080" height="1920" loading="lazy" /></figure>
     </div>
   </section>
 
   <section aria-labelledby="services-title">
     <div class="section-head">
-      <h2 id="services-title">Ce que tu peux faire</h2>
-      <p>Un atelier numérique pour former et vérifier avant le terrain.</p>
+      <h2 id="services-title" data-i18n="doTitle">Ce que tu peux faire</h2>
+      <p data-i18n="doLead">Un atelier numérique pour former et vérifier avant le terrain.</p>
     </div>
     <div class="services">
       <article>
-        <h3>Câblage &amp; simulation</h3>
-        <p>Bornes, sections, couleurs IEC, Play / Stop — le courant se voit sur les fils.</p>
+        <h3 data-i18n="svc1t">Câblage &amp; simulation</h3>
+        <p data-i18n="svc1p">Bornes, sections, couleurs IEC, Play / Stop — le courant se voit sur les fils.</p>
       </article>
       <article>
-        <h3>Bibliothèque pro</h3>
-        <p>Disjoncteurs, contacteurs, moteurs, commande, KNX SwissDz, PLC LOGO!, PV…</p>
+        <h3 data-i18n="svc2t">Bibliothèque pro</h3>
+        <p data-i18n="svc2p">Disjoncteurs, contacteurs, moteurs, commande, KNX SwissDz, PLC LOGO!, PV…</p>
       </article>
       <article>
-        <h3>Mesure Gold</h3>
-        <p>Fluke 1664 FC sur le plan, accessoires de mise à la terre, ETS formation.</p>
+        <h3 data-i18n="svc3t">Mesure Gold</h3>
+        <p data-i18n="svc3p">Fluke 1664 FC sur le plan, accessoires de mise à la terre, ETS formation.</p>
       </article>
     </div>
   </section>
 
   <section id="offres" aria-labelledby="offres-title">
     <div class="section-head">
-      <h2 id="offres-title">Offres</h2>
-      <p>Prix en euros. Achats via les stores (bientôt) — tu peux déjà tester les niveaux dans l’app.</p>
+      <h2 id="offres-title" data-i18n="plansTitle">Offres</h2>
+      <p data-i18n="plansLead">Prix en euros. Achats via les stores (bientôt) — tu peux déjà tester les niveaux dans l’app.</p>
     </div>
     <div class="plans">
       <article class="plan">
         <h3>Free</h3>
-        <p class="price">0 € <small>pour démarrer</small></p>
+        <p class="price">0 € <small data-i18n="freeStart">pour démarrer</small></p>
         <ul>
-          <li>Alim, structure, borniers, disjoncteurs, différentiels, moulés, sectionneurs</li>
-          <li>Boutonnerie &amp; commande sélectionnées, KM+FR, moteurs, LOGO!</li>
-          <li>KNX SwissDz de base, éclairage, prises, capteurs clés, compteurs numériques</li>
-          <li>Sans Fluke, ETS, PV ni schémas prédéfinis</li>
+          <li data-i18n="free1">Alim, structure, borniers, disjoncteurs, différentiels, moulés, sectionneurs</li>
+          <li data-i18n="free2">Boutonnerie &amp; commande sélectionnées, KM+FR, moteurs, LOGO!</li>
+          <li data-i18n="free3">KNX SwissDz de base, éclairage, prises, capteurs clés, compteurs numériques</li>
+          <li data-i18n="free4">Sans Fluke, ETS, PV ni schémas prédéfinis</li>
         </ul>
       </article>
       <article class="plan argent">
-        <h3>Argent</h3>
-        <p class="price">0,99 € / mois <small>ou 8,99 € / an</small></p>
+        <h3 data-i18n="silverName">Argent</h3>
+        <p class="price"><span data-i18n="silverPrice">0,99 € / mois</span> <small data-i18n="silverYear">ou 8,99 € / an</small></p>
         <ul>
-          <li>Toute la bibliothèque sauf l’appareil de mesure</li>
-          <li>Photovoltaïque inclus</li>
-          <li>Fluke + ETS + installations prédéfinies → Gold</li>
+          <li data-i18n="silver1">Toute la bibliothèque sauf l’appareil de mesure</li>
+          <li data-i18n="silver2">Photovoltaïque inclus</li>
+          <li data-i18n="silver3">Fluke + ETS + installations prédéfinies → Gold</li>
         </ul>
       </article>
       <article class="plan gold">
-        <h3>Gold</h3>
-        <p class="price">1,69 € / mois <small>ou 14,99 € / an</small></p>
+        <h3 data-i18n="goldName">Gold</h3>
+        <p class="price"><span data-i18n="goldPrice">1,69 € / mois</span> <small data-i18n="goldYear">ou 14,99 € / an</small></p>
         <ul>
-          <li>Tout Argent</li>
-          <li>Fluke 1664 + accessoires mise à la terre</li>
-          <li>ETS formation + installations prédéfinies</li>
+          <li data-i18n="gold1">Tout Argent</li>
+          <li data-i18n="gold2">Fluke 1664 + accessoires mise à la terre</li>
+          <li data-i18n="gold3">ETS formation + installations prédéfinies</li>
         </ul>
       </article>
     </div>
@@ -456,25 +489,25 @@
 
   <section id="liens" aria-labelledby="liens-title">
     <div class="section-head">
-      <h2 id="liens-title">Liens</h2>
-      <p>Stores et contact.</p>
+      <h2 id="liens-title" data-i18n="linksTitle">Liens</h2>
+      <p data-i18n="linksLead">Stores et contact.</p>
     </div>
     <div class="links">
       <a class="link-row" href="https://play.google.com/store/apps/details?id=com.wirelab.pro" rel="noopener">
         <span><strong>Google Play</strong><span>Android · com.wirelab.pro</span></span>
-        <em>Bientôt</em>
+        <em data-i18n="soon">Bientôt</em>
       </a>
       <a class="link-row" href="https://apps.apple.com/" rel="noopener">
         <span><strong>App Store</strong><span>iPhone &amp; iPad</span></span>
-        <em>Bientôt</em>
+        <em data-i18n="soon">Bientôt</em>
       </a>
       <a class="link-row" href="mailto:contact.electrodz@gmail.com">
-        <span><strong>Contact SwissDZ</strong><span>contact.electrodz@gmail.com</span></span>
-        <em>Écrire</em>
+        <span><strong data-i18n="contact">Contact SwissDZ</strong><span>contact.electrodz@gmail.com</span></span>
+        <em data-i18n="write">Écrire</em>
       </a>
       <a class="link-row" href="privacy/">
-        <span><strong>Confidentialité</strong><span>FR · EN · AR</span></span>
-        <em>Lire</em>
+        <span><strong data-i18n="privacy">Confidentialité</strong><span>FR · AR · EN · ES</span></span>
+        <em data-i18n="read">Lire</em>
       </a>
     </div>
   </section>
@@ -482,7 +515,7 @@
   <footer>
     <div class="footer-inner">
       <p>© <span id="y"></span> WireLab Pro by SwissDZ</p>
-      <nav class="socials" aria-label="Suivez-nous sur nos réseaux">
+      <nav class="socials" data-i18n-aria="socialAria" aria-label="Suivez-nous sur nos réseaux">
         <a class="soc-wa" href="https://wa.me/213555429960" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2C6.58 2 2.15 6.4 2.15 11.83c0 1.74.46 3.44 1.34 4.94L2 22l5.39-1.41a10.1 10.1 0 0 0 4.65 1.12h.01c5.46 0 9.89-4.4 9.89-9.83C21.94 6.4 17.5 2 12.04 2zm5.76 13.95c-.24.68-1.4 1.3-1.94 1.38-.5.07-1.12.1-1.81-.11-.41-.13-.95-.31-1.64-.61-2.88-1.24-4.76-4.14-4.9-4.33-.14-.19-1.16-1.54-1.16-2.94s.73-2.08 1-2.37c.24-.27.64-.39.86-.39h.62c.2 0 .46-.07.72.55.27.64.9 2.2.98 2.36.08.16.13.35.03.56-.1.21-.15.34-.3.52-.15.18-.31.4-.44.54-.15.15-.3.31-.13.6.17.29.76 1.25 1.63 2.03 1.12 1 2.06 1.31 2.35 1.46.29.15.46.12.63-.08.17-.19.73-.85.92-1.14.2-.29.39-.24.66-.14.27.1 1.7.8 1.99.95.29.14.48.21.55.33.07.12.07.68-.17 1.36z"/></svg>
         </a>
@@ -502,5 +535,6 @@
     </div>
   </footer>
   <script>document.getElementById("y").textContent = new Date().getFullYear();</script>
+  <script src="js/site-i18n.js"></script>
 </body>
 </html>
