@@ -18245,6 +18245,11 @@
       lib.dataset.libDragBound = "1";
       let drag = null;
       function overBoard(x, y) {
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+        try {
+          const r = board.getBoundingClientRect();
+          if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return true;
+        } catch (_) {}
         let el = null;
         try { el = document.elementFromPoint(x, y); } catch (_) {}
         return !!(el && el.closest && el.closest("#board"));
@@ -18293,6 +18298,8 @@
           try { drag.btn.setPointerCapture(ev.pointerId); } catch (_) {}
           try { closeLibTechSheet(); } catch (_) {}
         }
+        drag.lastX = ev.clientX;
+        drag.lastY = ev.clientY;
         if (drag.ghost) {
           drag.ghost.style.left = ev.clientX + "px";
           drag.ghost.style.top = ev.clientY + "px";
@@ -18300,25 +18307,36 @@
         setBoardHot(overBoard(ev.clientX, ev.clientY));
         if (ev.cancelable) ev.preventDefault();
       }
-      function endDrag(ev) {
-        if (!drag || ev.pointerId !== drag.pointerId) return;
-        const moved = drag.moved;
-        const type = drag.type;
-        const btn = drag.btn;
-        const x = ev.clientX, y = ev.clientY;
-        unbindDoc();
-        cleanup();
-        if (!moved) return;
+      function finishDrop(type, btn, x, y) {
         btn._libSkipClick = true;
         if (!overBoard(x, y)) return;
         if (!isTypeUnlocked(type)) { openTierGate(); return; }
         add(type, { x: x, y: y });
         try { closeMobileLib(); } catch (_) {}
       }
-      function onCancel(ev) {
+      function endDrag(ev) {
         if (!drag || ev.pointerId !== drag.pointerId) return;
+        const moved = drag.moved;
+        const type = drag.type;
+        const btn = drag.btn;
+        const x = Number.isFinite(ev.clientX) ? ev.clientX : drag.lastX;
+        const y = Number.isFinite(ev.clientY) ? ev.clientY : drag.lastY;
         unbindDoc();
         cleanup();
+        if (!moved) return;
+        finishDrop(type, btn, x, y);
+      }
+      function onCancel(ev) {
+        if (!drag || ev.pointerId !== drag.pointerId) return;
+        const moved = drag.moved;
+        const type = drag.type;
+        const btn = drag.btn;
+        const x = drag.lastX, y = drag.lastY;
+        unbindDoc();
+        cleanup();
+        /* pointercancel (capture / touch) : quand même poser si dernier point sur le plan. */
+        if (!moved) return;
+        finishDrop(type, btn, x, y);
       }
       lib.addEventListener("pointerdown", (ev) => {
         if (ev.button) return;
@@ -18331,6 +18349,8 @@
           btn: b,
           x: ev.clientX,
           y: ev.clientY,
+          lastX: ev.clientX,
+          lastY: ev.clientY,
           moved: false,
           pointerId: ev.pointerId,
           ghost: null
@@ -18340,6 +18360,7 @@
         document.addEventListener("pointercancel", onCancel);
       });
     })();
+
 
     function appendPaletteSection(cat, n, host) {
       const target = host || palette;
