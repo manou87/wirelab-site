@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>WireLab Pro — Simulateur de câblage électrique</title>
-  <meta name="description" content="WireLab Pro by SwissDZ : câble un tableau réel, simule le courant. Free, Argent 0,99 €/mois, Gold 1,69 €/mois." />
+  <title>WireLab Pro by SwissDZ</title>
+  <meta name="description" content="WireLab Pro by SwissDZ : teste le câblage en ligne. Place les modules, tire les fils, lance Play." />
   <link rel="canonical" href="https://wirelab.pro/" />
   <link rel="icon" href="assets/favicon.png" type="image/png" />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="WireLab Pro" />
-  <meta property="og:title" content="WireLab Pro — Simulateur de câblage électrique" />
-  <meta property="og:description" content="Câble, simule, forme-toi. Free · Argent · Gold. By SwissDZ." />
+  <meta property="og:site_name" content="WireLab Pro by SwissDZ" />
+  <meta property="og:title" content="WireLab Pro by SwissDZ" />
+  <meta property="og:description" content="Tester WireLab en ligne. Câble, simule, forme-toi." />
   <meta property="og:url" content="https://wirelab.pro/" />
   <meta property="og:image" content="https://wirelab.pro/assets/hero-logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -82,10 +82,11 @@
     .brand {
       font-family: Sora, sans-serif;
       font-weight: 800;
-      font-size: clamp(2.6rem, 8vw, 5.4rem);
+      font-size: clamp(1.85rem, 5.2vw, 3.4rem);
       letter-spacing: -0.04em;
-      line-height: 0.95;
+      line-height: 1.05;
       margin-bottom: 0.85rem;
+      max-width: 16ch;
     }
     .brand span { color: var(--amber); }
     .hero h1 {
@@ -132,6 +133,48 @@
     .btn-ghost:hover { border-color: var(--amber); }
     .byline { color: var(--mist); font-size: 0.92rem; }
     .byline strong { color: var(--white); font-weight: 600; }
+
+    .try {
+      width: min(1120px, calc(100% - 2.5rem));
+      margin: 0 auto;
+      padding: 0 0 1rem;
+    }
+    .try-card {
+      display: grid;
+      gap: 0.85rem;
+      padding: 1.6rem 1.5rem 1.5rem;
+      border-radius: 1.2rem;
+      border: 1px solid var(--line);
+      background:
+        radial-gradient(ellipse 80% 80% at 100% 0%, rgba(245, 197, 24, 0.16), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    }
+    .try-kicker {
+      font-family: Sora, sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--amber);
+    }
+    .try-card h2 {
+      font-family: Sora, sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+      letter-spacing: -0.03em;
+    }
+    .try-card p { color: var(--mist); max-width: 46rem; }
+    .try-points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.2rem 0 0.4rem;
+    }
+    .try-points span {
+      border: 1px solid var(--soft);
+      border-radius: 999px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.88rem;
+      color: var(--white);
+    }
 
     section {
       width: min(1120px, calc(100% - 2.5rem));
@@ -314,17 +357,32 @@
     <div class="hero__bg" aria-hidden="true"></div>
     <div class="hero__glow" aria-hidden="true"></div>
     <div class="hero__inner">
-      <p class="brand">WireLab <span>Pro</span></p>
+      <p class="brand">WireLab Pro <span>by SwissDZ</span></p>
       <h1>Le câblage électrique, comme sur le terrain.</h1>
-      <p class="lead">Place les modules, tire les fils, lance Play — le courant circule. Bibliothèque pro, KNX, PV, Fluke. By SwissDZ.</p>
+      <p class="lead">Place les modules, tire les fils, lance Play — le courant circule. Bibliothèque pro, KNX, PV, Fluke.</p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="swissdz-panel/index.html">Entrer dans le panneau</a>
-        <a class="btn btn-ghost" href="swissdz-panel/index.html">Connexion Google ou e-mail</a>
+        <a class="btn btn-primary" href="swissdz-panel/index.html">Tester WireLab en ligne</a>
         <a class="btn btn-ghost" href="#offres">Voir les offres</a>
       </div>
-      <p class="byline">By <strong>SwissDZ</strong> · wirelab.pro</p>
+      <p class="byline"><strong>WireLab Pro by SwissDZ</strong></p>
     </div>
   </header>
+
+  <section class="try" id="tester" aria-labelledby="tester-title">
+    <div class="try-card">
+      <p class="try-kicker">WireLab Pro by SwissDZ</p>
+      <h2 id="tester-title">Tester WireLab en ligne</h2>
+      <p>Ouvre le panneau dans le navigateur. Entre avec Google ou ton e-mail, pose les modules, tire les fils, puis lance Play.</p>
+      <div class="try-points">
+        <span>Câblage réel</span>
+        <span>Bibliothèque pro</span>
+        <span>KNX, PV, Fluke</span>
+      </div>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="swissdz-panel/index.html">Tester en ligne</a>
+      </div>
+    </div>
+  </section>
 
   <section id="apercu" aria-labelledby="apercu-title">
     <div class="section-head">
