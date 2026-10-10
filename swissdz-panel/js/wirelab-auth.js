@@ -9,7 +9,7 @@
  *
  * Redirect OAuth (Supabase → Authentication → Redirect URLs) :
  *   wirelab://auth-callback          ← Expo natif / APK (obligatoire)
- *   exp://**/--/auth-callback        ← Expo Go
+ *   exp://* /--/auth-callback        (Expo Go)
  *   http://localhost:8777/swissdz-panel/**
  *   http://127.0.0.1:8777/swissdz-panel/**
  *   http://<LAN>:8777/swissdz-panel/**  (web / WebView sans deep link)
@@ -455,6 +455,10 @@
       console.warn('[wirelab-auth]', err && err.message ? err.message : err);
       syncUi();
     }
+    try {
+      var qAuth = new URLSearchParams(g.location.search || '');
+      if (qAuth.get('auth') === '1' || g.location.hash === '#connexion') openModal();
+    } catch (_) {}
 
     async function applyTokensFromHashOrSearch(rawUrl) {
       var u;
