@@ -188,6 +188,7 @@
       background:rgba(15,23,42,.55); backdrop-filter:blur(4px);
     }
     #wlAuthModal.open { display:flex; }
+    #wlAuthModal.is-gate { background:rgba(15,23,42,.72); }
     .wl-auth-sheet {
       width:min(380px,100%); max-height:min(90vh,640px); overflow:auto;
       background:var(--panel,#fff); color:var(--text,#0f172a);
@@ -5845,7 +5846,7 @@
   <div id="wlAuthModal" aria-hidden="true" role="dialog" aria-labelledby="wlAuthTitle">
     <div class="wl-auth-sheet">
       <h2 id="wlAuthTitle" data-i18n="authTitle">Connexion</h2>
-      <p class="wl-auth-lead" data-i18n="authLead">Même compte que electro-dz.com (Supabase).</p>
+      <p class="wl-auth-lead" data-i18n="authLead">Google ou e-mail du compte Supabase pour entrer dans le panneau.</p>
       <p id="wlAuthExpoNote" class="wl-auth-expo" hidden data-i18n="authExpoNote">
         Expo Go : e-mail / mot de passe fonctionne ici. Google nécessite un redirect autorisé dans Supabase (voir docs panel).
       </p>
@@ -5887,7 +5888,7 @@
     <div class="tier-sheet">
       <div class="tier-brand">
         <div class="mark" aria-hidden="true"><img src="brand/logo-wirelab-pro-icon.png?v=official-gemini" alt="" width="34" height="34" /></div>
-        <div class="name">WireLab <span>by SwissDZ</span></div>
+        <div class="name">WireLab Pro <span>by SwissDZ</span></div>
       </div>
       <h1 id="tierTitle" data-i18n="tierTitle">Choisir une offre</h1>
       <p class="lead" data-i18n="tierLead">Free = schéma + KNX SwissDZ + solaire + terre. Pro = Fluke, contrôle électrique, KNX marques et installations.</p>
@@ -5941,7 +5942,7 @@
   <script src="labo-terre/labo-terre.js?v=labo-arrows-stakes1"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/wirelab-auth.js?v=v90-fluke-exmenu"></script>
+  <script src="js/wirelab-auth.js?v=gate-supabase"></script>
   <script>
     /* Assets pré-cadrés (photos studio trop larges → bandes). */
     const COLORS = [
