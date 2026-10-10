@@ -156,12 +156,13 @@
       min-width:240px; padding:4px; border-radius:10px;
       background:var(--surface); border:1px solid var(--line);
       box-shadow:var(--shadow);
+      max-height:none; overflow:visible;
     }
     .brand-menu.open .brand-dropdown { display:block; }
     .brand-dropdown button {
       display:block; width:100%; text-align:left;
       border:0; background:transparent; border-radius:7px;
-      padding:8px 10px; font-size:12px; font-weight:650; color:var(--text);
+      padding:6px 10px; font-size:12px; font-weight:650; color:var(--text);
     }
     .brand-dropdown button:hover { background:var(--hover); }
     .brand-dropdown button.on { background:var(--on-bg); color:var(--on-text); }
@@ -171,10 +172,10 @@
     /* Icônes réseaux dans le menu app (même liens que le pied de page du site). */
     .brand-dropdown .brand-socials {
       display:flex; align-items:center; justify-content:center; gap:8px;
-      padding:8px 10px 6px; direction:ltr;
+      padding:6px 10px 4px; direction:ltr;
     }
     .brand-dropdown .brand-socials a {
-      width:36px; height:36px; border-radius:50%;
+      width:32px; height:32px; border-radius:50%;
       display:inline-flex; align-items:center; justify-content:center;
       color:#fff; border:0; flex:0 0 auto; text-decoration:none;
     }
@@ -187,7 +188,7 @@
     .brand-dropdown button#btnTier {
       background:transparent; color:var(--text); border:0;
       text-transform:none; letter-spacing:0; height:auto; min-width:0;
-      font-size:12px; font-weight:650; padding:8px 10px; line-height:1.25;
+      font-size:12px; font-weight:650; padding:6px 10px; line-height:1.25;
     }
     .brand-dropdown button#btnTier:hover { background:var(--hover); color:var(--text); }
     .brand-dropdown button#btnTier.on {
@@ -4524,15 +4525,14 @@
     .lib-side .lib-examples,
     .lib-tab.lib-tab-examples { display:none !important; }
 
-    /* v89 : menu AR dans le viewport */
+    /* v89 : menu AR dans le viewport — toutes les lignes visibles, sans scroll interne */
     html[dir="rtl"] .brand-dropdown {
       left: 8px !important;
       right: auto !important;
       min-width: min(92vw, 300px) !important;
       max-width: min(96vw, 320px) !important;
-      max-height: min(70vh, 520px) !important;
-      overflow-y: auto !important;
-      -webkit-overflow-scrolling: touch;
+      max-height: none !important;
+      overflow: visible !important;
     }
     html[dir="rtl"] footer.toolbar-bottom #btnClearWires,
     html.pw-expo footer.toolbar-bottom #btnClearWires {
@@ -27483,17 +27483,25 @@
         btn.setAttribute("aria-expanded", "true");
         if (dropdown) {
           const r = btn.getBoundingClientRect();
-          dropdown.style.top = Math.round(r.bottom + 6) + "px";
           dropdown.style.right = "auto";
-          /* v89 : clamp viewport — en AR right:… cachait le menu à gauche. */
+          /* Toutes les lignes visibles : pas de max-height / scroll interne. */
           const dw = Math.min(300, Math.max(240, window.innerWidth - 16));
           dropdown.style.minWidth = dw + "px";
           dropdown.style.maxWidth = "min(96vw, 320px)";
-          dropdown.style.maxHeight = "min(70vh, 520px)";
-          dropdown.style.overflowY = "auto";
+          dropdown.style.maxHeight = "none";
+          dropdown.style.overflowY = "visible";
           let left = Math.round(r.left);
           left = Math.max(8, Math.min(left, Math.round(window.innerWidth - dw - 8)));
           dropdown.style.left = left + "px";
+          dropdown.style.top = Math.round(r.bottom + 6) + "px";
+          /* Si le menu dépasse en bas, on le remonte pour tout montrer d’un coup. */
+          requestAnimationFrame(() => {
+            const h = dropdown.offsetHeight || 0;
+            let top = Math.round(r.bottom + 6);
+            const maxTop = Math.max(8, Math.round(window.innerHeight - h - 8));
+            if (top > maxTop) top = maxTop;
+            dropdown.style.top = top + "px";
+          });
         }
       };
       btn.onclick = (ev) => {
