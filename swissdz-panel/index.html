@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v136-lib-phone-lower" />
+  <meta name="swissdz-rev" content="native-shell-8777-v137-knx-ets-controle" />
+  <!-- v137: ETS à la demande (pas au clic KNX) ; GA/IA uniques par instance ; exemple façade câblée ; Contrôle Expo via /oibt-trainer/ -->
   <!-- v136: téléphone — feuille composants ~10 % plus basse (82vh, top plus bas sous le chrome) -->
   <!-- v135: pinch = zoom viewport seulement (pas resize géométrique platine/composants) ; anti-jitter ; volets KNX ext visibles Free -->
   <!-- v134: Installations exemplaires — la liste de la modale centrale défile (molette + doigt), le plan derrière ne panne plus -->
@@ -10838,23 +10839,87 @@
       }
       return pref || "1.1.0";
     }
-    function defaultKnxKeysProg() {
-      /* Défaut poussoir + actionneur volet : T1/T2 = canal 1, T3/T4 = canal 2 */
+    /** GA déjà prises sur le plan (objets de communication existants). */
+    function collectUsedGas() {
+      const used = new Set();
+      const take = (g) => { const n = normGa(g); if (n) used.add(n); };
+      const takeObj = (o) => {
+        if (!o || typeof o !== "object") return;
+        ["ga", "gaUp", "gaDown", "gaStop", "gaOn", "gaLevel", "gaSet", "gaHeat", "gaStrike", "gaVideo"]
+          .forEach((k) => take(o[k]));
+      };
+      const takeMap = (m) => {
+        if (!m || typeof m !== "object") return;
+        Object.keys(m).forEach((k) => takeObj(m[k]));
+      };
+      state.items.forEach((it) => {
+        takeMap(it.knxKeysProg);
+        takeMap(it.knxChProg);
+        takeMap(it.knxShutterProg);
+        takeObj(it.knxRollerProg);
+        takeObj(it.knxDimProg);
+        takeObj(it.knxPresenceProg);
+        takeObj(it.knxTempProg);
+        takeObj(it.knxThermoProg);
+        takeMap(it.knxBinProg);
+        if (it.facade && it.facade.prog) takeMap(it.facade.prog);
+      });
+      return used;
+    }
+    /** Prochaine adresse de groupe libre (main/mid/sub). prefer si encore libre.
+     *  extraUsed : Set mutable pour enchaîner plusieurs allocations avant écriture sur l’item. */
+    function nextKnxGa(main, mid, prefer, extraUsed) {
+      const used = extraUsed || collectUsedGas();
+      const pref = prefer ? normGa(prefer) : "";
+      if (pref && !used.has(pref)) { used.add(pref); return pref; }
+      const m = (main | 0) || 1;
+      const d = (mid | 0);
+      for (let z = 1; z < 2000; z++) {
+        const a = m + "/" + d + "/" + z;
+        if (!used.has(a)) { used.add(a); return a; }
+      }
+      return pref || (m + "/" + d + "/1");
+    }
+    function allocKnxGaTriple(main, mid, preferUp, preferDown, preferStop) {
+      const used = collectUsedGas();
       return {
-        1: { fn: "up", ga: "1/2/1" },
-        2: { fn: "down", ga: "1/2/2" },
-        3: { fn: "up", ga: "1/2/4" },
-        4: { fn: "down", ga: "1/2/5" }
+        gaUp: nextKnxGa(main, mid, preferUp, used),
+        gaDown: nextKnxGa(main, mid, preferDown, used),
+        gaStop: nextKnxGa(main, mid, preferStop, used)
+      };
+    }
+    function defaultKnxKeysProg() {
+      /* Défaut poussoir volet : T1/T2 = canal 1, T3/T4 = canal 2 — GA uniques à l’allocation. */
+      const used = collectUsedGas();
+      return {
+        1: { fn: "up", ga: nextKnxGa(1, 2, "1/2/1", used) },
+        2: { fn: "down", ga: nextKnxGa(1, 2, "1/2/2", used) },
+        3: { fn: "up", ga: nextKnxGa(1, 2, "1/2/4", used) },
+        4: { fn: "down", ga: nextKnxGa(1, 2, "1/2/5", used) }
       };
     }
     function defaultKnxChProg() {
-      return { 1: { ga: "1/1/1" }, 2: { ga: "1/1/2" }, 3: { ga: "1/1/3" }, 4: { ga: "1/1/4" } };
+      const used = collectUsedGas();
+      return {
+        1: { ga: nextKnxGa(1, 1, "1/1/1", used) },
+        2: { ga: nextKnxGa(1, 1, "1/1/2", used) },
+        3: { ga: nextKnxGa(1, 1, "1/1/3", used) },
+        4: { ga: nextKnxGa(1, 1, "1/1/4", used) }
+      };
     }
     function defaultKnxShutterProg() {
-      return {
-        1: { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" },
-        2: { gaUp: "1/2/4", gaDown: "1/2/5", gaStop: "1/2/6" }
+      const used = collectUsedGas();
+      const c1 = {
+        gaUp: nextKnxGa(1, 2, "1/2/1", used),
+        gaDown: nextKnxGa(1, 2, "1/2/2", used),
+        gaStop: nextKnxGa(1, 2, "1/2/3", used)
       };
+      const c2 = {
+        gaUp: nextKnxGa(1, 2, "1/2/4", used),
+        gaDown: nextKnxGa(1, 2, "1/2/5", used),
+        gaStop: nextKnxGa(1, 2, "1/2/6", used)
+      };
+      return { 1: c1, 2: c2 };
     }
     function knxBinaryIds(def) {
       const hits = (def && def.knxBinHits) || [];
@@ -10887,7 +10952,11 @@
         if (!item.knxToggle) item.knxToggle = { 1: false, 2: false, 3: false, 4: false };
         if (!item.knxKeysProg) item.knxKeysProg = defaultKnxKeysProg();
         [1, 2, 3, 4].forEach((n) => {
-          if (!item.knxKeysProg[n]) item.knxKeysProg[n] = { fn: "switch", ga: "1/0/" + n };
+          if (!item.knxKeysProg[n]) {
+            item.knxKeysProg[n] = { fn: "switch", ga: nextKnxGa(1, 0, "1/0/" + n) };
+          } else if (!normGa(item.knxKeysProg[n].ga)) {
+            item.knxKeysProg[n].ga = nextKnxGa(1, 0, "1/0/" + n);
+          }
           knxEnsureName(item.knxKeysProg[n], "name", "Touche " + n);
         });
       }
@@ -10895,7 +10964,11 @@
         if (!item.knxCh) item.knxCh = { 1: false, 2: false, 3: false, 4: false };
         if (!item.knxChProg) item.knxChProg = defaultKnxChProg();
         [1, 2, 3, 4].forEach((n) => {
-          if (!item.knxChProg[n]) item.knxChProg[n] = { ga: "1/1/" + n };
+          if (!item.knxChProg[n]) {
+            item.knxChProg[n] = { ga: nextKnxGa(1, 1, "1/1/" + n) };
+          } else if (!normGa(item.knxChProg[n].ga)) {
+            item.knxChProg[n].ga = nextKnxGa(1, 1, "1/1/" + n);
+          }
           knxEnsureName(item.knxChProg[n], "name", "Sortie " + n);
         });
       }
@@ -10903,38 +10976,68 @@
         if (!item.knxShutter) item.knxShutter = { 1: { dir: "stop", pos: 0.35 }, 2: { dir: "stop", pos: 0.35 } };
         if (!item.knxShutterProg) item.knxShutterProg = defaultKnxShutterProg();
         [1, 2].forEach((n) => {
-          const p = item.knxShutterProg[n];
-          if (!p) return;
+          let p = item.knxShutterProg[n];
+          if (!p) {
+            const base = 1 + (n - 1) * 3;
+            p = allocKnxGaTriple(1, 2, "1/2/" + base, "1/2/" + (base + 1), "1/2/" + (base + 2));
+            item.knxShutterProg[n] = p;
+          } else {
+            if (!normGa(p.gaUp)) p.gaUp = nextKnxGa(1, 2);
+            if (!normGa(p.gaDown)) p.gaDown = nextKnxGa(1, 2);
+            if (!normGa(p.gaStop)) p.gaStop = nextKnxGa(1, 2);
+          }
           knxEnsureName(p, "nameUp", "Volet " + n + " montée");
           knxEnsureName(p, "nameDown", "Volet " + n + " descente");
           knxEnsureName(p, "nameStop", "Volet " + n + " arrêt");
         });
       }
       if (def.knxRoller) {
-        if (!item.knxRollerProg) item.knxRollerProg = { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" };
+        /* Chaque volet extérieur (fenetre_volet) reçoit ses propres GA — pas de collision entre instances. */
+        if (!item.knxRollerProg) {
+          item.knxRollerProg = allocKnxGaTriple(1, 2, "1/2/1", "1/2/2", "1/2/3");
+        } else {
+          const p = item.knxRollerProg;
+          if (!normGa(p.gaUp)) p.gaUp = nextKnxGa(1, 2);
+          if (!normGa(p.gaDown)) p.gaDown = nextKnxGa(1, 2);
+          if (!normGa(p.gaStop)) p.gaStop = nextKnxGa(1, 2);
+        }
         knxEnsureName(item.knxRollerProg, "nameUp", "Montée");
         knxEnsureName(item.knxRollerProg, "nameDown", "Descente");
         knxEnsureName(item.knxRollerProg, "nameStop", "Arrêt");
       }
       if (def.knxDimmer || def.knxDali) {
         if (!item.knxDim) item.knxDim = { on: false, level: 80 };
-        if (!item.knxDimProg) item.knxDimProg = { gaOn: "1/3/1", gaLevel: "1/3/2" };
+        if (!item.knxDimProg) {
+          const used = collectUsedGas();
+          item.knxDimProg = { gaOn: nextKnxGa(1, 3, "1/3/1", used), gaLevel: nextKnxGa(1, 3, "1/3/2", used) };
+        } else {
+          if (!normGa(item.knxDimProg.gaOn)) item.knxDimProg.gaOn = nextKnxGa(1, 3);
+          if (!normGa(item.knxDimProg.gaLevel)) item.knxDimProg.gaLevel = nextKnxGa(1, 3);
+        }
         knxEnsureName(item.knxDimProg, "nameOn", "ON/OFF");
         knxEnsureName(item.knxDimProg, "nameLevel", "Niveau");
       }
       if (def.knxPresence) {
         if (item.knxPresence == null) item.knxPresence = false;
-        if (!item.knxPresenceProg) item.knxPresenceProg = { ga: "1/4/1" };
+        if (!item.knxPresenceProg) item.knxPresenceProg = { ga: nextKnxGa(1, 4, "1/4/1") };
+        else if (!normGa(item.knxPresenceProg.ga)) item.knxPresenceProg.ga = nextKnxGa(1, 4);
         knxEnsureName(item.knxPresenceProg, "name", "Présence");
       }
       if (def.knxTemp) {
         if (item.knxTemp == null) item.knxTemp = 21.5;
-        if (!item.knxTempProg) item.knxTempProg = { ga: "1/5/1" };
+        if (!item.knxTempProg) item.knxTempProg = { ga: nextKnxGa(1, 5, "1/5/1") };
+        else if (!normGa(item.knxTempProg.ga)) item.knxTempProg.ga = nextKnxGa(1, 5);
         knxEnsureName(item.knxTempProg, "name", "Température");
       }
       if (def.knxThermo) {
         if (!item.knxThermo) item.knxThermo = { set: 20, room: 21, heat: false };
-        if (!item.knxThermoProg) item.knxThermoProg = { gaSet: "1/6/1", gaHeat: "1/6/2" };
+        if (!item.knxThermoProg) {
+          const used = collectUsedGas();
+          item.knxThermoProg = { gaSet: nextKnxGa(1, 6, "1/6/1", used), gaHeat: nextKnxGa(1, 6, "1/6/2", used) };
+        } else {
+          if (!normGa(item.knxThermoProg.gaSet)) item.knxThermoProg.gaSet = nextKnxGa(1, 6);
+          if (!normGa(item.knxThermoProg.gaHeat)) item.knxThermoProg.gaHeat = nextKnxGa(1, 6);
+        }
         knxEnsureName(item.knxThermoProg, "nameSet", "Consigne");
         knxEnsureName(item.knxThermoProg, "nameHeat", "Chauffage");
       }
@@ -10943,8 +11046,11 @@
         if (!item.knxBinProg || typeof item.knxBinProg !== "object") item.knxBinProg = {};
         knxBinaryIds(def).forEach((n) => {
           if (item.knxBin[n] == null) item.knxBin[n] = false;
-          if (!item.knxBinProg[n]) item.knxBinProg[n] = { ga: "1/7/" + n, name: "Entrée " + n };
-          else knxEnsureName(item.knxBinProg[n], "name", "Entrée " + n);
+          if (!item.knxBinProg[n]) item.knxBinProg[n] = { ga: nextKnxGa(1, 7, "1/7/" + n), name: "Entrée " + n };
+          else {
+            if (!normGa(item.knxBinProg[n].ga)) item.knxBinProg[n].ga = nextKnxGa(1, 7, "1/7/" + n);
+            knxEnsureName(item.knxBinProg[n], "name", "Entrée " + n);
+          }
         });
       }
       if (def.houseFacade) {
@@ -11390,22 +11496,31 @@
       };
       return map[slotId] || "";
     }
-    /* Défauts GA. La simulation lit item.facade.prog[slot] — un autre participant ne partage pas cet objet. */
+    /* Défauts GA. Allocation nextKnxGa : 2e façade / slots ajoutés n’entrent pas en collision. */
     function defaultFacadeSlotProg(slotId, kind) {
       if (kind === "volet" || kind === "garage") {
-        const p = facadeRollerProg(slotId) || { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" };
+        const prefer = facadeRollerProg(slotId) || { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" };
         const lab = (kind === "garage" ? "Garage " : "Volet ") + slotId;
+        const g = allocKnxGaTriple(1, 2, prefer.gaUp, prefer.gaDown, prefer.gaStop);
         return {
           nameUp: lab + " montée", nameDown: lab + " descente", nameStop: lab + " arrêt",
-          gaUp: p.gaUp, gaDown: p.gaDown, gaStop: p.gaStop
+          gaUp: g.gaUp, gaDown: g.gaDown, gaStop: g.gaStop
         };
       }
-      if (kind === "light") return { name: "Lampe " + slotId, ga: facadeLightGa(slotId) || "1/1/40" };
-      if (kind === "door") {
-        return { nameStrike: "Gâche", gaStrike: "1/1/30", nameVideo: "Visiophone", gaVideo: "1/1/31" };
+      if (kind === "light") {
+        return { name: "Lampe " + slotId, ga: nextKnxGa(1, 1, facadeLightGa(slotId) || "1/1/40") };
       }
-      if (kind === "meteo") return { name: "Station météo", ga: "1/5/10" };
-      if (kind === "pv") return { name: "Solaire " + slotId, ga: slotId === "pv2" ? "1/8/2" : "1/8/1" };
+      if (kind === "door") {
+        const used = collectUsedGas();
+        return {
+          nameStrike: "Gâche", gaStrike: nextKnxGa(1, 1, "1/1/30", used),
+          nameVideo: "Visiophone", gaVideo: nextKnxGa(1, 1, "1/1/31", used)
+        };
+      }
+      if (kind === "meteo") return { name: "Station météo", ga: nextKnxGa(1, 5, "1/5/10") };
+      if (kind === "pv") {
+        return { name: "Solaire " + slotId, ga: nextKnxGa(1, 8, slotId === "pv2" ? "1/8/2" : "1/8/1") };
+      }
       return null;
     }
     function ensureFacadeProg(item) {
@@ -12230,21 +12345,18 @@
       try { ensureEtsFrameGeom(true); } catch (_) {}
       syncEtsLayout();
     }
-    /** Sélection plan : ouvre le cadre ETS déjà existant sur CE participant (et ce slot façade). */
+    /** Sélection plan : mémorise le participant ; n’ouvre PAS ETS (btn ETS bas / Menu uniquement). */
     function focusEtsOnKnx(item, slotId) {
       if (!item || state.mode === "wire") return;
       const def = LIB[item.type];
       if (!def || !isKnxDevice(def)) return;
       state.etsSelUid = item.uid;
       state.etsSelSlot = slotId || "";
+      ensureKnxProgram(item);
+      /* Clic / sélection KNX : jamais d’auto-ouverture du cadre ETS. */
+      if (!state.etsOpen) return;
       state.etsTab = "params";
       state.etsProgMode = "params";
-      ensureKnxProgram(item);
-      if (!state.etsOpen) {
-        if (!tierAtLeast("silver")) return;
-        state.etsOpen = true;
-        try { ensureEtsFrameGeom(!state.etsFrame); } catch (_) {}
-      }
       syncEtsLayout();
     }
     function collectKnxLinks() {
@@ -15888,19 +16000,219 @@
       };
     }
     function exampleFacadeKnxProject() {
+      /* Tutorat KNX : GTL (alim + coupleur IP + poussoirs) + façade maison câblée
+         + 2 volets extérieurs avec IA/GA distinctes. Topology TP daisy-chain professionnelle. */
       const g = facadeGeom(4);
+      const facState = facadeFullState(4);
+      const facProg = {};
+      g.slots.forEach((s) => {
+        if (!facState.eq[s.id]) return;
+        if (s.kind === "volet" || s.kind === "garage") {
+          const p = facadeRollerProg(s.id) || { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" };
+          const lab = (s.kind === "garage" ? "Garage " : "Volet ") + s.id;
+          facProg[s.id] = {
+            nameUp: lab + " montée", nameDown: lab + " descente", nameStop: lab + " arrêt",
+            gaUp: p.gaUp, gaDown: p.gaDown, gaStop: p.gaStop
+          };
+        } else if (s.kind === "light") {
+          facProg[s.id] = { name: "Lampe " + s.id, ga: facadeLightGa(s.id) || "1/1/40" };
+        } else if (s.kind === "door") {
+          facProg[s.id] = { nameStrike: "Gâche", gaStrike: "1/1/30", nameVideo: "Visiophone", gaVideo: "1/1/31" };
+        } else if (s.kind === "meteo") {
+          facProg[s.id] = { name: "Station météo", ga: "1/5/10" };
+        } else if (s.kind === "pv") {
+          facProg[s.id] = { name: "Solaire " + s.id, ga: s.id === "pv2" ? "1/8/2" : "1/8/1" };
+        }
+      });
+      facState.prog = facProg;
+      /* Démo ciblée : retirer lampes intermédiaires / PV non câblés (reste tutor-ready). */
+      ["ei1", "ei2", "ei3", "e3", "e4", "pv1", "pv2"].forEach((id) => {
+        delete facState.eq[id];
+        if (facState.roller) delete facState.roller[id];
+        if (facState.light) delete facState.light[id];
+        delete facProg[id];
+      });
+      /* Poussoir éclairage façade : e1, e2, ed, gâche */
+      const pushLight = {
+        1: { fn: "switch", ga: "1/1/11", name: "Applique e1" },
+        2: { fn: "switch", ga: "1/1/13", name: "Applique e2" },
+        3: { fn: "switch", ga: "1/1/20", name: "Applique entrée" },
+        4: { fn: "switch", ga: "1/1/30", name: "Gâche porte" }
+      };
+      /* Poussoir volets : v1 montée/descente, v2 montée/descente */
+      const pushShut = {
+        1: { fn: "up", ga: "1/2/1", name: "Volet v1 ↑" },
+        2: { fn: "down", ga: "1/2/2", name: "Volet v1 ↓" },
+        3: { fn: "up", ga: "1/2/4", name: "Volet v2 ↑" },
+        4: { fn: "down", ga: "1/2/5", name: "Volet v2 ↓" }
+      };
+      const wires = [];
+      let wn = 1;
+      const addW = (aUid, aTerm, bUid, bTerm, color, section) => {
+        wires.push(exW("w" + wn, wn, aUid, aTerm, bUid, bTerm, color, section));
+        wn++;
+      };
+      /* Alim 230 V */
+      addW("p1", "L", "qf1", "1", EX_L, 2.5);
+      addW("p1", "N", "qf1", "3", EX_N, 2.5);
+      addW("qf1", "2", "g1", "L", EX_L, 1.5);
+      addW("qf1", "4", "g1", "N", EX_N, 1.5);
+      addW("g1", "PE", "pe1", "PE", EX_PE, 2.5);
+      addW("pe1", "PE", "x2", "PE", EX_PE, 2.5);
+      addW("qf1", "4", "x2", "N", EX_N, 1.5);
+      /* Bus KNX daisy-chain GTL → poussoirs → façade → volets libres */
+      addW("g1", "BUS", "ik1", "BUS", EX_BUS, 0.8);
+      addW("ik1", "BUS", "ip1", "BUS", EX_BUS, 0.8);
+      addW("ip1", "BUS", "s1", "BUS", EX_BUS, 0.8);
+      addW("s1", "BUS", "s2", "BUS", EX_BUS, 0.8);
+      addW("s2", "BUS", "fac1", "v1.BUS", EX_BUS, 0.8);
+      addW("fac1", "v1.BUS", "fac1", "v2.BUS", EX_BUS, 0.8);
+      addW("fac1", "v2.BUS", "fac1", "v3.BUS", EX_BUS, 0.8);
+      addW("fac1", "v3.BUS", "fac1", "v4.BUS", EX_BUS, 0.8);
+      addW("fac1", "v4.BUS", "fac1", "e1.BUS", EX_BUS, 0.8);
+      addW("fac1", "e1.BUS", "fac1", "e2.BUS", EX_BUS, 0.8);
+      addW("fac1", "e2.BUS", "fac1", "ed.BUS", EX_BUS, 0.8);
+      addW("fac1", "ed.BUS", "fac1", "eg1.BUS", EX_BUS, 0.8);
+      addW("fac1", "eg1.BUS", "fac1", "eg2.BUS", EX_BUS, 0.8);
+      addW("fac1", "eg2.BUS", "fac1", "g1.BUS", EX_BUS, 0.8);
+      addW("fac1", "g1.BUS", "fac1", "g2.BUS", EX_BUS, 0.8);
+      addW("fac1", "g2.BUS", "fac1", "porte.BUS", EX_BUS, 0.8);
+      addW("fac1", "porte.BUS", "fac1", "meteo.BUS", EX_BUS, 0.8);
+      addW("fac1", "meteo.BUS", "vr1", "BUS", EX_BUS, 0.8);
+      addW("vr1", "BUS", "vr2", "BUS", EX_BUS, 0.8);
+      /* Force façade : L/N/PE sur volets, lampes clés, garages, porte */
+      const powerSlots = ["v1", "v2", "v3", "v4", "e1", "e2", "ed", "eg1", "eg2", "g1", "g2", "porte"];
+      powerSlots.forEach((sid, i) => {
+        const fromL = i === 0 ? ["qf1", "2"] : ["fac1", powerSlots[i - 1] + ".L"];
+        const fromN = i === 0 ? ["x2", "N"] : ["fac1", powerSlots[i - 1] + ".N"];
+        addW(fromL[0], fromL[1], "fac1", sid + ".L", EX_L, 1.5);
+        addW(fromN[0], fromN[1], "fac1", sid + ".N", EX_N, 1.5);
+        /* PE : volets + garages uniquement (bornes PE sur ces slots). */
+        if (/^v\d+$/.test(sid) || /^g\d+$/.test(sid)) {
+          const prevPe = powerSlots.slice(0, i).reverse().find((p) => /^v\d+$/.test(p) || /^g\d+$/.test(p));
+          if (!prevPe) addW("pe1", "PE", "fac1", sid + ".PE", EX_PE, 2.5);
+          else addW("fac1", prevPe + ".PE", "fac1", sid + ".PE", EX_PE, 2.5);
+        }
+      });
+      /* Volets libres L/N/PE */
+      addW("qf1", "2", "vr1", "L", EX_L, 1.5);
+      addW("x2", "N", "vr1", "N", EX_N, 1.5);
+      addW("pe1", "PE", "vr1", "PE", EX_PE, 2.5);
+      addW("qf1", "2", "vr2", "L", EX_L, 1.5);
+      addW("x2", "N", "vr2", "N", EX_N, 1.5);
+      addW("pe1", "PE", "vr2", "PE", EX_PE, 2.5);
       return {
-        name: "facade-knx",
-        items: [{
-          uid: "fac1", type: "facade_maison", tag: "FH1",
-          x: 120, y: 40, closed: true, pressed: false,
-          w: g.w, h: g.h,
-          facade: facadeFullState(4)
-        }],
-        wires: [],
-        counts: { FH: 1 },
-        seq: 2,
-        wireNo: 1
+        name: "facade-knx-tutor",
+        items: [
+          exIt("p1", "compteur_sonelgaz", "P1", 36, 20),
+          exIt("qf1", "edz_schneider_acti9_ic60n_2p_c16", "QF1", 88, 210),
+          { uid: "r1", type: "rail_din_35", tag: "X1", x: 190, y: 228, closed: true, pressed: false },
+          {
+            uid: "g1", type: "edz_schneider_mtn684064", tag: "G1",
+            x: 210, y: 178, closed: true, pressed: false, physAddr: "1.1.0"
+          },
+          {
+            uid: "ik1", type: "edz_hager_tyfs120", tag: "IK1",
+            x: 368, y: 178, closed: true, pressed: false, physAddr: "1.1.1"
+          },
+          {
+            uid: "ip1", type: "edz_schneider_mtn680329", tag: "IP1",
+            x: 422, y: 178, closed: true, pressed: false, physAddr: "1.1.2"
+          },
+          {
+            uid: "s1", type: "edz_hager_wkt304", tag: "S1",
+            x: 560, y: 40, closed: true, pressed: false,
+            physAddr: "1.1.10",
+            knxToggle: { 1: false, 2: false, 3: false, 4: false },
+            knxKeysProg: pushLight
+          },
+          {
+            uid: "s2", type: "edz_hager_wkt304", tag: "S2",
+            x: 700, y: 40, closed: true, pressed: false,
+            physAddr: "1.1.11",
+            knxToggle: { 1: false, 2: false, 3: false, 4: false },
+            knxKeysProg: pushShut
+          },
+          exIt("x2", "borniers", "X2", 36, 420),
+          exIt("pe1", "pe", "PE1", 200, 440),
+          {
+            uid: "fac1", type: "facade_maison", tag: "FH1",
+            x: 40, y: 520, closed: true, pressed: false,
+            w: g.w, h: g.h, physAddr: "1.1.13",
+            facade: facState
+          },
+          {
+            uid: "vr1", type: "fenetre_volet", tag: "VR1",
+            x: g.w + 80, y: 520, closed: true, pressed: false,
+            physAddr: "1.1.20",
+            roller: { dir: "stop", pos: 0 },
+            knxRollerProg: {
+              gaUp: "1/2/40", gaDown: "1/2/41", gaStop: "1/2/42",
+              nameUp: "VR1 montée", nameDown: "VR1 descente", nameStop: "VR1 arrêt"
+            }
+          },
+          {
+            uid: "vr2", type: "fenetre_volet", tag: "VR2",
+            x: g.w + 310, y: 520, closed: true, pressed: false,
+            physAddr: "1.1.21",
+            roller: { dir: "stop", pos: 0 },
+            knxRollerProg: {
+              gaUp: "1/2/43", gaDown: "1/2/44", gaStop: "1/2/45",
+              nameUp: "VR2 montée", nameDown: "VR2 descente", nameStop: "VR2 arrêt"
+            }
+          }
+        ],
+        wires: wires,
+        knx: {
+          projectName: "Façade maison KNX — tutorat",
+          lineMedia: "IP",
+          createLine: true,
+          lineType: "TP",
+          gaStyle: "3",
+          integMode: "S",
+          mainGroups: [
+            {
+              id: 1, name: "ECLAIRAGE",
+              mid: [{
+                id: 1, name: "Façade",
+                gas: [
+                  { a: "1/1/11", n: "Applique e1" },
+                  { a: "1/1/13", n: "Applique e2" },
+                  { a: "1/1/20", n: "Applique entrée" },
+                  { a: "1/1/30", n: "Gâche porte" }
+                ]
+              }]
+            },
+            {
+              id: 2, name: "VOLETS / STORES",
+              mid: [{
+                id: 1, name: "Façade + libres",
+                gas: [
+                  { a: "1/2/1", n: "Volet v1 montée" },
+                  { a: "1/2/2", n: "Volet v1 descente" },
+                  { a: "1/2/4", n: "Volet v2 montée" },
+                  { a: "1/2/5", n: "Volet v2 descente" },
+                  { a: "1/2/40", n: "VR1 montée" },
+                  { a: "1/2/41", n: "VR1 descente" },
+                  { a: "1/2/43", n: "VR2 montée" },
+                  { a: "1/2/44", n: "VR2 descente" }
+                ]
+              }]
+            },
+            { id: 3, name: "AUTOMATISMES", mid: [] }
+          ],
+          building: {
+            name: "Villa démo façade KNX",
+            rooms: [
+              { id: "gtl", name: "Local Elec / GTL" },
+              { id: "facade", name: "Façade" },
+              { id: "jardin", name: "Jardin / volets libres" }
+            ]
+          }
+        },
+        counts: { P: 1, QF: 1, X: 2, G: 1, IK: 1, IP: 1, S: 2, FH: 1, VR: 2, PE: 1 },
+        seq: 40,
+        wireNo: wn
       };
     }
     function exampleCatalog() {
@@ -19903,7 +20215,21 @@
         fc.y = pose.y;
         state.items.push(fc);
       }
-      if (isKnxDevice(def)) ensureKnxProgram(copy);
+      if (isKnxDevice(def)) {
+        /* Dupliquer ≠ cloner les adresses : nouvelle IA + nouvelles GA par instance. */
+        delete copy.physAddr;
+        delete copy.knxKeysProg;
+        delete copy.knxChProg;
+        delete copy.knxShutterProg;
+        delete copy.knxRollerProg;
+        delete copy.knxDimProg;
+        delete copy.knxPresenceProg;
+        delete copy.knxTempProg;
+        delete copy.knxThermoProg;
+        delete copy.knxBinProg;
+        if (copy.facade && copy.facade.prog) delete copy.facade.prog;
+        ensureKnxProgram(copy);
+      }
       state.selected = copy.uid;
       state.edzPropsUid = null;
       return copy;
@@ -20415,10 +20741,11 @@
     function oibtBaseHref() {
       try {
         /* APK : file:///android_asset/swissdz-panel/ → ../oibt-trainer/
-           LAN (serve panel) : symlink swissdz-panel/oibt-trainer → même URL /oibt-trainer/ */
+           Expo Metro / site : http(s)://host/swissdz-panel/ → /oibt-trainer/ (servi à côté) */
         return new URL("../oibt-trainer/", location.href).href;
       } catch (_) {
-        return "/oibt-trainer/";
+        try { return new URL("/oibt-trainer/", location.origin).href; }
+        catch (_2) { return "/oibt-trainer/"; }
       }
     }
     function oibtAsset(path) {
@@ -27715,9 +28042,12 @@
         ctrlTrainerBoot = null;
         if (status) {
           status.hidden = false;
-          status.textContent = "Le contrôle n’a pas pu démarrer.";
+          const why = err && err.message ? String(err.message) : "";
+          status.textContent = why === "timeout"
+            ? "Le contrôle n’a pas pu démarrer (délai dépassé)."
+            : "Le contrôle n’a pas pu démarrer. Vérifiez /oibt-trainer/ (Metro ou assets APK).";
         }
-        console.error(err);
+        console.error("[controle-elec]", oibtBaseHref(), err);
         throw err;
       });
       return ctrlTrainerBoot;
