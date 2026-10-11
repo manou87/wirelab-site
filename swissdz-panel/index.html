@@ -8,7 +8,9 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v134-exemples-scroll" />
+  <meta name="swissdz-rev" content="native-shell-8777-v136-lib-phone-lower" />
+  <!-- v136: téléphone — feuille composants ~10 % plus basse (82vh, top plus bas sous le chrome) -->
+  <!-- v135: pinch = zoom viewport seulement (pas resize géométrique platine/composants) ; anti-jitter ; volets KNX ext visibles Free -->
   <!-- v134: Installations exemplaires — la liste de la modale centrale défile (molette + doigt), le plan derrière ne panne plus -->
   <!-- v133: ETS — chaque participant KNX (volet, slot façade, poussoir, actionneur, coupleur) a ses GA et noms d’objets -->
   <!-- v132: cordon PE continu ; mesures Fluke du plan = bornes réellement touchées (hors / sous tension) -->
@@ -628,15 +630,16 @@
       left:50% !important;
       right:auto !important;
       top:auto !important;
-      bottom:calc(var(--pw-foot-h, 56px) + 8px) !important;
-      width:min(312px, 78vw) !important;
-      max-width:78vw !important;
-      height:min(52vh, 440px) !important;
-      max-height:min(52vh, 440px) !important;
+      bottom:calc(var(--pw-foot-h, 56px) + 4px) !important;
+      width:min(96vw, 440px) !important;
+      max-width:96vw !important;
+      /* v136 : feuille ~10 % plus basse (top plus bas sous le chrome haut). */
+      height:min(78vh, 700px) !important;
+      max-height:min(78vh, 700px) !important;
       z-index:320 !important;
       grid-area:unset !important;
       transform:translate(-50%, 110%) !important;
-      border-radius:14px !important;
+      border-radius:14px 14px 10px 10px !important;
       border-top:1px solid var(--line) !important;
       box-shadow:0 -8px 28px rgba(15,23,42,.26) !important;
       overflow:hidden !important;
@@ -1702,7 +1705,7 @@
       background:rgba(15,23,42,.45); touch-action:manipulation;
     }
     html.pw-lib-bottom body.lib-open .lib-backdrop { display:block; }
-    /* v63 : feuille catalogue quasi plein écran (cartes photo + select catégorie). */
+    /* v88-lib-phone : feuille haute, grille 2 cols, vignettes + nom (pas de + Ajouter). */
     html.pw-lib-bottom .lib-side {
       position:absolute !important;
       grid-area:work !important;
@@ -1714,13 +1717,14 @@
       bottom:4px !important;
       width:min(440px, 96vw) !important;
       max-width:96vw !important;
-      height:min(82vh, 720px) !important;
-      max-height:min(82vh, 720px) !important;
+      /* v136 : ~10 % plus basse — top du tiroir plus bas sous le chrome. */
+      height:min(82vh, 740px) !important;
+      max-height:min(82vh, 740px) !important;
       transform:translate(-50%, 110%) !important;
       transition:transform .22s ease !important;
       border-right:none !important;
       border-top:1px solid rgba(148,163,184,.35) !important;
-      border-radius:18px 18px 12px 12px !important;
+      border-radius:14px 14px 10px 10px !important;
       box-shadow:0 -12px 40px rgba(15,23,42,.4) !important;
       overflow:hidden !important;
       pointer-events:none !important;
@@ -1733,68 +1737,65 @@
       pointer-events:auto !important;
       visibility:visible !important;
     }
+    /* En-tête compact : seul le × reste ; titre + hint masqués pour gagner de la hauteur. */
     html.pw-lib-bottom .lib-phone-head {
-      display:flex !important; align-items:flex-start; gap:10px;
-      padding:4px 2px 8px; margin:0;
+      display:flex !important; align-items:center; justify-content:flex-end; gap:0;
+      padding:0 0 2px; margin:0; min-height:0;
     }
     html.pw-lib-bottom .lib-phone-close {
-      flex:0 0 auto; width:36px; height:36px; border-radius:10px;
+      flex:0 0 auto; width:30px; height:30px; border-radius:8px;
       border:1px solid rgba(148,163,184,.35); background:rgba(30,41,59,.9);
-      color:#f8fafc; font-size:22px; line-height:1; font-weight:600;
+      color:#f8fafc; font-size:18px; line-height:1; font-weight:600;
       display:inline-flex; align-items:center; justify-content:center;
       touch-action:manipulation; -webkit-tap-highlight-color:transparent;
     }
-    html.pw-lib-bottom .lib-phone-titles {
-      flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px;
-    }
-    html.pw-lib-bottom .lib-phone-titles strong {
-      margin:0 !important; font-size:18px !important; font-weight:800 !important;
-      color:#f8fafc !important; letter-spacing:0 !important; text-transform:none !important;
-    }
-    html.pw-lib-bottom .lib-phone-titles span {
-      font-size:12px; font-weight:600; color:#94a3b8; line-height:1.25;
-    }
+    html.pw-lib-bottom .lib-phone-titles { display:none !important; }
+    html.pw-lib-bottom .lib-phone-titles strong,
+    html.pw-lib-bottom .lib-phone-titles span { display:none !important; }
     html.pw-lib-bottom .lib-desk-title,
     html.pw-lib-bottom .lib-tabs { display:none !important; }
     html.pw-lib-bottom .lib-cat-select-row {
-      display:block !important; margin:0 0 8px;
+      display:block !important; margin:0 0 4px;
     }
     html.pw-lib-bottom .lib-cat-select-row select {
-      width:100%; height:40px; border-radius:10px;
+      width:100%; height:34px; border-radius:8px;
       border:1px solid rgba(148,163,184,.35);
       background:#1e293b; color:#f1f5f9;
-      padding:0 12px; font-size:14px; font-weight:700;
+      padding:0 10px; font-size:13px; font-weight:700;
       outline:none; appearance:none;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-      background-repeat:no-repeat; background-position:right 12px center;
-      padding-right:32px;
+      background-repeat:no-repeat; background-position:right 10px center;
+      padding-right:28px;
     }
     html.pw-lib-bottom .lib-side-head {
-      flex:0 0 auto !important; padding:10px 12px 6px !important;
+      flex:0 0 auto !important; padding:6px 8px 4px !important;
       border-bottom:1px solid rgba(148,163,184,.2) !important;
       background:#0f172a !important;
     }
     html.pw-lib-bottom .lib-search-row input {
-      height:40px !important; font-size:14px !important; font-weight:650 !important;
-      border-radius:10px !important; padding-left:34px !important;
+      height:34px !important; font-size:13px !important; font-weight:650 !important;
+      border-radius:8px !important; padding-left:32px !important;
       background:#1e293b !important; color:#f1f5f9 !important;
       border-color:rgba(148,163,184,.35) !important;
     }
-    html.pw-lib-bottom .lib-search-row .lib-search-ico { color:#94a3b8 !important; left:10px !important; width:16px !important; height:16px !important; }
+    html.pw-lib-bottom .lib-search-row .lib-search-ico { color:#94a3b8 !important; left:10px !important; width:15px !important; height:15px !important; }
     html.pw-lib-bottom .lib-side > .lib-items,
     html.pw-lib-bottom .lib-phone-grid {
       display:grid !important; flex:1 1 auto !important; min-height:0 !important;
-      grid-template-columns:1fr 1fr !important; gap:10px !important;
-      padding:10px 12px 16px !important; overflow-y:auto !important;
-      -webkit-overflow-scrolling:touch; align-content:start;
+      /* 2 cols : lisible sur téléphone ; auto-rows évite l’écrasement (all-cats). */
+      grid-template-columns:1fr 1fr !important;
+      grid-auto-rows:auto !important; gap:8px !important;
+      padding:8px 10px 14px !important; overflow-y:auto !important;
+      -webkit-overflow-scrolling:touch; align-content:start; align-items:start;
       background:#0b1220 !important;
     }
     html.pw-lib-bottom .lib-tabs .lib-acc-panel.lib-items { display:none !important; }
     html.pw-lib-bottom .item {
       background:#1e293b !important; border:1px solid rgba(148,163,184,.22) !important;
-      border-radius:14px !important; padding:10px 8px 8px !important;
-      gap:6px !important; min-height:148px; justify-content:flex-start !important;
-      box-shadow:0 4px 14px rgba(0,0,0,.22);
+      border-radius:10px !important; padding:8px 6px 6px !important;
+      gap:4px !important; min-height:118px !important; height:auto !important;
+      justify-content:flex-start !important; align-self:start !important;
+      overflow:visible !important; box-shadow:none;
     }
     html.pw-lib-bottom .item:hover,
     html.pw-lib-bottom .item:active {
@@ -1802,21 +1803,23 @@
     }
     html.pw-lib-bottom .item img,
     html.pw-lib-bottom .item .thumb {
-      width:78% !important; max-height:88px !important; margin:2px auto 0 !important;
-      background:#fff !important; border-radius:10px !important; padding:6px;
-      box-sizing:border-box;
+      width:78% !important; max-height:72px !important; min-height:40px !important;
+      margin:2px auto 0 !important; flex:0 0 auto !important;
+      background:#fff !important; border-radius:8px !important; padding:4px;
+      box-sizing:border-box; object-fit:contain !important;
     }
     html.pw-lib-bottom .item > span:not(.thumb):not(.lib-add) {
-      font-size:12px !important; font-weight:700 !important; color:#e2e8f0 !important;
-      -webkit-line-clamp:2; min-height:2.4em;
+      display:-webkit-box !important; -webkit-box-orient:vertical !important;
+      font-size:11px !important; font-weight:700 !important; color:#e2e8f0 !important;
+      -webkit-line-clamp:2; line-clamp:2; min-height:2.2em; line-height:1.15;
+      overflow:hidden; text-overflow:ellipsis; flex:0 0 auto !important;
+      max-width:100%;
     }
+    /* Téléphone : vignettes seules — pas de bouton « + Ajouter ». */
     html.pw-lib-bottom .item .lib-add {
-      display:inline-flex !important; align-items:center; justify-content:center; gap:4px;
-      margin-top:auto; width:100%; height:32px; border-radius:9px;
-      background:#2563eb; color:#fff; font-size:12px; font-weight:800;
-      letter-spacing:.01em; pointer-events:none;
+      display:none !important;
     }
-    html.pw-lib-bottom .item .lib-add::before { content:"+"; font-size:15px; font-weight:900; line-height:1; }
+    html.pw-lib-bottom .item .lib-add::before { content:none; }
     html.pw-lib-bottom .lib-examples {
       background:#0b1220 !important; color:#e2e8f0 !important;
       flex:1 1 auto; min-height:0; overflow:auto; padding:10px 12px;
@@ -2795,10 +2798,31 @@
       display:flex; flex-direction:column; gap:4px; align-items:center; justify-content:center;
       width:100%; min-width:0; max-width:none; text-align:center;
       margin:0; border:1px solid #eef2f7; border-radius:10px; padding:8px 6px;
-      background:#fafbfc; cursor:pointer;
+      background:#fafbfc; cursor:grab;
       touch-action:manipulation; -webkit-tap-highlight-color:transparent;
     }
+    .item:active { cursor:grabbing; }
     .item:hover { border-color:#bfdbfe; background:#f8fbff; }
+    .lib-ghost {
+      position:fixed; z-index:5800; pointer-events:none;
+      transform:translate(-50%,-55%);
+      width:72px; max-width:22vw; padding:6px; border-radius:10px;
+      border:1.5px solid #2563eb; background:#fff;
+      box-shadow:0 10px 28px rgba(15,23,42,.28);
+      display:flex; flex-direction:column; align-items:center; gap:4px;
+      font-size:10px; font-weight:800; color:#0f172a; text-align:center;
+    }
+    .lib-ghost img, .lib-ghost .thumb {
+      width:100%; max-height:48px; object-fit:contain; display:block;
+    }
+    body.lib-palette-drag #board {
+      outline:2px dashed rgba(37,99,235,.55);
+      outline-offset:-2px;
+    }
+    body.lib-palette-drag #board.lib-drop-hot {
+      outline-color:#2563eb;
+      background-color:rgba(37,99,235,.04);
+    }
     .item > span:not(.thumb) {
       font-size:11px; font-weight:650; color:#475569; line-height:1.2;
       max-width:100%; overflow:hidden;
@@ -2859,6 +2883,11 @@
       pointer-events:none !important;
       transition:none !important;
       animation:none !important;
+    }
+    /* v135 : poignées resize invisibles/inertes pendant pinch — évite resize géométrique vs zoom. */
+    #board.is-pinching .rhandle {
+      display:none !important;
+      pointer-events:none !important;
     }
     /* Spacer = marge pan (fond uni). Grille UNIQUEMENT dans #boardWorld. */
     #boardZoomSpacer {
@@ -4587,23 +4616,23 @@
       text-overflow: clip !important;
       padding: 2px 4px !important;
     }
+    /* v91 : ne pas écraser les cartes (min-height:0 + overflow:hidden → barres blanches en all-cats). */
     html.pw-lib-bottom .item {
-      overflow: hidden !important;
-      align-self: stretch !important;
-      min-height: 168px !important;
+      overflow: visible !important;
+      align-self: start !important;
+      min-height: 118px !important;
+      height: auto !important;
       position: relative !important;
       z-index: 1 !important;
     }
     html.pw-lib-bottom .item img,
     html.pw-lib-bottom .item .thumb {
       max-height: 72px !important;
+      min-height: 40px !important;
       flex: 0 0 auto !important;
     }
     html.pw-lib-bottom .item .lib-add {
-      flex: 0 0 auto !important;
-      margin-top: auto !important;
-      position: relative !important;
-      z-index: 2 !important;
+      display: none !important;
     }
     .lib-tech-close {
       display: block; width: 100%; margin-top: 8px;
@@ -5461,7 +5490,7 @@
           <button type="button" id="btnLibClose" class="lib-phone-close" data-i18n-aria="libCloseAria" aria-label="Fermer">×</button>
           <div class="lib-phone-titles">
             <strong data-i18n="libPhoneTitle">Composants</strong>
-            <span data-i18n="libPhoneHint">Toucher pour ajouter · glisser possible</span>
+            <span data-i18n="libPhoneHint">Toucher = fiche · glisser sur le plan</span>
           </div>
         </div>
         <div class="lib-search-row">
@@ -7249,7 +7278,7 @@
          Pas de bornes Monter/Descendre. knxRoller = mêmes GA qu’un canal knxShutter, sans L→U/D.
          roller.pos 0 = fermé à la pose, 1 = ouvert.
          v123 : touches Monter/Arrêt/Descendre inertes tant que L, N, PE et BUS ne sont pas raccordés. */
-      fenetre_volet: {name:"Fenêtre + volet roulant",nameEn:"Window + roller shutter",prefix:"VR",cat:"Domotique KNX",w:210,h:332,image:"assets/electrodz/fenetre_volet.png?v=v121-fenetre-knx",badge:"Volet",iec:"VR",rollerBlind:true,knxRoller:true,busLed:{nx:0.08,ny:0.045},rollerOpening:{nx:0.168,ny:0.218,nw:0.652,nh:0.640},terminals:[
+      fenetre_volet: {name:"Volet KNX extérieur (fenêtre)",nameEn:"KNX exterior shutter (window)",nameAr:"شباك خارجي KNX",prefix:"VR",cat:"Domotique KNX",w:210,h:332,image:"assets/electrodz/fenetre_volet.png?v=v121-fenetre-knx",badge:"Volet ext",iec:"VR",rollerBlind:true,knxRoller:true,busLed:{nx:0.08,ny:0.045},rollerOpening:{nx:0.168,ny:0.218,nw:0.652,nh:0.640},terminals:[
         {id:"L",nx:0.28,ny:0.04,direction:"top"},
         {id:"N",nx:0.46,ny:0.04,direction:"top"},
         {id:"PE",nx:0.64,ny:0.04,direction:"top"},
@@ -10639,11 +10668,14 @@
     /* Déclaré tôt : utilisé pendant pinch (défini avant les handlers). */
     var boardTouchPinch = null;
     var boardPinchPtrs = new Map();
+    var boardZoomRaf = 0;
+    var boardZoomPend = null;
     /*
      * v108 : zoom 1.0.1 + spacer FIGÉ pendant pinch.
      * Cause user : plan vide fluide ; dès qu’un .dev (photo) est posé → tremblement.
      * Resize spacer frame-à-frame + scale des PNG = thrash WebKit. Pendant pinch =
      * uniquement scale(#boardWorld) + scroll. Settle spacer à la fin.
+     * v135 : coalesce rAF pendant pinch (anti-vibration) ; resize géométrique interdit.
      */
     function ensurePinchSpacerRoom(zNow) {
       const spacer = document.getElementById("boardZoomSpacer");
@@ -10716,18 +10748,50 @@
     function setBoardZoom(next) {
       setBoardZoomAt(next, null, null);
     }
-    /* Zoom ancré sous curseur/doigts — exact 1.0.1 (recalcule ax/ay chaque frame). */
+    /* Zoom ancré sous curseur/doigts — viewport only (jamais item.w/h). */
     function setBoardZoomAt(next, clientX, clientY, opts) {
       const z0 = boardZoom();
       const z1 = clampBoardZoom(next);
       const rect = board.getBoundingClientRect();
       const pad = BOARD_PAN_PAD;
-      const ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
-      const oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
-      const ax = (board.scrollLeft + ox - pad) / z0;
-      const ay = (board.scrollTop + oy - pad) / z0;
-      if (Math.abs(z1 - z0) < 1e-9) {
+      const pinching = !!(opts && opts.livePinch) || board.classList.contains("is-pinching");
+      let ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
+      let oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
+      /* Ancre monde figée au début du pinch (évite oscillation si doigts bougent). */
+      let ax, ay;
+      if (pinching && boardTouchPinch && Number.isFinite(boardTouchPinch.ax)) {
+        ax = boardTouchPinch.ax;
+        ay = boardTouchPinch.ay;
+        if (Number.isFinite(boardTouchPinch.ox0)) ox = boardTouchPinch.ox0;
+        if (Number.isFinite(boardTouchPinch.oy0)) oy = boardTouchPinch.oy0;
+      } else {
+        ax = (board.scrollLeft + ox - pad) / z0;
+        ay = (board.scrollTop + oy - pad) / z0;
+      }
+      if (Math.abs(z1 - z0) < 1e-9 && !pinching) {
         applyBoardZoomStyles(opts);
+        return;
+      }
+      if (pinching) {
+        if (boardTouchPinch && !Number.isFinite(boardTouchPinch.ax)) {
+          boardTouchPinch.ax = ax;
+          boardTouchPinch.ay = ay;
+          boardTouchPinch.ox0 = ox;
+          boardTouchPinch.oy0 = oy;
+        }
+        boardZoomPend = { z1: z1, ox: ox, oy: oy, ax: ax, ay: ay, pad: pad };
+        if (!boardZoomRaf) {
+          boardZoomRaf = requestAnimationFrame(function () {
+            boardZoomRaf = 0;
+            const p = boardZoomPend;
+            boardZoomPend = null;
+            if (!p) return;
+            state.boardZoom = p.z1;
+            applyBoardZoomStyles({ livePinch: true });
+            board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
+            board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
+          });
+        }
         return;
       }
       state.boardZoom = z1;
@@ -18125,8 +18189,19 @@
       if (!q) return true;
       const disp = (libDisplayName(id, def) || "").toLowerCase();
       const name = ((def && def.name) || "").toLowerCase();
+      const nameEn = ((def && def.nameEn) || "").toLowerCase();
       const badge = ((def && def.badge) || "").toLowerCase();
-      return disp.indexOf(q) >= 0 || name.indexOf(q) >= 0 || badge.indexOf(q) >= 0 || String(id).toLowerCase().indexOf(q) >= 0;
+      const idL = String(id).toLowerCase();
+      if (disp.indexOf(q) >= 0 || name.indexOf(q) >= 0 || nameEn.indexOf(q) >= 0
+          || badge.indexOf(q) >= 0 || idL.indexOf(q) >= 0) return true;
+      /* Synonymes recherche téléphone : « volet knx ext », « shutter », façade… */
+      const hay = disp + " " + name + " " + nameEn + " " + badge + " " + idL;
+      if ((/volet|shutter|roller|fenetre|fenêtre/.test(q) || /volet|shutter|roller/.test(hay))
+          && (def && (def.knxRoller || def.knxShutter || def.rollerBlind || idL.indexOf("volet") >= 0))) {
+        if (/ext|exter|extérieur|exterior|fenetre|fenêtre|window|knx|volet|shutter/.test(q)) return true;
+      }
+      if (/facade|façade|maison|house/.test(q) && def && def.houseFacade) return true;
+      return false;
     }
     function libCatVisibleEntries(cat) {
       const q = libQuery();
@@ -18208,13 +18283,139 @@
       addLab.className = "lib-add";
       addLab.textContent = tOr("libAdd", "Ajouter");
       b.appendChild(addLab);
+      b.dataset.libType = id;
       b.onclick = () => {
+        if (b._libSkipClick) { b._libSkipClick = false; return; }
         if (!isTypeUnlocked(id)) { openTierGate(); return; }
-        /* v87 : 1er clic = fiche technique ; Ajouter (dans la fiche) pose sur le plan. */
+        /* v87 : 1er clic = fiche technique ; glisser sur le plan = pose directe. */
         openLibTechSheet(id);
       };
       target.appendChild(b);
     }
+
+    (function initLibPaletteDrag() {
+      const lib = document.getElementById("libTop");
+      if (!lib || lib.dataset.libDragBound === "1") return;
+      lib.dataset.libDragBound = "1";
+      let drag = null;
+      function overBoard(x, y) {
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+        try {
+          const r = board.getBoundingClientRect();
+          if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return true;
+        } catch (_) {}
+        let el = null;
+        try { el = document.elementFromPoint(x, y); } catch (_) {}
+        return !!(el && el.closest && el.closest("#board"));
+      }
+      function setBoardHot(on) {
+        try { board.classList.toggle("lib-drop-hot", !!on); } catch (_) {}
+      }
+      function cleanup() {
+        if (drag && drag.ghost && drag.ghost.parentNode) drag.ghost.parentNode.removeChild(drag.ghost);
+        document.body.classList.remove("lib-palette-drag");
+        setBoardHot(false);
+        drag = null;
+      }
+      function unbindDoc() {
+        document.removeEventListener("pointermove", onMove);
+        document.removeEventListener("pointerup", endDrag);
+        document.removeEventListener("pointercancel", onCancel);
+      }
+      function makeGhost(btn) {
+        const g = document.createElement("div");
+        g.className = "lib-ghost";
+        const img = btn.querySelector("img, .thumb, .fluke-lib-face");
+        if (img) g.appendChild(img.cloneNode(true));
+        const lab = document.createElement("span");
+        const name = btn.querySelector("span:not(.thumb):not(.lib-add):not(.fluke-lib-face)");
+        lab.textContent = (name && name.textContent) || btn.dataset.libType || "";
+        g.appendChild(lab);
+        document.body.appendChild(g);
+        return g;
+      }
+      function onMove(ev) {
+        if (!drag || ev.pointerId !== drag.pointerId) return;
+        const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+        if (!drag.moved) {
+          if (dx * dx + dy * dy < 64) return;
+          /* Scroll vertical dans la biblio → ne pas démarrer le drag. */
+          if (Math.abs(dy) >= Math.abs(dx) * 1.15) {
+            unbindDoc();
+            cleanup();
+            return;
+          }
+          drag.moved = true;
+          drag.btn._libSkipClick = true;
+          document.body.classList.add("lib-palette-drag");
+          drag.ghost = makeGhost(drag.btn);
+          try { drag.btn.setPointerCapture(ev.pointerId); } catch (_) {}
+          try { closeLibTechSheet(); } catch (_) {}
+        }
+        drag.lastX = ev.clientX;
+        drag.lastY = ev.clientY;
+        if (drag.ghost) {
+          drag.ghost.style.left = ev.clientX + "px";
+          drag.ghost.style.top = ev.clientY + "px";
+        }
+        setBoardHot(overBoard(ev.clientX, ev.clientY));
+        if (ev.cancelable) ev.preventDefault();
+      }
+      function finishDrop(type, btn, x, y) {
+        btn._libSkipClick = true;
+        if (!overBoard(x, y)) return;
+        if (!isTypeUnlocked(type)) { openTierGate(); return; }
+        add(type, { x: x, y: y });
+        try { closeMobileLib(); } catch (_) {}
+      }
+      function endDrag(ev) {
+        if (!drag || ev.pointerId !== drag.pointerId) return;
+        const moved = drag.moved;
+        const type = drag.type;
+        const btn = drag.btn;
+        const x = Number.isFinite(ev.clientX) ? ev.clientX : drag.lastX;
+        const y = Number.isFinite(ev.clientY) ? ev.clientY : drag.lastY;
+        unbindDoc();
+        cleanup();
+        if (!moved) return;
+        finishDrop(type, btn, x, y);
+      }
+      function onCancel(ev) {
+        if (!drag || ev.pointerId !== drag.pointerId) return;
+        const moved = drag.moved;
+        const type = drag.type;
+        const btn = drag.btn;
+        const x = drag.lastX, y = drag.lastY;
+        unbindDoc();
+        cleanup();
+        /* pointercancel (capture / touch) : quand même poser si dernier point sur le plan. */
+        if (!moved) return;
+        finishDrop(type, btn, x, y);
+      }
+      lib.addEventListener("pointerdown", (ev) => {
+        if (ev.button) return;
+        const b = ev.target.closest("button.item[data-lib-type]");
+        if (!b || !lib.contains(b)) return;
+        const type = b.dataset.libType;
+        if (!type || !LIB[type]) return;
+        drag = {
+          type: type,
+          btn: b,
+          x: ev.clientX,
+          y: ev.clientY,
+          lastX: ev.clientX,
+          lastY: ev.clientY,
+          moved: false,
+          pointerId: ev.pointerId,
+          ghost: null
+        };
+        document.addEventListener("pointermove", onMove, { passive: false });
+        document.addEventListener("pointerup", endDrag);
+        document.addEventListener("pointercancel", onCancel);
+      });
+    })();
+
+
     function appendPaletteSection(cat, n, host) {
       const target = host || palette;
       if (!target) return;
@@ -18654,6 +18855,30 @@
       item.x = x0;
       item.y = y0;
     }
+    /** Pose sous le pointeur (drag & drop biblio → plan). */
+    function placeAtClient(item, clientX, clientY) {
+      if (!item || clientX == null || clientY == null) {
+        placeBesideAligned(item);
+        return;
+      }
+      let over = null;
+      try { over = document.elementFromPoint(clientX, clientY); } catch (_) {}
+      if (!over || !over.closest || !over.closest("#board")) {
+        placeBesideAligned(item);
+        return;
+      }
+      const pt = boardPointFromClient(clientX, clientY);
+      const sz = itemSize(item);
+      let x = pt.x - sz.w / 2;
+      let y = pt.y - sz.h / 2;
+      if (!Number.isFinite(x)) x = 8;
+      if (!Number.isFinite(y)) y = 8;
+      x = Math.max(0, x);
+      y = Math.max(0, y);
+      try { x = resolveDinX(item, x, y); } catch (_) {}
+      item.x = x;
+      item.y = y;
+    }
     /**
      * v53-place-beside-align : à l’ajout, si de la place → à côté du composant
      * sélectionné / dernier posé, même alignement Y (haut). Sinon centre viewport.
@@ -18771,10 +18996,12 @@
       if (motorHasSixLeadPlate(def)) applyMotorBarPreset(item, "delta");
       return item;
     }
-    function add(type) {
+    function add(type, atClient) {
       if (!isTypeUnlocked(type)) { openTierGate(); return; }
       const def = LIB[type];
       if (!def) return;
+      const drop = atClient && Number.isFinite(atClient.x) && Number.isFinite(atClient.y)
+        ? atClient : null;
       if (def.kind === "barrette") {
         const host = state.selected && find(state.selected);
         if (host && isMotorDef(host.type, LIB[host.type]) && nextBarTermsOnMotor(host, def.holes || 2)) {
@@ -18794,7 +19021,8 @@
         if (!isTypeUnlocked(kmType) || !isTypeUnlocked(frType)) { openTierGate(); return; }
         pushHistory();
         const km = makeLibBoardItem(kmType);
-        placeBesideAligned(km);
+        if (drop) placeAtClient(km, drop.x, drop.y);
+        else placeBesideAligned(km);
         state.items.push(km);
         const fr = makeLibBoardItem(frType);
         attachFrUnderKm(km, fr);
@@ -18809,8 +19037,9 @@
       }
       pushHistory();
       const item = makeLibBoardItem(type);
-      /* v53 : à côté + même alignement Y si place, sinon centre viewport. */
-      placeBesideAligned(item);
+      /* Drag & drop : sous le doigt/souris. Sinon à côté / centre viewport. */
+      if (drop) placeAtClient(item, drop.x, drop.y);
+      else placeBesideAligned(item);
       state.items.push(item);
       if (isKnxDevice(def)) ensureKnxProgram(item);
       setSelection([item.uid], item.uid);
@@ -24971,6 +25200,12 @@
               ev.stopPropagation();
               if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
               ev.preventDefault();
+              /* v135 : 2e doigt / pinch en cours → pas de resize (zoom plan). */
+              if (boardTouchPinch || boardGesturePinch
+                  || (boardPinchPtrs && boardPinchPtrs.size >= 2)
+                  || (board && board.classList && board.classList.contains("is-pinching"))) {
+                return;
+              }
               state.selected = item.uid;
               state.selectedWire = null;
               state.drag = null; /* priorité resize vs group-drag rail */
@@ -25574,6 +25809,14 @@
 
     function applyResizePointer(ev) {
       if (!state.resize) return false;
+      /* v135 : pinch / 2 doigts = zoom plan uniquement — jamais resize w/h. */
+      if (boardTouchPinch || boardGesturePinch
+          || (boardPinchPtrs && boardPinchPtrs.size >= 2)
+          || (board && board.classList && board.classList.contains("is-pinching"))) {
+        state.resize = null;
+        syncDragLock();
+        return true;
+      }
       if (state.resize.ref) {
         const ref = state.refSchematic;
         if (!ref || ref.locked) return true;
@@ -25733,6 +25976,12 @@
         return;
       }
       if (state.wireDrag || state.resize) return;
+      /* v135 : pendant pinch, ne pas déplacer/resizer — zoom viewport only. */
+      if (boardTouchPinch || boardGesturePinch
+          || (board && board.classList && board.classList.contains("is-pinching"))) {
+        if (state.drag) { state.drag = null; syncDragLock(); }
+        return;
+      }
       if (state.drag) {
         if (state.drag.ref) {
           const ref = state.refSchematic;
@@ -26756,6 +27005,7 @@
       return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 };
     }
     function cancelBoardOpsForPinch() {
+      /* Pinch = caméra seule : annuler drag/resize (sinon w/h platine change + vibration). */
       if (state.drag) state.drag = null;
       if (state.resize) state.resize = null;
       if (state.wireDrag) state.wireDrag = null;
@@ -26765,6 +27015,11 @@
       if (typeof clearEdzLongPress === "function") clearEdzLongPress();
       if (typeof clearWireHold === "function") clearWireHold();
       syncDragLock();
+      try {
+        board.querySelectorAll(".rhandle").forEach(function (h) {
+          h.style.pointerEvents = "none";
+        });
+      } catch (_) {}
       if (boardMidPan) {
         const pid = boardMidPan.pointerId;
         boardMidPan = null;
@@ -26791,14 +27046,23 @@
       if (!(dist > 8)) return false;
       cancelBoardOpsForPinch();
       ensurePinchSpacerRoom(boardZoom());
+      const z0 = boardZoom();
+      const pad = BOARD_PAN_PAD;
+      const rect = board.getBoundingClientRect();
+      const ox0 = mid.x - rect.left;
+      const oy0 = mid.y - rect.top;
       boardTouchPinch = {
         dist0: dist,
-        z0: boardZoom(),
+        z0: z0,
         midX: mid.x,
         midY: mid.y,
         idA: a.identifier,
         idB: b.identifier,
-        via: "touch"
+        via: "touch",
+        ox0: ox0,
+        oy0: oy0,
+        ax: (board.scrollLeft + ox0 - pad) / z0,
+        ay: (board.scrollTop + oy0 - pad) / z0
       };
       boardGesturePinch = true;
       board.classList.add("is-pinching");
@@ -26911,6 +27175,18 @@
       boardGesturePinch = false;
       board.classList.remove("is-pinching");
       try { lockShellDuringPinch(false); } catch (_) {}
+      /* Appliquer le dernier frame pinch en attente, puis settle spacer. */
+      if (boardZoomRaf) {
+        try { cancelAnimationFrame(boardZoomRaf); } catch (_) {}
+        boardZoomRaf = 0;
+      }
+      if (boardZoomPend) {
+        const p = boardZoomPend;
+        boardZoomPend = null;
+        state.boardZoom = p.z1;
+        board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
+        board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
+      }
       /* Settle spacer (hors pinch) + grille ; render différé si demandé pendant pinch. */
       applyBoardZoomStyles();
       try { syncBoardCoords(); } catch (_) {}
@@ -26969,14 +27245,23 @@
       if (!boardTouchPinch) {
         cancelBoardOpsForPinch();
         ensurePinchSpacerRoom(boardZoom());
+        const z0 = boardZoom();
+        const pad = BOARD_PAN_PAD;
+        const rect = board.getBoundingClientRect();
+        const ox0 = midX - rect.left;
+        const oy0 = midY - rect.top;
         boardTouchPinch = {
           dist0: dist,
-          z0: boardZoom(),
+          z0: z0,
           midX: midX,
           midY: midY,
           idA: a.id,
           idB: b.id,
-          via: "pointer"
+          via: "pointer",
+          ox0: ox0,
+          oy0: oy0,
+          ax: (board.scrollLeft + ox0 - pad) / z0,
+          ay: (board.scrollTop + oy0 - pad) / z0
         };
         boardGesturePinch = true;
         board.classList.add("is-pinching");
