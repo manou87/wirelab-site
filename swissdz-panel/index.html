@@ -1484,6 +1484,16 @@
       font-size:11px; line-height:1; pointer-events:none;
       filter:drop-shadow(0 1px 1px rgba(15,23,42,.35));
     }
+    /* Mode Lecture (Play) : indicateur discret — layout cadenasé, sim OK */
+    .lecture-badge {
+      display:none; align-items:center; gap:3px;
+      margin-left:6px; padding:4px 8px;
+      border-radius:6px; font:700 11px/1.2 system-ui,sans-serif;
+      background:#166534; color:#fff; white-space:nowrap;
+      pointer-events:none; user-select:none;
+    }
+    body.sim-lecture .lecture-badge { display:inline-flex; }
+    html[data-theme="dark"] .lecture-badge { background:#16a34a; }
     .play-fab { display:none !important; }
     @media (max-width: 1100px) {
       .app-shell { grid-template-columns:240px minmax(0,1fr); }
@@ -5804,6 +5814,7 @@
         <button id="btnPlay" class="btn-ico" type="button" data-i18n-title="btnPlayTitle" data-i18n-aria="btnPlayAria" title="Vérifier le courant" aria-label="Vérifier le courant">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6L19.2 12 8 5.2z"/></svg>
         </button>
+        <span id="lectureBadge" class="lecture-badge" hidden aria-live="polite" data-i18n="lectureBadge">🔒 Lecture</span>
       </div>
     </div>
   </footer>
@@ -19385,10 +19396,10 @@
       const refMode = !!(state._ctxRef && state.refSchematic && state.refSchematic.url);
       const ref = refMode ? state.refSchematic : null;
       if (lockBtn) {
-        const locked = refMode ? !!ref.locked : !!(item && item.locked);
+        const locked = refMode ? !!ref.locked : !!(item && isLayoutLocked(item));
         lockBtn.textContent = locked ? "Cadenassé ✓" : "Cadenassé";
         lockBtn.classList.toggle("on", locked);
-        lockBtn.hidden = false;
+        lockBtn.hidden = !!state.sim;
       }
       if (rotBtn) {
         const deg = refMode ? refRotDeg(ref) : itemRotDeg(item);
@@ -19606,7 +19617,7 @@
       item.prevY = y;
     }
     function resetItemPrevPos(item) {
-      if (!item || item.locked) return false;
+      if (!item || isLayoutLocked(item)) return false;
       if (item.prevX == null || item.prevY == null) return false;
       if (item.prevX === item.x && item.prevY === item.y) return false;
       pushHistory();
@@ -19618,7 +19629,7 @@
       return true;
     }
     function nudgeItemByMm(item, dxMm, dyMm) {
-      if (!item || item.locked) return false;
+      if (!item || isLayoutLocked(item)) return false;
       const dx = Number(dxMm) * MM_TO_PX;
       const dy = Number(dyMm) * MM_TO_PX;
       if (!dx && !dy) return false;
@@ -19631,7 +19642,7 @@
       return true;
     }
     function rotateItemBy(item, deltaDeg) {
-      if (!item || item.locked) return false;
+      if (!item || isLayoutLocked(item)) return false;
       pushHistory();
       const beforeEps = snapshotItemTermEps(item.uid);
       item.rot = itemRotDeg(item) + deltaDeg;
@@ -19639,10 +19650,14 @@
       return true;
     }
     function toggleItemLock(item) {
-      if (!item) return false;
+      if (!item || state.sim) return false;
       pushHistory();
       item.locked = !item.locked;
       return true;
+    }
+    /** Mode Lecture (Play) ou cadenas item : bloque drag / resize / delete / move. Interactions sim OK. */
+    function isLayoutLocked(item) {
+      return !!state.sim || !!(item && item.locked);
     }
     /** item.z : < OVER_WIRES_Z_BASE = sous les fils ; ≥ OVER_WIRES_Z_BASE = au-dessus des fils. */
     const OVER_WIRES_Z_BASE = 1000;
@@ -19655,7 +19670,7 @@
     }
     /** Devant = face couvre les fils (z ≥ 1000 → CSS 56–58). */
     function bringItemToFront(item) {
-      if (!item || item.locked) return false;
+      if (!item || isLayoutLocked(item)) return false;
       pushHistory();
       let max = OVER_WIRES_Z_BASE;
       state.items.forEach((it) => { max = Math.max(max, itemZKey(it)); });
@@ -19664,7 +19679,7 @@
     }
     /** Derrière = fils visibles par-dessus (z < 1000 → CSS 20–50). */
     function sendItemToBack(item) {
-      if (!item || item.locked) return false;
+      if (!item || isLayoutLocked(item)) return false;
       pushHistory();
       let min = 0;
       state.items.forEach((it) => {
@@ -19726,7 +19741,7 @@
       return map;
     }
     function duplicateItem(item) {
-      if (!item) return null;
+      if (!item || state.sim) return null;
       if (!isTypeUnlocked(item.type)) { openTierGate(); return null; }
       const def = LIB[item.type];
       if (!def) return null;
@@ -19801,28 +19816,39 @@
       bar.setAttribute("aria-hidden", show ? "false" : "true");
       const sheetBtn = bar.querySelector('[data-chip="sheet"]');
       const dupBtn = bar.querySelector('[data-chip="dup"]');
+      const rotBtn = bar.querySelector('[data-chip="rot"]');
+      const delBtn = bar.querySelector('[data-chip="del"]');
       const etsBtn = bar.querySelector('[data-chip="ets"]');
       const astroDayBtn = bar.querySelector('[data-chip="astroDay"]');
       const astroForceBtn = bar.querySelector('[data-chip="astroForce"]');
       const atsPosBtn = bar.querySelector('[data-chip="atsPos"]');
       const pcrPosBtn = bar.querySelector('[data-chip="pcrPos"]');
+      const layoutOff = !!state.sim || !!(item && item.locked);
       if (sheetBtn) {
         sheetBtn.hidden = refOn;
         sheetBtn.setAttribute("aria-hidden", refOn ? "true" : "false");
       }
       if (dupBtn) {
-        dupBtn.hidden = refOn;
-        dupBtn.setAttribute("aria-hidden", refOn ? "true" : "false");
+        dupBtn.hidden = refOn || !!state.sim;
+        dupBtn.setAttribute("aria-hidden", (refOn || !!state.sim) ? "true" : "false");
+      }
+      if (rotBtn) {
+        rotBtn.hidden = layoutOff;
+        rotBtn.setAttribute("aria-hidden", layoutOff ? "true" : "false");
+      }
+      if (delBtn) {
+        delBtn.hidden = !!state.sim;
+        delBtn.setAttribute("aria-hidden", state.sim ? "true" : "false");
       }
       const frontBtn = bar.querySelector('[data-chip="front"]');
       const backBtn = bar.querySelector('[data-chip="back"]');
       if (frontBtn) {
-        frontBtn.hidden = refOn;
-        frontBtn.setAttribute("aria-hidden", refOn ? "true" : "false");
+        frontBtn.hidden = refOn || layoutOff;
+        frontBtn.setAttribute("aria-hidden", (refOn || layoutOff) ? "true" : "false");
       }
       if (backBtn) {
-        backBtn.hidden = refOn;
-        backBtn.setAttribute("aria-hidden", refOn ? "true" : "false");
+        backBtn.hidden = refOn || layoutOff;
+        backBtn.setAttribute("aria-hidden", (refOn || layoutOff) ? "true" : "false");
       }
       /* v35-ets-chip : ETS visible seulement si composant KNX sélectionné (pas cadre réf.). */
       const canEts = !refOn && !!(item && isKnxDevice(LIB[item.type]));
@@ -19899,6 +19925,8 @@
       const label = state.sim ? t("btnStopTitle") : t("btnPlayTitle");
       const btn = document.getElementById("btnPlay");
       const fab = document.getElementById("btnPlayFab");
+      const badge = document.getElementById("lectureBadge");
+      try { document.body.classList.toggle("sim-lecture", !!state.sim); } catch (_) {}
       if (btn) {
         btn.classList.toggle("on", state.sim);
         btn.title = label;
@@ -19910,6 +19938,10 @@
         fab.title = label;
         fab.setAttribute("aria-label", label);
         fab.innerHTML = simIconHtml("fab-ico") + '<span class="fab-label">' + short + "</span>";
+      }
+      if (badge) {
+        badge.hidden = !state.sim;
+        badge.textContent = t("lectureBadge") || "🔒 Lecture";
       }
     }
     function toggleSim() {
@@ -20968,7 +21000,7 @@
       state.wireDrag = null;
       state.selected = item.uid;
       state.selectedWire = null;
-      if (item.locked) { render(); return; }
+      if (isLayoutLocked(item)) { render(); return; }
       const histKey = structuralKey(cloneEditableState());
       pushHistory();
       state.drag = {
@@ -25058,7 +25090,7 @@
           el.appendChild(b);
         }
         /* Poignées de taille : tous les composants placés (din, rail, boutonnerie, KNX, etc.) */
-        if (isItemSelected(item.uid) && state.mode === "select" && canResizeItem(item) && !item.locked && state.selected === item.uid) {
+        if (isItemSelected(item.uid) && state.mode === "select" && canResizeItem(item) && !isLayoutLocked(item) && state.selected === item.uid) {
           ["nw", "n", "ne", "e", "se", "s", "sw", "w"].forEach((dir) => {
             const h = document.createElement("div");
             h.className = "rhandle " + dir;
@@ -25127,9 +25159,9 @@
             }
             return;
           }
-          /* Platine cadenassée : laisser remonter → pan du plan (comme le vide). Pas de drag groupe.
+          /* Platine cadenassée / Lecture : laisser remonter → pan du plan (comme le vide). Pas de drag groupe.
              Les composants non verrouillés dessus restent des .dev séparés, donc déplaçables. */
-          if (item.locked && isPlatine(item)) return;
+          if (isLayoutLocked(item) && isPlatine(item)) return;
           ev.stopPropagation();
           if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
           ev.preventDefault();
@@ -25204,7 +25236,7 @@
           }
           /* Hors sim : disj. photo — clic court sur le corps = I-ON/O-OFF (sinon drag) */
           if (!state.sim && def.imageOff && (def.pair || def.pairs) && !def.selector && !def.push && !def.prox && !hasCoil(def)) {
-            if (item.locked) { render(); return; }
+            if (isLayoutLocked(item)) { render(); return; }
             const histKey = structuralKey(cloneEditableState());
             pushHistory();
             ev.preventDefault();
@@ -25225,7 +25257,7 @@
             render();
             return;
           }
-          if (item.locked) { render(); return; }
+          if (isLayoutLocked(item)) { render(); return; }
           const histKey = structuralKey(cloneEditableState());
           pushHistory();
           /* Mobile : empêche le pan/scroll du board ; capture sur #board (survit au render) */
@@ -25485,6 +25517,8 @@
     }
 
     function deleteSelection() {
+      /* Mode Lecture : pas de suppression (composants / fils / barres). */
+      if (state.sim) return false;
       if (state.selectedBar) {
         const m = find(state.selectedBar.uid);
         if (m && m.bars) {
@@ -25847,7 +25881,12 @@
           if (noteEdzLongPressMove(ev)) return;
         }
         if (state.drag.pendingToggle && moved < (state.drag.tapSlop || 8)) return;
-        if (state.drag.pendingToggle) state.drag.pendingToggle = false;
+        if (state.drag.pendingToggle) {
+          /* Lecture / cadenas : tap = on/off seulement, jamais de déplacement. */
+          if (isLayoutLocked(item)) return;
+          state.drag.pendingToggle = false;
+        }
+        if (isLayoutLocked(item)) return;
         const dlt = boardDeltaFromScreen(ev.clientX - state.drag.px, ev.clientY - state.drag.py);
         /* v110 : plus de plancher X/Y=0 — liberté sur le plan étendu. */
         const nx = state.drag.x + dlt.x;
@@ -26288,7 +26327,7 @@
           return;
         }
         if (act === "size") {
-          if (item.locked) return;
+          if (isLayoutLocked(item)) return;
           closeCtxMenu();
           openSizeDialog(item);
           return;
@@ -26310,13 +26349,14 @@
           return;
         }
         if (act === "dup") {
+          if (state.sim) return;
           closeCtxMenu();
           duplicateItem(item);
           render();
           return;
         }
         if (act === "detachFr") {
-          if (item.locked) return;
+          if (isLayoutLocked(item)) return;
           pushHistory();
           detachKmFr(item);
           closeCtxMenu();
@@ -26499,7 +26539,7 @@
       if (sizeLenWrap) sizeLenWrap.hidden = true;
     }
     function openSizeDialog(item) {
-      if (!item) return;
+      if (!item || isLayoutLocked(item)) return;
       state.selected = item.uid;
       state.selectedWire = null;
       state.drag = null;
