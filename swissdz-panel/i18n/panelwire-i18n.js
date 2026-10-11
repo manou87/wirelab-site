@@ -2450,6 +2450,16 @@
     for (var i = 0; i < keys.length; i++) {
       try { localStorage.setItem(keys[i], lang); } catch (_) {}
     }
+    /* Sync ?lang= — getLang() lit l’URL en priorité ; sans ça le menu FR/EN/AR
+       écrit le localStorage puis applyStaticDom() recharge l’ancienne langue. */
+    try {
+      if (typeof history !== "undefined" && history.replaceState && typeof URL !== "undefined"
+          && typeof window !== "undefined" && window.location) {
+        var url = new URL(window.location.href);
+        url.searchParams.set("lang", lang);
+        history.replaceState(null, "", url.pathname + url.search + url.hash);
+      }
+    } catch (_) {}
     try { applyStaticDom(); } catch (_) {}
     return lang;
   }
