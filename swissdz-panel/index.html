@@ -3366,6 +3366,11 @@
     }
     .dev.source.phase { background:#fecaca; }
     .dev.source.neutre { background:#bfdbfe; }
+    svg.wire-clips {
+      position:absolute; inset:0; width:100%; height:100%; overflow:visible;
+      pointer-events:none; min-width:2000px; min-height:1400px; z-index:66;
+    }
+
     /* Pastilles : L1 marron · L2 noir · L3 gris · N bleu · PE jaune-vert · BUS KNX.
        Taille de base ; le JS scale width/height/margin/font avec le resize composant.
        --term-snap-aim-* partagés avec JS termVisualSnapRadius (v40-terminal-snap). */
@@ -20429,6 +20434,67 @@
       });
       return map;
     }
+    function termShowsEmbout(ref) {
+      return wiresSharingTerm(ref).length === 1;
+    }
+    /** Cosse verte (14×8) sur la vis, au-dessus de la photo du module. */
+    function appendTerminalClips(svg, NS) {
+      if (!svg || !NS) return;
+      (state.wires || []).forEach((w) => {
+        if (!w || !w.a || !w.b) return;
+        try {
+          if (typeof isFlukeMeterRef === "function" && (isFlukeMeterRef(w.a) || isFlukeMeterRef(w.b))) return;
+        } catch (_) {}
+        ["a", "b"].forEach((end) => {
+          const ref = w[end];
+          if (!ref || !termShowsEmbout(ref)) return;
+          let ep;
+          try { ep = endpoint(ref); } catch (_) { return; }
+          if (!ep) return;
+          const u = padUnit(ep);
+          const len = EMBOUT_LEN;
+          const th = EMBOUT_TH;
+          const cx = ep.x + u[0] * (len * 0.46);
+          const cy = ep.y + u[1] * (len * 0.46);
+          const ang = Math.atan2(u[1], u[0]) * (180 / Math.PI);
+          const g = document.createElementNS(NS, "g");
+          g.setAttribute("class", "wc-boot");
+          g.setAttribute(
+            "transform",
+            "translate(" + cx.toFixed(2) + "," + cy.toFixed(2) + ") rotate(" + ang.toFixed(2) + ")"
+          );
+          const body = document.createElementNS(NS, "rect");
+          body.setAttribute("x", String(-len / 2));
+          body.setAttribute("y", String(-th / 2));
+          body.setAttribute("width", String(len));
+          body.setAttribute("height", String(th));
+          body.setAttribute("rx", "2.2");
+          body.setAttribute("fill", EMBOUT_GREEN);
+          body.setAttribute("stroke", EMBOUT_GREEN_EDGE);
+          body.setAttribute("stroke-width", "0.7");
+          g.appendChild(body);
+          const hi = document.createElementNS(NS, "rect");
+          hi.setAttribute("x", String(-len / 2 + 1.1));
+          hi.setAttribute("y", String(-th / 2 + 1.1));
+          hi.setAttribute("width", String(len * 0.42));
+          hi.setAttribute("height", String(Math.max(1.3, th * 0.32)));
+          hi.setAttribute("rx", "1");
+          hi.setAttribute("fill", "rgba(255,255,255,.42)");
+          g.appendChild(hi);
+          svg.appendChild(g);
+          const px = -u[1];
+          const py = u[0];
+          const slot = document.createElementNS(NS, "path");
+          const slotHalf = 2.2;
+          slot.setAttribute("d", "M" + (ep.x - px * slotHalf) + " " + (ep.y - py * slotHalf) + " L" + (ep.x + px * slotHalf) + " " + (ep.y + py * slotHalf));
+          slot.setAttribute("stroke", "rgba(255,255,255,.88)");
+          slot.setAttribute("stroke-width", "1.15");
+          slot.setAttribute("stroke-linecap", "round");
+          svg.appendChild(slot);
+        });
+      });
+    }
+
     function duplicateItem(item) {
       if (!item) return null;
       if (!isTypeUnlocked(item.type)) { openTierGate(); return null; }
