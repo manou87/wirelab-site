@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WireLab Pro by SwissDZ</title>
-  <meta name="description" content="WireLab Pro by SwissDZ : teste le câblage en ligne. Place les modules, tire les fils, lance Play." />
+  <meta name="description" content="WireLab Pro by SwissDZ : schémas d’installation réels (PV, LOGO!, moteur, terre). Câble, simule, forme-toi et présente avant le chantier." />
   <link rel="canonical" href="https://wirelab.pro/" />
   <link rel="icon" href="assets/favicon.png" type="image/png" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="WireLab Pro by SwissDZ" />
   <meta property="og:title" content="WireLab Pro by SwissDZ" />
-  <meta property="og:description" content="Tester WireLab en ligne. Câble, simule, forme-toi." />
+  <meta property="og:description" content="Schémas réels WireLab : PV, automatisme LOGO!, démarreur moteur, mise à la terre. Câble, simule, vends ton savoir-faire." />
   <meta property="og:url" content="https://wirelab.pro/" />
-  <meta property="og:image" content="https://wirelab.pro/assets/hero-logo.png" />
+  <meta property="og:image" content="https://wirelab.pro/assets/schema-pv-reseau.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -218,32 +218,134 @@
     }
     .section-head p { color: var(--mist); }
 
-    .shots {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
+    .showcase {
+      width: min(1280px, calc(100% - 1.5rem));
+      padding-top: 3.5rem;
+      padding-bottom: 3.5rem;
     }
-    .shots figure {
-      margin: 0;
-      border-radius: 1.1rem;
+    .showcase .section-head { max-width: 46rem; }
+    .showcase-stage {
+      position: relative;
+      border-radius: 1.15rem;
       overflow: hidden;
-      border: 1px solid var(--soft);
-      background: var(--panel);
-      opacity: 0;
-      transform: translateY(12px);
-      animation: riseIn 0.8s ease forwards;
+      border: 1px solid var(--line);
+      background: #0a0e14;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
     }
-    .shots figure:nth-child(2) { animation-delay: 0.12s; }
-    .shots figure:nth-child(3) { animation-delay: 0.24s; }
-    .shots img {
+    .showcase-slide {
+      display: none;
+      margin: 0;
+      position: relative;
+    }
+    .showcase-slide.is-active {
+      display: block;
+      animation: showcaseIn 0.7s ease;
+    }
+    .showcase-slide img {
       width: 100%;
-      aspect-ratio: 9 / 16;
+      height: auto;
+      aspect-ratio: 16 / 9;
       object-fit: cover;
-      object-position: top;
+      object-position: center;
+      background: #0a0e14;
     }
-    @keyframes riseIn {
-      to { transform: translateY(0); opacity: 1; }
+    .showcase-caption {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 2.4rem 1.35rem 1.25rem;
+      background: linear-gradient(180deg, transparent 0%, rgba(8, 12, 18, 0.92) 55%);
     }
+    .showcase-caption .schema-name {
+      font-family: Sora, sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.15rem, 2.6vw, 1.65rem);
+      letter-spacing: -0.03em;
+      margin-bottom: 0.35rem;
+      color: var(--white);
+    }
+    .showcase-caption .schema-explain {
+      color: var(--mist);
+      font-size: clamp(0.92rem, 1.8vw, 1.05rem);
+      max-width: 58ch;
+      line-height: 1.45;
+    }
+    .showcase-caption .schema-tag {
+      display: inline-block;
+      margin-bottom: 0.45rem;
+      color: var(--amber);
+      font-family: Sora, sans-serif;
+      font-weight: 700;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .showcase-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 3px;
+      width: 0%;
+      background: var(--amber);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .showcase-bar.is-running {
+      animation: showcaseBar 10s linear forwards;
+    }
+    @keyframes showcaseBar {
+      from { width: 0%; }
+      to { width: 100%; }
+    }
+    @keyframes showcaseIn {
+      from { opacity: 0.35; transform: scale(1.012); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .showcase-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-top: 0.9rem;
+      flex-wrap: wrap;
+    }
+    .showcase-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      flex: 1;
+    }
+    .showcase-dots button {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 0;
+      padding: 0;
+      background: rgba(255, 255, 255, 0.28);
+      cursor: pointer;
+    }
+    .showcase-dots button[aria-current="true"] {
+      background: var(--amber);
+      transform: scale(1.15);
+    }
+    .showcase-arrows {
+      display: flex;
+      gap: 0.45rem;
+    }
+    .showcase-arrows button {
+      min-width: 44px;
+      min-height: 40px;
+      border-radius: 999px;
+      border: 1px solid var(--soft);
+      background: rgba(20, 27, 39, 0.85);
+      color: var(--white);
+      font-family: Sora, sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .showcase-arrows button:hover { border-color: var(--amber); }
+    .showcase-cta { margin-top: 1.15rem; }
 
     .services {
       display: grid;
@@ -374,8 +476,9 @@
     .soc-fb { background: #1877f2; }
 
     @media (max-width: 900px) {
-      .shots, .services, .plans { grid-template-columns: 1fr; }
-      .shots { max-width: 320px; }
+      .services, .plans { grid-template-columns: 1fr; }
+      .showcase-slide img { aspect-ratio: 4 / 3; }
+      .showcase-caption { padding: 2rem 1rem 1rem; }
     }
   </style>
 </head>
@@ -392,7 +495,7 @@
     <div class="hero__inner">
       <p class="brand">WireLab Pro <span>by SwissDZ</span></p>
       <h1 data-i18n="heroTitle">Le câblage électrique, comme sur le terrain.</h1>
-      <p class="lead" data-i18n="heroLead">Place les modules, tire les fils, lance Play — le courant circule. Bibliothèque pro, KNX, PV, Fluke.</p>
+      <p class="lead" data-i18n="heroLead">Schémas réels : PV, automatisme, moteur, terre. Pose, câble, Play — forme-toi et présente une installation avant le chantier.</p>
       <div class="cta-row">
         <a class="btn btn-primary" data-panel href="swissdz-panel/index.html" data-i18n="testOnline">Tester WireLab en ligne</a>
         <a class="btn btn-ghost" href="#offres" data-i18n="seeOffers">Voir les offres</a>
@@ -405,11 +508,11 @@
     <div class="try-card">
       <p class="try-kicker">WireLab Pro by SwissDZ</p>
       <h2 id="tester-title" data-i18n="testOnline">Tester WireLab en ligne</h2>
-      <p data-i18n="tryLead">Ouvre le panneau dans le navigateur. Entre avec Google ou ton e-mail, pose les modules, tire les fils, puis lance Play.</p>
+      <p data-i18n="tryLead">Ouvre le panneau, pose les modules d’une vraie installation, tire les fils couleur par couleur, puis lance Play — tu vois si ça marche avant le chantier.</p>
       <div class="try-points">
-        <span data-i18n="chipWire">Câblage réel</span>
+        <span data-i18n="chipWire">Schémas réels</span>
         <span data-i18n="chipLib">Bibliothèque pro</span>
-        <span>KNX, PV, Fluke</span>
+        <span data-i18n="chipSell">Pour former &amp; vendre</span>
       </div>
       <div class="cta-row">
         <a class="btn btn-primary" data-panel href="swissdz-panel/index.html" data-i18n="testShort">Tester en ligne</a>
@@ -417,15 +520,87 @@
     </div>
   </section>
 
-  <section id="apercu" aria-labelledby="apercu-title">
+  <section class="showcase" id="schemas" aria-labelledby="schemas-title">
     <div class="section-head">
-      <h2 id="apercu-title" data-i18n="shotsTitle">Dans l’application</h2>
-      <p data-i18n="shotsLead">Captures réelles : câblage, bibliothèque, protections.</p>
+      <h2 id="schemas-title" data-i18n="shotsTitle">Schémas d’installation réels</h2>
+      <p data-i18n="shotsLead">Grandes captures WireLab : le vrai nom du schéma, l’explication du câblage, et la preuve que tu peux former, vérifier et présenter une installation avant le terrain.</p>
     </div>
-    <div class="shots">
-      <figure><img src="assets/shot-cablage.png" data-i18n-alt="altWire" alt="Câblage WireLab Pro" width="1080" height="1920" loading="lazy" /></figure>
-      <figure><img src="assets/shot-biblio.png" data-i18n-alt="altLib" alt="Bibliothèque de composants" width="1080" height="1920" loading="lazy" /></figure>
-      <figure><img src="assets/shot-protections.png" data-i18n-alt="altProt" alt="Protections et tableau" width="1080" height="1920" loading="lazy" /></figure>
+    <div class="showcase-stage" id="schemaShowcase" aria-roledescription="carousel" data-i18n-aria="showcaseAria" aria-label="Carrousel des schémas WireLab">
+      <div class="showcase-bar" id="showcaseBar" aria-hidden="true"></div>
+
+      <figure class="showcase-slide is-active" data-slide="0">
+        <img src="assets/schema-pv-reseau.jpg" data-i18n-alt="s1alt" alt="Installation photovoltaïque raccordée réseau" width="1798" height="934" fetchpriority="high" />
+        <figcaption class="showcase-caption">
+          <span class="schema-tag" data-i18n="s1tag">Schéma · Photovoltaïque</span>
+          <p class="schema-name" data-i18n="s1name">Installation photovoltaïque raccordée réseau</p>
+          <p class="schema-explain" data-i18n="s1ex">Panneaux → coffret DC (parafoudre + sectionneur) → onduleur → protections AC → compteur Sonelgaz. Tu câbles L / N / PE et tu lances Play pour voir l’injection.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="showcase-slide" data-slide="1" hidden>
+        <img src="assets/schema-pv-reseau-nuit.jpg" data-i18n-alt="s2alt" alt="Installation photovoltaïque — vue atelier sombre" width="1704" height="878" loading="eager" />
+        <figcaption class="showcase-caption">
+          <span class="schema-tag" data-i18n="s2tag">Schéma · Photovoltaïque</span>
+          <p class="schema-name" data-i18n="s2name">PV raccordé réseau — atelier sombre</p>
+          <p class="schema-explain" data-i18n="s2ex">Même chaîne PV en mode sombre : idéal pour présenter une offre client ou une formation soirée, avec fils DC/AC et terre bien lisibles.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="showcase-slide" data-slide="2" hidden>
+        <img src="assets/schema-automatisme-logo.jpg" data-i18n-alt="s3alt" alt="Automatisme LOGO! commande et détection" width="1608" height="1016" loading="eager" />
+        <figcaption class="showcase-caption">
+          <span class="schema-tag" data-i18n="s3tag">Schéma · Automatisme</span>
+          <p class="schema-name" data-i18n="s3name">Automatisme LOGO! — commande &amp; détection</p>
+          <p class="schema-explain" data-i18n="s3ex">Compteur, disjoncteur, PLC Siemens LOGO!, boutons, sélecteur Man/Auto, voyants et capteur de proximité. Branche les entrées/sorties puis simule le cycle.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="showcase-slide" data-slide="3" hidden>
+        <img src="assets/schema-automatisme-logo-nuit.jpg" data-i18n-alt="s4alt" alt="Automatisme LOGO! — vue sombre" width="1668" height="1010" loading="eager" />
+        <figcaption class="showcase-caption">
+          <span class="schema-tag" data-i18n="s4tag">Schéma · Automatisme</span>
+          <p class="schema-name" data-i18n="s4name">Automatisme LOGO! — vue sombre</p>
+          <p class="schema-explain" data-i18n="s4ex">Le même automatisme en fond sombre : parfait pour une démo commerciale ou un cours, avec distance capteur affichée sur le plan.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="showcase-slide" data-slide="4" hidden>
+        <img src="assets/schema-demarreur-moteur.jpg" data-i18n-alt="s5alt" alt="Démarreur moteur DOL ABB" width="964" height="992" loading="eager" />
+        <figcaption class="showcase-caption">
+          <span class="schema-tag" data-i18n="s5tag">Schéma · Force motrice</span>
+          <p class="schema-name" data-i18n="s5name">Démarreur moteur DOL — ABB AF09</p>
+          <p class="schema-explain" data-i18n="s5ex">Compteur triphasé → MS116 → contacteur AF09 + thermique TF42 → moteur. Voyants marche/arrêt, borniers N/PE : le schéma force classique pour l’apprentissage.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="showcase-slide" data-slide="5" hidden>
+        <img src="assets/schema-labo-terre.jpg" data-i18n-alt="s6alt" alt="Labo mise à la terre méthode 62 %" width="1800" height="893" loading="eager" />
+        <figcaption class="showcase-caption">
+          <span class="schema-tag" data-i18n="s6tag">Schéma · Mise à la terre</span>
+          <p class="schema-name" data-i18n="s6name">Labo mise à la terre — méthode 62 %</p>
+          <p class="schema-explain" data-i18n="s6ex">Piquets H et S, barrette ouverte, Fluke 1664 FC, coach et score. Tu apprends la mesure de terre comme sur le chantier, étape par étape.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="showcase-slide" data-slide="6" hidden>
+        <img src="assets/schema-mise-a-la-terre.jpg" data-i18n-alt="s7alt" alt="Installation de la mise à la terre" width="1478" height="1186" loading="eager" />
+        <figcaption class="showcase-caption">
+          <span class="schema-tag" data-i18n="s7tag">Schéma · Mise à la terre</span>
+          <p class="schema-name" data-i18n="s7name">Installation de la mise à la terre</p>
+          <p class="schema-explain" data-i18n="s7ex">Câblette, cosse, piquet, barrette de coupure ouverte : l’installation terre expliquée pour former, contrôler et rassurer le client.</p>
+        </figcaption>
+      </figure>
+    </div>
+    <div class="showcase-nav">
+      <div class="showcase-dots" id="showcaseDots" role="tablist" aria-label="Schémas"></div>
+      <div class="showcase-arrows">
+        <button type="button" id="showcasePrev" aria-label="Schéma précédent">‹</button>
+        <button type="button" id="showcaseNext" aria-label="Schéma suivant">›</button>
+      </div>
+    </div>
+    <div class="cta-row showcase-cta">
+      <a class="btn btn-primary" data-panel href="swissdz-panel/index.html" data-i18n="showcaseCta">Ouvrir WireLab et câbler un schéma</a>
+      <a class="btn btn-ghost" href="#offres" data-i18n="seeOffers">Voir les offres</a>
     </div>
   </section>
 
@@ -536,5 +711,75 @@
   </footer>
   <script>document.getElementById("y").textContent = new Date().getFullYear();</script>
   <script src="js/site-i18n.js"></script>
+  <script>
+    (function () {
+      var root = document.getElementById("schemaShowcase");
+      var bar = document.getElementById("showcaseBar");
+      var dotsHost = document.getElementById("showcaseDots");
+      var prev = document.getElementById("showcasePrev");
+      var next = document.getElementById("showcaseNext");
+      if (!root || !dotsHost) return;
+      var slides = Array.prototype.slice.call(root.querySelectorAll(".showcase-slide"));
+      if (!slides.length) return;
+      var i = 0;
+      var timer = null;
+      var INTERVAL = 10000;
+
+      slides.forEach(function (slide, idx) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.setAttribute("role", "tab");
+        btn.setAttribute("aria-label", "Schéma " + (idx + 1));
+        btn.addEventListener("click", function () { go(idx, true); });
+        dotsHost.appendChild(btn);
+      });
+      var dots = Array.prototype.slice.call(dotsHost.querySelectorAll("button"));
+
+      function restartBar() {
+        if (!bar) return;
+        bar.classList.remove("is-running");
+        void bar.offsetWidth;
+        bar.classList.add("is-running");
+      }
+
+      function go(n, user) {
+        i = (n + slides.length) % slides.length;
+        slides.forEach(function (slide, idx) {
+          var on = idx === i;
+          slide.classList.toggle("is-active", on);
+          if (on) slide.removeAttribute("hidden");
+          else slide.setAttribute("hidden", "");
+        });
+        dots.forEach(function (d, idx) {
+          d.setAttribute("aria-current", idx === i ? "true" : "false");
+        });
+        restartBar();
+        if (timer) clearInterval(timer);
+        timer = setInterval(function () { go(i + 1, false); }, INTERVAL);
+        if (user && root) root.focus({ preventScroll: true });
+      }
+
+      if (prev) prev.addEventListener("click", function () { go(i - 1, true); });
+      if (next) next.addEventListener("click", function () { go(i + 1, true); });
+      root.addEventListener("mouseenter", function () {
+        if (timer) clearInterval(timer);
+        if (bar) bar.style.animationPlayState = "paused";
+      });
+      root.addEventListener("mouseleave", function () {
+        if (bar) bar.style.animationPlayState = "running";
+        if (timer) clearInterval(timer);
+        timer = setInterval(function () { go(i + 1, false); }, INTERVAL);
+        restartBar();
+      });
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+          if (timer) clearInterval(timer);
+        } else {
+          go(i, false);
+        }
+      });
+      go(0, false);
+    })();
+  </script>
 </body>
 </html>
