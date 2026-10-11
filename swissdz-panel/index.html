@@ -12214,7 +12214,7 @@
         bay.textContent = "+";
         bay.title = "Ajouter une travée";
         bay.style.left = ((g.w - 42) / g.w * 100) + "%";
-        bay.style.top = (400 / g.h * 100) + "%";
+        bay.style.top = ((g.eave + (g.h - g.eave) * 0.35) / g.h * 100) + "%";
         bindRollerTap(bay, function () { facadeAddBay(item); });
         el.appendChild(bay);
       }
