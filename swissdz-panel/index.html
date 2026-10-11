@@ -8,9 +8,10 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v137-knx-ets-controle" />
+  <meta name="swissdz-rev" content="native-shell-8777-v138-lib-phone-lower" />
+  <!-- v138: téléphone — feuille composants visiblement plus basse (top explicite, plus de height vh clipée par work) -->
   <!-- v137: ETS à la demande (pas au clic KNX) ; GA/IA uniques par instance ; exemple façade câblée ; Contrôle Expo via /oibt-trainer/ -->
-  <!-- v136: téléphone — feuille composants ~10 % plus basse (82vh, top plus bas sous le chrome) -->
+  <!-- v136: téléphone — feuille composants ~10 % plus basse (82vh) — ineffective web: 82vh≈92vh après clip overflow -->
   <!-- v135: pinch = zoom viewport seulement (pas resize géométrique platine/composants) ; anti-jitter ; volets KNX ext visibles Free -->
   <!-- v134: Installations exemplaires — la liste de la modale centrale défile (molette + doigt), le plan derrière ne panne plus -->
   <!-- v133: ETS — chaque participant KNX (volet, slot façade, poussoir, actionneur, coupleur) a ses GA et noms d’objets -->
@@ -715,13 +716,13 @@
       position:fixed !important;
       left:50% !important;
       right:auto !important;
-      top:auto !important;
+      /* v138 : top explicite — bande plan visible sous le chrome (vh seul était masqué). */
+      top:max(12dvh, calc(var(--pw-head-h, 48px) + 10px)) !important;
       bottom:calc(var(--pw-foot-h, 56px) + 4px) !important;
       width:min(96vw, 440px) !important;
       max-width:96vw !important;
-      /* v136 : feuille ~10 % plus basse (top plus bas sous le chrome haut). */
-      height:min(78vh, 700px) !important;
-      max-height:min(78vh, 700px) !important;
+      height:auto !important;
+      max-height:none !important;
       z-index:320 !important;
       grid-area:unset !important;
       transform:translate(-50%, 110%) !important;
@@ -1809,13 +1810,13 @@
       z-index:60 !important;
       left:50% !important;
       right:auto !important;
-      top:auto !important;
+      /* v138 : top % du work (pas height vh) — 82vh/92vh dépassaient work + overflow:hidden → même rendu. */
+      top:14% !important;
       bottom:4px !important;
       width:min(440px, 96vw) !important;
       max-width:96vw !important;
-      /* v136 : ~10 % plus basse — top du tiroir plus bas sous le chrome. */
-      height:min(82vh, 740px) !important;
-      max-height:min(82vh, 740px) !important;
+      height:auto !important;
+      max-height:none !important;
       transform:translate(-50%, 110%) !important;
       transition:transform .22s ease !important;
       border-right:none !important;
@@ -6174,7 +6175,7 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v135-lang-zorder"></script>
+  <script src="i18n/panelwire-i18n.js?v=v138-lib-phone-lower"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -29450,7 +29451,7 @@
     });
 
     if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-      navigator.serviceWorker.register("sw-pwire.js?v=free-cats-vfd-r1").catch(function () {});
+      navigator.serviceWorker.register("sw-pwire.js?v=lib-phone-lower-v138").catch(function () {});
     }
     if ("launchQueue" in window && window.launchQueue && typeof window.launchQueue.setConsumer === "function") {
       window.launchQueue.setConsumer(function (params) {
