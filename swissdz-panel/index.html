@@ -18326,6 +18326,9 @@
       addLab.textContent = tOr("libAdd", "Ajouter");
       b.appendChild(addLab);
       b.dataset.libType = id;
+      if (def.image) {
+        try { warmLibTypeFaces(id); } catch (_) {}
+      }
       b.onclick = () => {
         if (b._libSkipClick) { b._libSkipClick = false; return; }
         if (!isTypeUnlocked(id)) { openTierGate(); return; }
@@ -18418,9 +18421,9 @@
         const x = Number.isFinite(ev.clientX) ? ev.clientX : drag.lastX;
         const y = Number.isFinite(ev.clientY) ? ev.clientY : drag.lastY;
         unbindDoc();
+        /* Pose avant cleanup : le ghost garde la face décodée jusqu’au paint board. */
+        if (moved) finishDrop(type, btn, x, y);
         cleanup();
-        if (!moved) return;
-        finishDrop(type, btn, x, y);
       }
       function onCancel(ev) {
         if (!drag || ev.pointerId !== drag.pointerId) return;
@@ -18429,10 +18432,9 @@
         const btn = drag.btn;
         const x = drag.lastX, y = drag.lastY;
         unbindDoc();
-        cleanup();
         /* pointercancel (capture / touch) : quand même poser si dernier point sur le plan. */
-        if (!moved) return;
-        finishDrop(type, btn, x, y);
+        if (moved) finishDrop(type, btn, x, y);
+        cleanup();
       }
       lib.addEventListener("pointerdown", (ev) => {
         if (ev.button) return;
@@ -18903,9 +18905,13 @@
         placeBesideAligned(item);
         return;
       }
-      let over = null;
-      try { over = document.elementFromPoint(clientX, clientY); } catch (_) {}
-      if (!over || !over.closest || !over.closest("#board")) {
+      /* Rect #board (pas elementFromPoint) : après teardown du ghost, le hit-test peut rater. */
+      let onBoard = false;
+      try {
+        const r = board.getBoundingClientRect();
+        onBoard = clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
+      } catch (_) {}
+      if (!onBoard) {
         placeBesideAligned(item);
         return;
       }
@@ -19065,9 +19071,11 @@
         const km = makeLibBoardItem(kmType);
         if (drop) placeAtClient(km, drop.x, drop.y);
         else placeBesideAligned(km);
+        try { primeDeviceFace(km, kmType); } catch (_) {}
         state.items.push(km);
         const fr = makeLibBoardItem(frType);
         attachFrUnderKm(km, fr);
+        try { primeDeviceFace(fr, frType); } catch (_) {}
         state.items.push(fr);
         setSelection([km.uid, fr.uid], km.uid);
         state.selectedBar = null;
@@ -19082,6 +19090,7 @@
       /* Drag & drop : sous le doigt/souris. Sinon à côté / centre viewport. */
       if (drop) placeAtClient(item, drop.x, drop.y);
       else placeBesideAligned(item);
+      try { primeDeviceFace(item, type); } catch (_) {}
       state.items.push(item);
       if (isKnxDevice(def)) ensureKnxProgram(item);
       setSelection([item.uid], item.uid);
@@ -20444,6 +20453,29 @@
         img.src = src;
       }
       return img;
+    }
+    /** Précharge face plan (souvent ≠ thumb biblio) pour pose immédiate. */
+    function warmLibTypeFaces(type) {
+      const def = LIB[type];
+      if (!def) return;
+      const urls = [];
+      if (def.image) urls.push(def.image);
+      if (def.imageOff && def.imageOff !== def.image) urls.push(def.imageOff);
+      if (def.thumb && def.thumb !== def.image) urls.push(def.thumb);
+      urls.forEach((src) => {
+        if (!src) return;
+        try {
+          const im = new Image();
+          im.decoding = "async";
+          im.src = src;
+        } catch (_) {}
+      });
+    }
+    /** Crée tout de suite l’<img> cache avant render() (évite case vide au 1er paint). */
+    function primeDeviceFace(item, type) {
+      const def = LIB[type];
+      if (!item || !def || !def.image) return null;
+      try { return deviceFaceImg(item, def); } catch (_) { return null; }
     }
     function flukeParkEl() {
       let park = document.getElementById("flukePark");
