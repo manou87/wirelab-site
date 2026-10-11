@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v138-lib-phone-lower" />
+  <meta name="swissdz-rev" content="native-shell-8777-v139-fix-lecture-jump" />
+  <!-- v139: Play/Lecture — badge hors flux (pas de shift footer) ; annule autofit exemplaire en retard ; conserve pan/zoom -->
   <!-- v138: téléphone — feuille composants visiblement plus basse (top explicite, plus de height vh clipée par work) -->
   <!-- v137: ETS à la demande (pas au clic KNX) ; GA/IA uniques par instance ; exemple façade câblée ; Contrôle Expo via /oibt-trainer/ -->
   <!-- v136: téléphone — feuille composants ~10 % plus basse (82vh) — ineffective web: 82vh≈92vh après clip overflow -->
@@ -976,6 +977,7 @@
        Mobile (≤900px) : .bar reprend flex:1 pour épingler le play à droite. */
     .foot-pin-play {
       display:flex; align-items:center; flex:0 0 auto; z-index:5;
+      position:relative; /* ancre badge Lecture hors flux */
     }
     .bar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex:0 1 auto; min-width:0; }
     /* Desktop : wrapper projet en ligne flex */
@@ -1490,13 +1492,16 @@
       font-size:11px; line-height:1; pointer-events:none;
       filter:drop-shadow(0 1px 1px rgba(15,23,42,.35));
     }
-    /* Mode Lecture (Play) : indicateur discret — layout cadenasé, sim OK */
+    /* Mode Lecture (Play) : indicateur discret — hors flux (jamais élargir le footer → jump board). */
     .lecture-badge {
       display:none; align-items:center; gap:3px;
-      margin-left:6px; padding:4px 8px;
+      position:absolute; left:50%; bottom:calc(100% + 4px);
+      transform:translateX(-50%);
+      margin:0; padding:4px 8px;
       border-radius:6px; font:700 11px/1.2 system-ui,sans-serif;
       background:#166534; color:#fff; white-space:nowrap;
       pointer-events:none; user-select:none;
+      z-index:9;
     }
     body.sim-lecture .lecture-badge { display:inline-flex; }
     html[data-theme="dark"] .lecture-badge { background:#16a34a; }
@@ -6176,7 +6181,7 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v138-lib-phone-lower"></script>
+  <script src="i18n/panelwire-i18n.js?v=v139-fix-lecture-jump"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -10655,6 +10660,12 @@
     const BOARD_FIT_ZOOM_MIN = 0.45;
     let boardOriginReady = false;
     let boardCoordsExtentKey = "";
+    /* Token : annule centerBoardView différé (exemplaire) si Play / pan / zoom avant la fin. */
+    let exampleFitToken = 0;
+    function bumpExampleFitToken() {
+      exampleFitToken++;
+      return exampleFitToken;
+    }
 
     function boardZoom() {
       const z = Number(state.boardZoom);
@@ -10917,6 +10928,8 @@
     }
     /* Zoom ancré sous curseur/doigts — viewport only (jamais item.w/h). */
     function setBoardZoomAt(next, clientX, clientY, opts) {
+      /* Zoom utilisateur / pinch : annule autofit exemplaire différé. */
+      try { bumpExampleFitToken(); } catch (_) {}
       const z0 = boardZoom();
       const z1 = clampBoardZoom(next);
       const rect = board.getBoundingClientRect();
@@ -16871,12 +16884,16 @@
     function afterExampleLoaded() {
       /* Attendre un board mesurable puis cadrer.
          Hauteur absurde après retries → skip (pas de zoom sur demi-écran).
-         Jamais muter body/html / VV. */
+         Jamais muter body/html / VV.
+         v139 : token — Play immédiat ne doit pas subir un 2e fit en retard. */
+      const token = bumpExampleFitToken();
       try { syncPhoneLibSheetClass(); } catch (_) {}
       try { measureFootBandH(); } catch (_) {}
       const run = (attempt) => {
+        if (token !== exampleFitToken) return;
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
+            if (token !== exampleFitToken) return;
             try { measureFootBandH(); } catch (_) {}
             const vh = board ? board.clientHeight : 0;
             const ih = Math.max(1, window.innerHeight || 1);
@@ -16886,10 +16903,12 @@
               return;
             }
             if (absurd) return;
+            if (token !== exampleFitToken) return;
             try { centerBoardView(); } catch (_) {}
-            /* Relayout (fermeture lib) : second passage court. */
+            /* Relayout (fermeture lib) : second passage court — annulable. */
             if (attempt === 0) {
               setTimeout(() => {
+                if (token !== exampleFitToken) return;
                 try { centerBoardView(); } catch (_) {}
               }, 80);
             }
@@ -20752,6 +20771,14 @@
       }
     }
     function toggleSim() {
+      /* v139 : couper tout autofit exemplaire en vol (évite jump Play juste après charge). */
+      try { bumpExampleFitToken(); } catch (_) {}
+      let keepSl = 0, keepSt = 0, keepZ = 1;
+      try {
+        keepSl = board.scrollLeft;
+        keepSt = board.scrollTop;
+        keepZ = boardZoom();
+      } catch (_) {}
       try {
         if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       } catch (_) {}
@@ -20782,6 +20809,15 @@
         });
       }
       render();
+      /* Conserver pan/zoom : blur + badge + rebuild ne doivent pas recadrer. */
+      try {
+        if (Math.abs(boardZoom() - keepZ) > 1e-9) {
+          state.boardZoom = keepZ;
+          applyBoardZoomStyles();
+        }
+        board.scrollLeft = keepSl;
+        board.scrollTop = keepSt;
+      } catch (_) {}
       if (state.etsOpen) renderEtsPanel();
       /* v12 : shell en flux (pas fixed) — ne jamais réécrire height/transform sur body. */
     }
@@ -28181,6 +28217,7 @@
           needRender = true;
         }
       }
+      try { bumpExampleFitToken(); } catch (_) {}
       boardMidPan = {
         pointerId: ev.pointerId,
         button: ev.button,
