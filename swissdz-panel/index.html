@@ -6193,7 +6193,7 @@
       try { if (typeof syncColorSwatches === "function") syncColorSwatches(); } catch (_) {}
     }
 
-    /* ========== Tiers Free / Silver / Gold (stub Play Billing) ========== */
+    /* ========== Tiers Free / Pro (stub Play Billing) ========== */
     const TIER_STORAGE_KEY = "wirelab-tier";
     const TIER_LEGACY_VIP_KEY = "swissdz-panel-vip";
     const TIER_ORDER = { free: 0, silver: 1, gold: 1, pro: 1 };
@@ -6203,7 +6203,7 @@
       gold_month: "wirelab_gold_month",
       gold_year: "wirelab_gold_year"
     };
-    /* Free : liste détaillée (v77) — le reste = Argent ; Fluke/ETS/exemples = Gold. */
+    /* Free : liste détaillée ; Pro = Fluke / contrôle / ETS / KNX marques / exemples. */
     const TIER_FREE_TYPES = new Set();
     const VIP_FREE_TYPES = TIER_FREE_TYPES;
     const DIVERS_FREE_IDS = TIER_FREE_TYPES;
