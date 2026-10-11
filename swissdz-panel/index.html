@@ -5267,6 +5267,73 @@
   </style>
 </head>
 <body>
+  <style id="wl-access-css">
+    html.wl-access-locked .app-shell { visibility: hidden !important; pointer-events: none !important; }
+    #wlAccessGate {
+      position: fixed; inset: 0; z-index: 2147483000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px; box-sizing: border-box;
+      background: radial-gradient(120% 80% at 50% 0%, #1e293b 0%, #0f172a 55%, #020617 100%);
+      color: #e2e8f0; font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+    }
+    #wlAccessGate[hidden] { display: none !important; }
+    #wlAccessGate .wl-access-card {
+      width: min(380px, 100%);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.92);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      padding: 28px 24px 22px;
+      text-align: center;
+    }
+    #wlAccessGate .wl-access-card img { width: 52px; height: 52px; border-radius: 12px; display: block; margin: 0 auto 14px; }
+    #wlAccessGate h1 { margin: 0 0 6px; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
+    #wlAccessGate p { margin: 0 0 18px; font-size: 0.92rem; color: #94a3b8; line-height: 1.4; }
+    #wlAccessGate input[type="password"],
+    #wlAccessGate input[type="text"] {
+      width: 100%; box-sizing: border-box;
+      border: 1px solid #334155; border-radius: 10px;
+      background: #0b1220; color: #f8fafc;
+      padding: 12px 14px; font-size: 1rem; margin-bottom: 10px;
+    }
+    #wlAccessGate input:focus { outline: 2px solid #3b82f6; outline-offset: 1px; }
+    #wlAccessGate button[type="submit"] {
+      width: 100%; border: none; border-radius: 10px; cursor: pointer;
+      background: #2563eb; color: #fff; font-weight: 700;
+      padding: 12px 14px; font-size: 0.98rem;
+    }
+    #wlAccessGate button[type="submit"]:hover { background: #1d4ed8; }
+    #wlAccessErr { min-height: 1.2em; margin: 8px 0 0; font-size: 0.88rem; color: #f87171; }
+  </style>
+  <div id="wlAccessGate" aria-hidden="false" role="dialog" aria-modal="true" aria-labelledby="wlAccessTitle">
+    <div class="wl-access-card">
+      <img src="brand/logo-wirelab-pro-icon.png?v=official-gemini" alt="" width="52" height="52" />
+      <h1 id="wlAccessTitle">WireLab Pro</h1>
+      <p>Entrez le code d’accès pour ouvrir le panneau.</p>
+      <form id="wlAccessForm" autocomplete="off">
+        <input id="wlAccessCode" name="code" type="password" inputmode="text" autocomplete="off"
+          placeholder="Code d’accès" aria-label="Code d’accès" required />
+        <button type="submit" id="wlAccessSubmit">Entrer</button>
+        <div id="wlAccessErr" hidden></div>
+      </form>
+    </div>
+  </div>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('wirelab-panel-access-v1') === '1') {
+          document.documentElement.classList.remove('wl-access-locked');
+          var g = document.getElementById('wlAccessGate');
+          if (g) { g.hidden = true; g.setAttribute('aria-hidden', 'true'); }
+        } else {
+          document.documentElement.classList.add('wl-access-locked');
+        }
+      } catch (_) {
+        document.documentElement.classList.add('wl-access-locked');
+      }
+    })();
+  </script>
+  <script src="js/panel-access.js?v=athmano-1"></script>
   <div class="app-shell">
   <div class="brand-col">
     <div class="brand-menu" id="brandMenu">
