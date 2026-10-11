@@ -1,4 +1,17 @@
-/* Service worker minimal : installe WireLab comme application (ouverture des .pwire). v=lib-phone-lower-v138 */
-self.addEventListener("install", function (ev) { self.skipWaiting(); });
-self.addEventListener("activate", function (ev) { ev.waitUntil(self.clients.claim()); });
-self.addEventListener("fetch", function (ev) { ev.respondWith(fetch(ev.request)); });
+/* Service worker minimal : installe WireLab comme application (ouverture des .pwire).
+ * v=safari-crash-v140
+ * IMPORTANT : aucun listener fetch — un respondWith(fetch()) pass-through provoquait
+ * des crash-loops WebKit iOS (« Un problème récurrent est survenu »).
+ */
+self.addEventListener("install", function (ev) {
+  self.skipWaiting();
+});
+self.addEventListener("activate", function (ev) {
+  ev.waitUntil(
+    caches.keys().then(function (keys) {
+      return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+    }).then(function () {
+      return self.clients.claim();
+    })
+  );
+});

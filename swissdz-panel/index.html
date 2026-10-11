@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v139-fix-lecture-jump" />
+  <meta name="swissdz-rev" content="native-shell-8777-v140-safari-crash" />
+  <!-- v140: iOS Safari — SW sans fetch intercept ; calques SVG sans min 2000×1400 (OOM WebKit) ; supabase 1st-party ; embouts harden -->
   <!-- v139: Play/Lecture — badge hors flux (pas de shift footer) ; annule autofit exemplaire en retard ; conserve pan/zoom -->
   <!-- v138: téléphone — feuille composants visiblement plus basse (top explicite, plus de height vh clipée par work) -->
   <!-- v137: ETS à la demande (pas au clic KNX) ; GA/IA uniques par instance ; exemple façade câblée ; Contrôle Expo via /oibt-trainer/ -->
@@ -3270,7 +3271,8 @@
     /* Cordons Fluke : calque dédié, jamais clipés par l’iframe / masque trainer */
     svg.fluke-leads {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible !important;
-      pointer-events:none; min-width:1600px; min-height:1000px; z-index:59;
+      /* v140 : pas de min-width/height forcés — calques géants = OOM WebKit iOS */
+      pointer-events:none; z-index:59;
     }
     svg.fluke-leads path.fluke-lead,
     svg.wires path.fluke-lead {
@@ -3388,7 +3390,8 @@
     .dev.source.neutre { background:#bfdbfe; }
     svg.wire-clips {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible;
-      pointer-events:none; min-width:2000px; min-height:1400px; z-index:66;
+      /* v140 : embouts — taille = boardWorld (pas min 2000×1400 → crash GPU iPhone) */
+      pointer-events:none; z-index:66;
     }
 
     /* Pastilles : L1 marron · L2 noir · L3 gris · N bleu · PE jaune-vert · BUS KNX.
@@ -4347,7 +4350,7 @@
     /* Guides d’alignement DIN : traits fins, pistache = rail / distance, violet = bords */
     svg.align-guides {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible;
-      pointer-events:none; min-width:1600px; min-height:1000px; z-index:45;
+      pointer-events:none; z-index:45;
     }
     svg.align-guides line {
       vector-effect:non-scaling-stroke;
@@ -4359,14 +4362,15 @@
     }
     svg.wires {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible;
-      pointer-events:none; min-width:2000px; min-height:1400px; z-index:55;
+      /* v140 : size via viewBox JS / 100% parent — min 2000×1400 tuait Safari iOS */
+      pointer-events:none; z-index:55;
       -webkit-user-select:none; user-select:none;
       -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent;
     }
     /* Faisceau capteur prox / photo : secteur depuis le nez, sous les modules */
     svg.prox-beams {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible;
-      pointer-events:none; min-width:2000px; min-height:1400px; z-index:14;
+      pointer-events:none; z-index:14;
     }
     svg.prox-beams .prox-cone {
       stroke-linejoin:round; stroke-linecap:round;
@@ -6181,10 +6185,11 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v139-fix-lecture-jump"></script>
+  <script src="i18n/panelwire-i18n.js?v=v140-safari-crash"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- v140 : 1st-party — plus de cdn.jsdelivr (jamais d’hôte tiers pour le panel) -->
+  <script src="js/supabase.min.js?v=v140-safari-crash"></script>
   <script src="js/wirelab-auth.js?v=v37-google-only"></script>
   <script src="js/wirelab-auth-vitrine.js?v=vitrine10"></script>
   <script>
@@ -10665,6 +10670,16 @@
     function bumpExampleFitToken() {
       exampleFitToken++;
       return exampleFitToken;
+    }
+    /** Calque SVG plan : viewBox monde, sans forcer un backing-store 2000×1400 (crash iOS). */
+    function sizeBoardSvg(svg) {
+      if (!svg) return;
+      try {
+        svg.setAttribute("width", String(BOARD_WORLD_W));
+        svg.setAttribute("height", String(BOARD_WORLD_H));
+        svg.setAttribute("viewBox", "0 0 " + BOARD_WORLD_W + " " + BOARD_WORLD_H);
+        svg.setAttribute("preserveAspectRatio", "none");
+      } catch (_) {}
     }
 
     function boardZoom() {
@@ -20009,6 +20024,7 @@
       const svg = document.createElementNS(NS, "svg");
       svg.setAttribute("class", "prox-beams");
       svg.setAttribute("aria-hidden", "true");
+      sizeBoardSvg(svg);
       const defs = document.createElementNS(NS, "defs");
       svg.appendChild(defs);
       state.items.forEach((item) => {
@@ -20492,62 +20508,66 @@
       return map;
     }
     function termShowsEmbout(ref) {
-      return wiresSharingTerm(ref).length === 1;
+      try { return wiresSharingTerm(ref).length === 1; } catch (_) { return false; }
     }
     /** Cosse verte (14×8) sur la vis, au-dessus de la photo du module. */
     function appendTerminalClips(svg, NS) {
       if (!svg || !NS) return;
+      const green = (typeof EMBOUT_GREEN !== "undefined") ? EMBOUT_GREEN : "#16a34a";
+      const edge = (typeof EMBOUT_GREEN_EDGE !== "undefined") ? EMBOUT_GREEN_EDGE : "#14532d";
+      const len = (typeof EMBOUT_LEN !== "undefined") ? EMBOUT_LEN : 14;
+      const th = (typeof EMBOUT_TH !== "undefined") ? EMBOUT_TH : 8;
       (state.wires || []).forEach((w) => {
         if (!w || !w.a || !w.b) return;
         try {
           if (typeof isFlukeMeterRef === "function" && (isFlukeMeterRef(w.a) || isFlukeMeterRef(w.b))) return;
         } catch (_) {}
         ["a", "b"].forEach((end) => {
-          const ref = w[end];
-          if (!ref || !termShowsEmbout(ref)) return;
-          let ep;
-          try { ep = endpoint(ref); } catch (_) { return; }
-          if (!ep) return;
-          const u = padUnit(ep);
-          const len = EMBOUT_LEN;
-          const th = EMBOUT_TH;
-          const cx = ep.x + u[0] * (len * 0.46);
-          const cy = ep.y + u[1] * (len * 0.46);
-          const ang = Math.atan2(u[1], u[0]) * (180 / Math.PI);
-          const g = document.createElementNS(NS, "g");
-          g.setAttribute("class", "wc-boot");
-          g.setAttribute(
-            "transform",
-            "translate(" + cx.toFixed(2) + "," + cy.toFixed(2) + ") rotate(" + ang.toFixed(2) + ")"
-          );
-          const body = document.createElementNS(NS, "rect");
-          body.setAttribute("x", String(-len / 2));
-          body.setAttribute("y", String(-th / 2));
-          body.setAttribute("width", String(len));
-          body.setAttribute("height", String(th));
-          body.setAttribute("rx", "2.2");
-          body.setAttribute("fill", EMBOUT_GREEN);
-          body.setAttribute("stroke", EMBOUT_GREEN_EDGE);
-          body.setAttribute("stroke-width", "0.7");
-          g.appendChild(body);
-          const hi = document.createElementNS(NS, "rect");
-          hi.setAttribute("x", String(-len / 2 + 1.1));
-          hi.setAttribute("y", String(-th / 2 + 1.1));
-          hi.setAttribute("width", String(len * 0.42));
-          hi.setAttribute("height", String(Math.max(1.3, th * 0.32)));
-          hi.setAttribute("rx", "1");
-          hi.setAttribute("fill", "rgba(255,255,255,.42)");
-          g.appendChild(hi);
-          svg.appendChild(g);
-          const px = -u[1];
-          const py = u[0];
-          const slot = document.createElementNS(NS, "path");
-          const slotHalf = 2.2;
-          slot.setAttribute("d", "M" + (ep.x - px * slotHalf) + " " + (ep.y - py * slotHalf) + " L" + (ep.x + px * slotHalf) + " " + (ep.y + py * slotHalf));
-          slot.setAttribute("stroke", "rgba(255,255,255,.88)");
-          slot.setAttribute("stroke-width", "1.15");
-          slot.setAttribute("stroke-linecap", "round");
-          svg.appendChild(slot);
+          try {
+            const ref = w[end];
+            if (!ref || !ref.uid || !termShowsEmbout(ref)) return;
+            let ep;
+            try { ep = endpoint(ref); } catch (_) { return; }
+            if (!ep || !Number.isFinite(ep.x) || !Number.isFinite(ep.y)) return;
+            const u = padUnit(ep);
+            const cx = ep.x + u[0] * (len * 0.46);
+            const cy = ep.y + u[1] * (len * 0.46);
+            const ang = Math.atan2(u[1], u[0]) * (180 / Math.PI);
+            const g = document.createElementNS(NS, "g");
+            g.setAttribute("class", "wc-boot");
+            g.setAttribute(
+              "transform",
+              "translate(" + cx.toFixed(2) + "," + cy.toFixed(2) + ") rotate(" + ang.toFixed(2) + ")"
+            );
+            const body = document.createElementNS(NS, "rect");
+            body.setAttribute("x", String(-len / 2));
+            body.setAttribute("y", String(-th / 2));
+            body.setAttribute("width", String(len));
+            body.setAttribute("height", String(th));
+            body.setAttribute("rx", "2.2");
+            body.setAttribute("fill", green);
+            body.setAttribute("stroke", edge);
+            body.setAttribute("stroke-width", "0.7");
+            g.appendChild(body);
+            const hi = document.createElementNS(NS, "rect");
+            hi.setAttribute("x", String(-len / 2 + 1.1));
+            hi.setAttribute("y", String(-th / 2 + 1.1));
+            hi.setAttribute("width", String(len * 0.42));
+            hi.setAttribute("height", String(Math.max(1.3, th * 0.32)));
+            hi.setAttribute("rx", "1");
+            hi.setAttribute("fill", "rgba(255,255,255,.42)");
+            g.appendChild(hi);
+            svg.appendChild(g);
+            const px = -u[1];
+            const py = u[0];
+            const slot = document.createElementNS(NS, "path");
+            const slotHalf = 2.2;
+            slot.setAttribute("d", "M" + (ep.x - px * slotHalf) + " " + (ep.y - py * slotHalf) + " L" + (ep.x + px * slotHalf) + " " + (ep.y + py * slotHalf));
+            slot.setAttribute("stroke", "rgba(255,255,255,.88)");
+            slot.setAttribute("stroke-width", "1.15");
+            slot.setAttribute("stroke-linecap", "round");
+            svg.appendChild(slot);
+          } catch (_) { /* un embout ne doit jamais tuer render() */ }
         });
       });
     }
@@ -22445,11 +22465,12 @@
     }
     /* Affichage seul (guidage inchangé) : embouts + ancrage selon direction d’approche. */
     function wiresSharingTerm(ref) {
-      return state.wires.filter(
-        (w) =>
-          (w.a.uid === ref.uid && w.a.term === ref.term) ||
-          (w.b.uid === ref.uid && w.b.term === ref.term)
-      );
+      if (!ref || ref.uid == null) return [];
+      return (state.wires || []).filter((w) => {
+        if (!w || !w.a || !w.b) return false;
+        return (w.a.uid === ref.uid && w.a.term === ref.term)
+          || (w.b.uid === ref.uid && w.b.term === ref.term);
+      });
     }
     /** Côté d’arrivée du fil vers la borne (voisin → borne). */
     function approachSide(fromPt, toPt) {
@@ -24650,6 +24671,7 @@
       syncBoardRefBar();
       const svgWires = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       svgWires.setAttribute("class", "wires");
+      sizeBoardSvg(svgWires);
       const NS = svgWires.namespaceURI;
 
       boardCoordsExtentKey = "";
@@ -26198,6 +26220,7 @@
       const svgFlukeLeads = document.createElementNS(NS, "svg");
       svgFlukeLeads.setAttribute("class", "fluke-leads");
       svgFlukeLeads.setAttribute("aria-hidden", "true");
+      sizeBoardSvg(svgFlukeLeads);
       world.appendChild(svgFlukeLeads);
       appendFlukeLeads(svgFlukeLeads, NS);
 
@@ -26240,8 +26263,9 @@
       const svgClips = document.createElementNS(NS, "svg");
       svgClips.setAttribute("class", "wire-clips");
       svgClips.setAttribute("aria-hidden", "true");
+      sizeBoardSvg(svgClips);
       world.appendChild(svgClips);
-      appendTerminalClips(svgClips, NS);
+      try { appendTerminalClips(svgClips, NS); } catch (_) {}
 
       /* 4) Effet court-circuit : bannière + arc / étincelles */
       if (state.short) {
@@ -29488,8 +29512,31 @@
       openProjectFile(f);
     });
 
+    /* v140 : purge anciens SW (fetch pass-through = crash-loop iOS), puis registre sans intercept. */
     if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-      navigator.serviceWorker.register("sw-pwire.js?v=lib-phone-lower-v138").catch(function () {});
+      var SW_VER = "safari-crash-v140";
+      var swReg = function () {
+        navigator.serviceWorker.register("sw-pwire.js?v=" + SW_VER).catch(function () {});
+      };
+      if (navigator.serviceWorker.getRegistrations) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          var ops = (regs || []).map(function (reg) {
+            try {
+              var url = (reg.active && reg.active.scriptURL)
+                || (reg.waiting && reg.waiting.scriptURL)
+                || (reg.installing && reg.installing.scriptURL)
+                || "";
+              if (url.indexOf("sw-pwire.js") >= 0 && url.indexOf(SW_VER) < 0) {
+                return reg.unregister();
+              }
+            } catch (_) {}
+            return Promise.resolve();
+          });
+          return Promise.all(ops);
+        }).then(swReg).catch(swReg);
+      } else {
+        swReg();
+      }
     }
     if ("launchQueue" in window && window.launchQueue && typeof window.launchQueue.setConsumer === "function") {
       window.launchQueue.setConsumer(function (params) {
