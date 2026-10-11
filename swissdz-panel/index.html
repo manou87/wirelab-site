@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v134-exemples-scroll" />
+  <meta name="swissdz-rev" content="native-shell-8777-v135-zoom-viewport" />
+  <!-- v135: pinch = zoom viewport seulement (pas resize géométrique platine/composants) ; anti-jitter ; volets KNX ext visibles Free -->
   <!-- v134: Installations exemplaires — la liste de la modale centrale défile (molette + doigt), le plan derrière ne panne plus -->
   <!-- v133: ETS — chaque participant KNX (volet, slot façade, poussoir, actionneur, coupleur) a ses GA et noms d’objets -->
   <!-- v132: cordon PE continu ; mesures Fluke du plan = bornes réellement touchées (hors / sous tension) -->
@@ -2874,6 +2875,11 @@
       pointer-events:none !important;
       transition:none !important;
       animation:none !important;
+    }
+    /* v135 : poignées resize invisibles/inertes pendant pinch — évite resize géométrique vs zoom. */
+    #board.is-pinching .rhandle {
+      display:none !important;
+      pointer-events:none !important;
     }
     /* Spacer = marge pan (fond uni). Grille UNIQUEMENT dans #boardWorld. */
     #boardZoomSpacer {
@@ -7261,7 +7267,7 @@
          Pas de bornes Monter/Descendre. knxRoller = mêmes GA qu’un canal knxShutter, sans L→U/D.
          roller.pos 0 = fermé à la pose, 1 = ouvert.
          v123 : touches Monter/Arrêt/Descendre inertes tant que L, N, PE et BUS ne sont pas raccordés. */
-      fenetre_volet: {name:"Fenêtre + volet roulant",nameEn:"Window + roller shutter",prefix:"VR",cat:"Domotique KNX",w:210,h:332,image:"assets/electrodz/fenetre_volet.png?v=v121-fenetre-knx",badge:"Volet",iec:"VR",rollerBlind:true,knxRoller:true,busLed:{nx:0.08,ny:0.045},rollerOpening:{nx:0.168,ny:0.218,nw:0.652,nh:0.640},terminals:[
+      fenetre_volet: {name:"Volet KNX extérieur (fenêtre)",nameEn:"KNX exterior shutter (window)",nameAr:"شباك خارجي KNX",prefix:"VR",cat:"Domotique KNX",w:210,h:332,image:"assets/electrodz/fenetre_volet.png?v=v121-fenetre-knx",badge:"Volet ext",iec:"VR",rollerBlind:true,knxRoller:true,busLed:{nx:0.08,ny:0.045},rollerOpening:{nx:0.168,ny:0.218,nw:0.652,nh:0.640},terminals:[
         {id:"L",nx:0.28,ny:0.04,direction:"top"},
         {id:"N",nx:0.46,ny:0.04,direction:"top"},
         {id:"PE",nx:0.64,ny:0.04,direction:"top"},
@@ -10651,11 +10657,14 @@
     /* Déclaré tôt : utilisé pendant pinch (défini avant les handlers). */
     var boardTouchPinch = null;
     var boardPinchPtrs = new Map();
+    var boardZoomRaf = 0;
+    var boardZoomPend = null;
     /*
      * v108 : zoom 1.0.1 + spacer FIGÉ pendant pinch.
      * Cause user : plan vide fluide ; dès qu’un .dev (photo) est posé → tremblement.
      * Resize spacer frame-à-frame + scale des PNG = thrash WebKit. Pendant pinch =
      * uniquement scale(#boardWorld) + scroll. Settle spacer à la fin.
+     * v135 : coalesce rAF pendant pinch (anti-vibration) ; resize géométrique interdit.
      */
     function ensurePinchSpacerRoom(zNow) {
       const spacer = document.getElementById("boardZoomSpacer");
@@ -10728,18 +10737,50 @@
     function setBoardZoom(next) {
       setBoardZoomAt(next, null, null);
     }
-    /* Zoom ancré sous curseur/doigts — exact 1.0.1 (recalcule ax/ay chaque frame). */
+    /* Zoom ancré sous curseur/doigts — viewport only (jamais item.w/h). */
     function setBoardZoomAt(next, clientX, clientY, opts) {
       const z0 = boardZoom();
       const z1 = clampBoardZoom(next);
       const rect = board.getBoundingClientRect();
       const pad = BOARD_PAN_PAD;
-      const ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
-      const oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
-      const ax = (board.scrollLeft + ox - pad) / z0;
-      const ay = (board.scrollTop + oy - pad) / z0;
-      if (Math.abs(z1 - z0) < 1e-9) {
+      const pinching = !!(opts && opts.livePinch) || board.classList.contains("is-pinching");
+      let ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
+      let oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
+      /* Ancre monde figée au début du pinch (évite oscillation si doigts bougent). */
+      let ax, ay;
+      if (pinching && boardTouchPinch && Number.isFinite(boardTouchPinch.ax)) {
+        ax = boardTouchPinch.ax;
+        ay = boardTouchPinch.ay;
+        if (Number.isFinite(boardTouchPinch.ox0)) ox = boardTouchPinch.ox0;
+        if (Number.isFinite(boardTouchPinch.oy0)) oy = boardTouchPinch.oy0;
+      } else {
+        ax = (board.scrollLeft + ox - pad) / z0;
+        ay = (board.scrollTop + oy - pad) / z0;
+      }
+      if (Math.abs(z1 - z0) < 1e-9 && !pinching) {
         applyBoardZoomStyles(opts);
+        return;
+      }
+      if (pinching) {
+        if (boardTouchPinch && !Number.isFinite(boardTouchPinch.ax)) {
+          boardTouchPinch.ax = ax;
+          boardTouchPinch.ay = ay;
+          boardTouchPinch.ox0 = ox;
+          boardTouchPinch.oy0 = oy;
+        }
+        boardZoomPend = { z1: z1, ox: ox, oy: oy, ax: ax, ay: ay, pad: pad };
+        if (!boardZoomRaf) {
+          boardZoomRaf = requestAnimationFrame(function () {
+            boardZoomRaf = 0;
+            const p = boardZoomPend;
+            boardZoomPend = null;
+            if (!p) return;
+            state.boardZoom = p.z1;
+            applyBoardZoomStyles({ livePinch: true });
+            board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
+            board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
+          });
+        }
         return;
       }
       state.boardZoom = z1;
@@ -18137,8 +18178,19 @@
       if (!q) return true;
       const disp = (libDisplayName(id, def) || "").toLowerCase();
       const name = ((def && def.name) || "").toLowerCase();
+      const nameEn = ((def && def.nameEn) || "").toLowerCase();
       const badge = ((def && def.badge) || "").toLowerCase();
-      return disp.indexOf(q) >= 0 || name.indexOf(q) >= 0 || badge.indexOf(q) >= 0 || String(id).toLowerCase().indexOf(q) >= 0;
+      const idL = String(id).toLowerCase();
+      if (disp.indexOf(q) >= 0 || name.indexOf(q) >= 0 || nameEn.indexOf(q) >= 0
+          || badge.indexOf(q) >= 0 || idL.indexOf(q) >= 0) return true;
+      /* Synonymes recherche téléphone : « volet knx ext », « shutter », façade… */
+      const hay = disp + " " + name + " " + nameEn + " " + badge + " " + idL;
+      if ((/volet|shutter|roller|fenetre|fenêtre/.test(q) || /volet|shutter|roller/.test(hay))
+          && (def && (def.knxRoller || def.knxShutter || def.rollerBlind || idL.indexOf("volet") >= 0))) {
+        if (/ext|exter|extérieur|exterior|fenetre|fenêtre|window|knx|volet|shutter/.test(q)) return true;
+      }
+      if (/facade|façade|maison|house/.test(q) && def && def.houseFacade) return true;
+      return false;
     }
     function libCatVisibleEntries(cat) {
       const q = libQuery();
@@ -25137,6 +25189,12 @@
               ev.stopPropagation();
               if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
               ev.preventDefault();
+              /* v135 : 2e doigt / pinch en cours → pas de resize (zoom plan). */
+              if (boardTouchPinch || boardGesturePinch
+                  || (boardPinchPtrs && boardPinchPtrs.size >= 2)
+                  || (board && board.classList && board.classList.contains("is-pinching"))) {
+                return;
+              }
               state.selected = item.uid;
               state.selectedWire = null;
               state.drag = null; /* priorité resize vs group-drag rail */
@@ -25740,6 +25798,14 @@
 
     function applyResizePointer(ev) {
       if (!state.resize) return false;
+      /* v135 : pinch / 2 doigts = zoom plan uniquement — jamais resize w/h. */
+      if (boardTouchPinch || boardGesturePinch
+          || (boardPinchPtrs && boardPinchPtrs.size >= 2)
+          || (board && board.classList && board.classList.contains("is-pinching"))) {
+        state.resize = null;
+        syncDragLock();
+        return true;
+      }
       if (state.resize.ref) {
         const ref = state.refSchematic;
         if (!ref || ref.locked) return true;
@@ -25899,6 +25965,12 @@
         return;
       }
       if (state.wireDrag || state.resize) return;
+      /* v135 : pendant pinch, ne pas déplacer/resizer — zoom viewport only. */
+      if (boardTouchPinch || boardGesturePinch
+          || (board && board.classList && board.classList.contains("is-pinching"))) {
+        if (state.drag) { state.drag = null; syncDragLock(); }
+        return;
+      }
       if (state.drag) {
         if (state.drag.ref) {
           const ref = state.refSchematic;
@@ -26922,6 +26994,7 @@
       return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 };
     }
     function cancelBoardOpsForPinch() {
+      /* Pinch = caméra seule : annuler drag/resize (sinon w/h platine change + vibration). */
       if (state.drag) state.drag = null;
       if (state.resize) state.resize = null;
       if (state.wireDrag) state.wireDrag = null;
@@ -26931,6 +27004,11 @@
       if (typeof clearEdzLongPress === "function") clearEdzLongPress();
       if (typeof clearWireHold === "function") clearWireHold();
       syncDragLock();
+      try {
+        board.querySelectorAll(".rhandle").forEach(function (h) {
+          h.style.pointerEvents = "none";
+        });
+      } catch (_) {}
       if (boardMidPan) {
         const pid = boardMidPan.pointerId;
         boardMidPan = null;
@@ -26957,14 +27035,23 @@
       if (!(dist > 8)) return false;
       cancelBoardOpsForPinch();
       ensurePinchSpacerRoom(boardZoom());
+      const z0 = boardZoom();
+      const pad = BOARD_PAN_PAD;
+      const rect = board.getBoundingClientRect();
+      const ox0 = mid.x - rect.left;
+      const oy0 = mid.y - rect.top;
       boardTouchPinch = {
         dist0: dist,
-        z0: boardZoom(),
+        z0: z0,
         midX: mid.x,
         midY: mid.y,
         idA: a.identifier,
         idB: b.identifier,
-        via: "touch"
+        via: "touch",
+        ox0: ox0,
+        oy0: oy0,
+        ax: (board.scrollLeft + ox0 - pad) / z0,
+        ay: (board.scrollTop + oy0 - pad) / z0
       };
       boardGesturePinch = true;
       board.classList.add("is-pinching");
@@ -27077,6 +27164,18 @@
       boardGesturePinch = false;
       board.classList.remove("is-pinching");
       try { lockShellDuringPinch(false); } catch (_) {}
+      /* Appliquer le dernier frame pinch en attente, puis settle spacer. */
+      if (boardZoomRaf) {
+        try { cancelAnimationFrame(boardZoomRaf); } catch (_) {}
+        boardZoomRaf = 0;
+      }
+      if (boardZoomPend) {
+        const p = boardZoomPend;
+        boardZoomPend = null;
+        state.boardZoom = p.z1;
+        board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
+        board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
+      }
       /* Settle spacer (hors pinch) + grille ; render différé si demandé pendant pinch. */
       applyBoardZoomStyles();
       try { syncBoardCoords(); } catch (_) {}
@@ -27135,14 +27234,23 @@
       if (!boardTouchPinch) {
         cancelBoardOpsForPinch();
         ensurePinchSpacerRoom(boardZoom());
+        const z0 = boardZoom();
+        const pad = BOARD_PAN_PAD;
+        const rect = board.getBoundingClientRect();
+        const ox0 = midX - rect.left;
+        const oy0 = midY - rect.top;
         boardTouchPinch = {
           dist0: dist,
-          z0: boardZoom(),
+          z0: z0,
           midX: midX,
           midY: midY,
           idA: a.id,
           idB: b.id,
-          via: "pointer"
+          via: "pointer",
+          ox0: ox0,
+          oy0: oy0,
+          ax: (board.scrollLeft + ox0 - pad) / z0,
+          ay: (board.scrollTop + oy0 - pad) / z0
         };
         boardGesturePinch = true;
         board.classList.add("is-pinching");
