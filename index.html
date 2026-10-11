@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WireLab Pro by SwissDZ</title>
-  <meta name="description" content="WireLab Pro by SwissDZ : teste le câblage en ligne. Place les modules, tire les fils, lance Play." />
+  <meta name="description" content="WireLab Pro by SwissDZ : schémas d’installation réels (PV, LOGO!, moteur, terre). Câble, simule, forme-toi et présente avant le chantier." />
   <link rel="canonical" href="https://wirelab.pro/" />
   <link rel="icon" href="assets/favicon.png" type="image/png" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="WireLab Pro by SwissDZ" />
   <meta property="og:title" content="WireLab Pro by SwissDZ" />
-  <meta property="og:description" content="Tester WireLab en ligne. Câble, simule, forme-toi." />
+  <meta property="og:description" content="Schémas réels WireLab : PV, automatisme LOGO!, démarreur moteur, mise à la terre. Câble, simule, vends ton savoir-faire." />
   <meta property="og:url" content="https://wirelab.pro/" />
-  <meta property="og:image" content="https://wirelab.pro/assets/hero-logo.png" />
+  <meta property="og:image" content="https://wirelab.pro/assets/schema-pv-reseau.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -48,36 +48,101 @@
       overflow: hidden;
       isolation: isolate;
     }
-    .hero__bg {
+    .hero__showcase {
       position: absolute;
       inset: 0;
       z-index: -2;
-      background:
-        linear-gradient(180deg, rgba(11, 16, 24, 0.25) 0%, rgba(11, 16, 24, 0.55) 45%, rgba(11, 16, 24, 0.96) 100%),
-        url("assets/hero-logo.png") center / cover no-repeat;
-      animation: heroDrift 18s ease-in-out infinite alternate;
+      background: #0a0e14;
     }
-    .hero__glow {
+    .hero__showcase .showcase-slide {
+      display: none;
+      margin: 0;
       position: absolute;
-      inset: auto -10% -20% -10%;
-      height: 55%;
+      inset: 0;
+    }
+    .hero__showcase .showcase-slide.is-active {
+      display: block;
+      animation: showcaseIn 0.7s ease;
+    }
+    .hero__showcase .showcase-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    .hero__veil {
+      position: absolute;
+      inset: 0;
       z-index: -1;
-      background: radial-gradient(ellipse at 50% 0%, rgba(245, 197, 24, 0.22), transparent 65%);
-      animation: glowPulse 5s ease-in-out infinite;
+      pointer-events: none;
+      /* Voile fort : texte blanc lisible aussi sur schémas à fond clair. */
+      background:
+        linear-gradient(90deg, rgba(8, 12, 18, 0.88) 0%, rgba(8, 12, 18, 0.62) 42%, rgba(8, 12, 18, 0.35) 100%),
+        linear-gradient(180deg, rgba(8, 12, 18, 0.55) 0%, rgba(8, 12, 18, 0.35) 35%, rgba(8, 12, 18, 0.92) 100%);
+    }
+    .hero__bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 3px;
+      width: 0%;
+      background: var(--amber);
+      z-index: 4;
       pointer-events: none;
     }
-    @keyframes heroDrift {
-      from { transform: scale(1.02); }
-      to { transform: scale(1.06) translateY(-1.5%); }
+    .hero__bar.is-running { animation: showcaseBar 10s linear forwards; }
+    .hero__caption {
+      max-width: 40rem;
+      margin: 0 0 0.85rem;
+      padding: 0.9rem 1.05rem 1rem;
+      border-radius: 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(8, 12, 18, 0.82);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
     }
-    @keyframes glowPulse {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
+    .hero__caption .schema-tag {
+      display: inline-block;
+      color: var(--amber);
+      font-family: Sora, sans-serif;
+      font-weight: 700;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+    .hero__caption .schema-name {
+      font-family: Sora, sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+      letter-spacing: -0.03em;
+      margin-bottom: 0.25rem;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    }
+    .hero__caption .schema-explain {
+      color: #d7e0ee;
+      font-size: clamp(0.9rem, 1.7vw, 1.02rem);
+      max-width: 52ch;
+      line-height: 1.4;
+      margin: 0;
+    }
+    .hero__nav {
+      width: min(1120px, calc(100% - 2.5rem));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0 0 1.25rem;
+      flex-wrap: wrap;
     }
     .hero__inner {
       width: min(1120px, calc(100% - 2.5rem));
       margin: 0 auto;
-      padding: 5.5rem 0 3.25rem;
+      padding: 5.5rem 0 1.1rem;
+      position: relative;
+      z-index: 2;
     }
     .brand {
       font-family: Sora, sans-serif;
@@ -87,6 +152,8 @@
       line-height: 1.05;
       margin-bottom: 0.85rem;
       max-width: 16ch;
+      color: #fff;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
     }
     .brand span { color: var(--amber); }
     .hero h1 {
@@ -96,13 +163,17 @@
       letter-spacing: -0.02em;
       max-width: 20ch;
       margin-bottom: 0.75rem;
+      color: #fff;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
     }
     .hero p.lead {
-      color: var(--mist);
+      color: #e2e8f0;
       font-size: clamp(1rem, 2.2vw, 1.15rem);
       max-width: 40ch;
       margin-bottom: 1.6rem;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
     }
+    .byline { text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5); }
     .cta-row {
       display: flex;
       flex-wrap: wrap;
@@ -218,31 +289,48 @@
     }
     .section-head p { color: var(--mist); }
 
-    .shots {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
+    .showcase-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      flex: 1;
     }
-    .shots figure {
-      margin: 0;
-      border-radius: 1.1rem;
-      overflow: hidden;
+    .showcase-dots button {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 0;
+      padding: 0;
+      background: rgba(255, 255, 255, 0.28);
+      cursor: pointer;
+    }
+    .showcase-dots button[aria-current="true"] {
+      background: var(--amber);
+      transform: scale(1.15);
+    }
+    .showcase-arrows {
+      display: flex;
+      gap: 0.45rem;
+    }
+    .showcase-arrows button {
+      min-width: 44px;
+      min-height: 40px;
+      border-radius: 999px;
       border: 1px solid var(--soft);
-      background: var(--panel);
-      opacity: 0;
-      transform: translateY(12px);
-      animation: riseIn 0.8s ease forwards;
+      background: rgba(20, 27, 39, 0.85);
+      color: var(--white);
+      font-family: Sora, sans-serif;
+      font-weight: 700;
+      cursor: pointer;
     }
-    .shots figure:nth-child(2) { animation-delay: 0.12s; }
-    .shots figure:nth-child(3) { animation-delay: 0.24s; }
-    .shots img {
-      width: 100%;
-      aspect-ratio: 9 / 16;
-      object-fit: cover;
-      object-position: top;
+    .showcase-arrows button:hover { border-color: var(--amber); }
+    @keyframes showcaseBar {
+      from { width: 0%; }
+      to { width: 100%; }
     }
-    @keyframes riseIn {
-      to { transform: translateY(0); opacity: 1; }
+    @keyframes showcaseIn {
+      from { opacity: 0.35; transform: scale(1.012); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     .services {
@@ -374,15 +462,44 @@
     .soc-fb { background: #1877f2; }
 
     @media (max-width: 900px) {
-      .shots, .services, .plans { grid-template-columns: 1fr; }
-      .shots { max-width: 320px; }
+      .services, .plans { grid-template-columns: 1fr; }
+      .hero__inner { padding-top: 4.2rem; }
     }
   </style>
 </head>
 <body>
-  <header class="hero">
-    <div class="hero__bg" aria-hidden="true"></div>
-    <div class="hero__glow" aria-hidden="true"></div>
+  <header class="hero" id="schemas" aria-roledescription="carousel" data-i18n-aria="showcaseAria" aria-label="Carrousel des schémas WireLab">
+    <div class="hero__bar" id="showcaseBar" aria-hidden="true"></div>
+    <div class="hero__showcase" id="schemaShowcase">
+      <figure class="showcase-slide is-active" data-slide="0">
+        <img src="assets/schema-pv-reseau.jpg" data-i18n-alt="s1alt" alt="Installation photovoltaïque raccordée réseau" width="1798" height="934" fetchpriority="high" />
+      </figure>
+
+      <figure class="showcase-slide" data-slide="1" hidden>
+        <img src="assets/schema-pv-reseau-nuit.jpg" data-i18n-alt="s2alt" alt="Installation photovoltaïque — vue atelier sombre" width="1704" height="878" loading="eager" />
+      </figure>
+
+      <figure class="showcase-slide" data-slide="2" hidden>
+        <img src="assets/schema-automatisme-logo.jpg" data-i18n-alt="s3alt" alt="Automatisme LOGO! commande et détection" width="1608" height="1016" loading="eager" />
+      </figure>
+
+      <figure class="showcase-slide" data-slide="3" hidden>
+        <img src="assets/schema-automatisme-logo-nuit.jpg" data-i18n-alt="s4alt" alt="Automatisme LOGO! — vue sombre" width="1668" height="1010" loading="eager" />
+      </figure>
+
+      <figure class="showcase-slide" data-slide="4" hidden>
+        <img src="assets/schema-demarreur-moteur.jpg" data-i18n-alt="s5alt" alt="Démarreur moteur DOL ABB" width="964" height="992" loading="eager" />
+      </figure>
+
+      <figure class="showcase-slide" data-slide="5" hidden>
+        <img src="assets/schema-labo-terre.jpg" data-i18n-alt="s6alt" alt="Labo mise à la terre méthode 62 %" width="1800" height="893" loading="eager" />
+      </figure>
+
+      <figure class="showcase-slide" data-slide="6" hidden>
+        <img src="assets/schema-mise-a-la-terre.jpg" data-i18n-alt="s7alt" alt="Installation de la mise à la terre" width="1478" height="1186" loading="eager" />
+      </figure>
+    </div>
+    <div class="hero__veil" aria-hidden="true"></div>
     <nav class="langs" aria-label="Langue">
       <button type="button" data-set-lang="fr" aria-pressed="true">FR</button>
       <button type="button" data-set-lang="ar" aria-pressed="false">AR</button>
@@ -392,10 +509,22 @@
     <div class="hero__inner">
       <p class="brand">WireLab Pro <span>by SwissDZ</span></p>
       <h1 data-i18n="heroTitle">Le câblage électrique, comme sur le terrain.</h1>
-      <p class="lead" data-i18n="heroLead">Place les modules, tire les fils, lance Play — le courant circule. Bibliothèque pro, KNX, PV, Fluke.</p>
+      <p class="lead" data-i18n="heroLead">Schémas réels : PV, automatisme, moteur, terre. Pose, câble, Play — forme-toi et présente une installation avant le chantier.</p>
       <div class="cta-row">
         <a class="btn btn-primary" data-panel href="swissdz-panel/index.html" data-i18n="testOnline">Tester WireLab en ligne</a>
         <a class="btn btn-ghost" href="#offres" data-i18n="seeOffers">Voir les offres</a>
+      </div>
+      <div class="hero__caption">
+        <span class="schema-tag" id="heroSchemaTag" data-i18n="s1tag">Schéma · Photovoltaïque</span>
+        <p class="schema-name" id="heroSchemaName" data-i18n="s1name">Installation photovoltaïque raccordée réseau</p>
+        <p class="schema-explain" id="heroSchemaEx" data-i18n="s1ex">Panneaux → coffret DC (parafoudre + sectionneur) → onduleur → protections AC → compteur Sonelgaz. Tu câbles L / N / PE et tu lances Play pour voir l’injection.</p>
+      </div>
+      <div class="hero__nav">
+        <div class="showcase-dots" id="showcaseDots" role="tablist" aria-label="Schémas"></div>
+        <div class="showcase-arrows">
+          <button type="button" id="showcasePrev" aria-label="Schéma précédent">‹</button>
+          <button type="button" id="showcaseNext" aria-label="Schéma suivant">›</button>
+        </div>
       </div>
       <p class="byline"><strong>WireLab Pro by SwissDZ</strong></p>
     </div>
@@ -405,27 +534,15 @@
     <div class="try-card">
       <p class="try-kicker">WireLab Pro by SwissDZ</p>
       <h2 id="tester-title" data-i18n="testOnline">Tester WireLab en ligne</h2>
-      <p data-i18n="tryLead">Ouvre le panneau dans le navigateur. Entre avec Google ou ton e-mail, pose les modules, tire les fils, puis lance Play.</p>
+      <p data-i18n="tryLead">Ouvre le panneau, pose les modules d’une vraie installation, tire les fils couleur par couleur, puis lance Play — tu vois si ça marche avant le chantier.</p>
       <div class="try-points">
-        <span data-i18n="chipWire">Câblage réel</span>
+        <span data-i18n="chipWire">Schémas réels</span>
         <span data-i18n="chipLib">Bibliothèque pro</span>
-        <span>KNX, PV, Fluke</span>
+        <span data-i18n="chipSell">Pour former &amp; vendre</span>
       </div>
       <div class="cta-row">
         <a class="btn btn-primary" data-panel href="swissdz-panel/index.html" data-i18n="testShort">Tester en ligne</a>
       </div>
-    </div>
-  </section>
-
-  <section id="apercu" aria-labelledby="apercu-title">
-    <div class="section-head">
-      <h2 id="apercu-title" data-i18n="shotsTitle">Dans l’application</h2>
-      <p data-i18n="shotsLead">Captures réelles : câblage, bibliothèque, protections.</p>
-    </div>
-    <div class="shots">
-      <figure><img src="assets/shot-cablage.png" data-i18n-alt="altWire" alt="Câblage WireLab Pro" width="1080" height="1920" loading="lazy" /></figure>
-      <figure><img src="assets/shot-biblio.png" data-i18n-alt="altLib" alt="Bibliothèque de composants" width="1080" height="1920" loading="lazy" /></figure>
-      <figure><img src="assets/shot-protections.png" data-i18n-alt="altProt" alt="Protections et tableau" width="1080" height="1920" loading="lazy" /></figure>
     </div>
   </section>
 
@@ -536,5 +653,107 @@
   </footer>
   <script>document.getElementById("y").textContent = new Date().getFullYear();</script>
   <script src="js/site-i18n.js"></script>
+  <script>
+    (function () {
+      var root = document.getElementById("schemaShowcase");
+      var bar = document.getElementById("showcaseBar");
+      var dotsHost = document.getElementById("showcaseDots");
+      var prev = document.getElementById("showcasePrev");
+      var next = document.getElementById("showcaseNext");
+      var tagEl = document.getElementById("heroSchemaTag");
+      var nameEl = document.getElementById("heroSchemaName");
+      var exEl = document.getElementById("heroSchemaEx");
+      if (!root || !dotsHost) return;
+      var slides = Array.prototype.slice.call(root.querySelectorAll(".showcase-slide"));
+      if (!slides.length) return;
+      var META = [
+        { tag: "s1tag", name: "s1name", ex: "s1ex" },
+        { tag: "s2tag", name: "s2name", ex: "s2ex" },
+        { tag: "s3tag", name: "s3name", ex: "s3ex" },
+        { tag: "s4tag", name: "s4name", ex: "s4ex" },
+        { tag: "s5tag", name: "s5name", ex: "s5ex" },
+        { tag: "s6tag", name: "s6name", ex: "s6ex" },
+        { tag: "s7tag", name: "s7name", ex: "s7ex" }
+      ];
+      var FALLBACK = [
+        { tag: "Schéma · Photovoltaïque", name: "Installation photovoltaïque raccordée réseau", ex: "Panneaux → coffret DC (parafoudre + sectionneur) → onduleur → protections AC → compteur Sonelgaz. Tu câbles L / N / PE et tu lances Play pour voir l’injection." },
+        { tag: "Schéma · Photovoltaïque", name: "PV raccordé réseau — atelier sombre", ex: "Même chaîne PV en mode sombre : idéal pour présenter une offre client ou une formation soirée, avec fils DC/AC et terre bien lisibles." },
+        { tag: "Schéma · Automatisme", name: "Automatisme LOGO! — commande & détection", ex: "Compteur, disjoncteur, PLC Siemens LOGO!, boutons, sélecteur Man/Auto, voyants et capteur de proximité. Branche les entrées/sorties puis simule le cycle." },
+        { tag: "Schéma · Automatisme", name: "Automatisme LOGO! — vue sombre", ex: "Le même automatisme en fond sombre : parfait pour une démo commerciale ou un cours, avec distance capteur affichée sur le plan." },
+        { tag: "Schéma · Force motrice", name: "Démarreur moteur DOL — ABB AF09", ex: "Compteur triphasé → MS116 → contacteur AF09 + thermique TF42 → moteur. Voyants marche/arrêt, borniers N/PE : le schéma force classique pour l’apprentissage." },
+        { tag: "Schéma · Mise à la terre", name: "Labo mise à la terre — méthode 62 %", ex: "Piquets H et S, barrette ouverte, Fluke 1664 FC, coach et score. Tu apprends la mesure de terre comme sur le chantier, étape par étape." },
+        { tag: "Schéma · Mise à la terre", name: "Installation de la mise à la terre", ex: "Câblette, cosse, piquet, barrette de coupure ouverte : l’installation terre expliquée pour former, contrôler et rassurer le client." }
+      ];
+      var i = 0;
+      var timer = null;
+      var INTERVAL = 10000;
+
+      function pack() {
+        try {
+          var lang = localStorage.getItem("wirelab-site-lang") || "fr";
+          var dict = window.__WIRELAB_SITE_DICT__;
+          if (dict && dict[lang]) return dict[lang];
+        } catch (e) {}
+        return null;
+      }
+
+      function textFor(idx) {
+        var p = pack();
+        var keys = META[idx] || META[0];
+        var fb = FALLBACK[idx] || FALLBACK[0];
+        return {
+          tag: (p && p[keys.tag]) || fb.tag,
+          name: (p && p[keys.name]) || fb.name,
+          ex: (p && p[keys.ex]) || fb.ex
+        };
+      }
+
+      slides.forEach(function (slide, idx) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.setAttribute("role", "tab");
+        btn.setAttribute("aria-label", "Schéma " + (idx + 1));
+        btn.addEventListener("click", function () { go(idx, true); });
+        dotsHost.appendChild(btn);
+      });
+      var dots = Array.prototype.slice.call(dotsHost.querySelectorAll("button"));
+
+      function restartBar() {
+        if (!bar) return;
+        bar.classList.remove("is-running");
+        void bar.offsetWidth;
+        bar.classList.add("is-running");
+      }
+
+      function go(n) {
+        i = (n + slides.length) % slides.length;
+        slides.forEach(function (slide, idx) {
+          var on = idx === i;
+          slide.classList.toggle("is-active", on);
+          if (on) slide.removeAttribute("hidden");
+          else slide.setAttribute("hidden", "");
+        });
+        dots.forEach(function (d, idx) {
+          d.setAttribute("aria-current", idx === i ? "true" : "false");
+        });
+        var tx = textFor(i);
+        if (tagEl) tagEl.textContent = tx.tag;
+        if (nameEl) nameEl.textContent = tx.name;
+        if (exEl) exEl.textContent = tx.ex;
+        restartBar();
+        if (timer) clearInterval(timer);
+        timer = setInterval(function () { go(i + 1); }, INTERVAL);
+      }
+
+      if (prev) prev.addEventListener("click", function () { go(i - 1); });
+      if (next) next.addEventListener("click", function () { go(i + 1); });
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) { if (timer) clearInterval(timer); }
+        else go(i);
+      });
+      document.addEventListener("wirelab-site-lang", function () { go(i); });
+      go(0);
+    })();
+  </script>
 </body>
 </html>
