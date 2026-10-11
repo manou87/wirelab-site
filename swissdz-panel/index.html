@@ -1705,7 +1705,7 @@
       background:rgba(15,23,42,.45); touch-action:manipulation;
     }
     html.pw-lib-bottom body.lib-open .lib-backdrop { display:block; }
-    /* v88-lib-phone-dense : feuille haute, grille 3 cols, vignettes only (pas de + Ajouter). */
+    /* v88-lib-phone : feuille haute, grille 2 cols, vignettes + nom (pas de + Ajouter). */
     html.pw-lib-bottom .lib-side {
       position:absolute !important;
       grid-area:work !important;
@@ -1782,17 +1782,20 @@
     html.pw-lib-bottom .lib-side > .lib-items,
     html.pw-lib-bottom .lib-phone-grid {
       display:grid !important; flex:1 1 auto !important; min-height:0 !important;
-      grid-template-columns:repeat(3, minmax(0, 1fr)) !important; gap:6px !important;
-      padding:6px 8px 12px !important; overflow-y:auto !important;
-      -webkit-overflow-scrolling:touch; align-content:start;
+      /* 2 cols : lisible sur téléphone ; auto-rows évite l’écrasement (all-cats). */
+      grid-template-columns:1fr 1fr !important;
+      grid-auto-rows:auto !important; gap:8px !important;
+      padding:8px 10px 14px !important; overflow-y:auto !important;
+      -webkit-overflow-scrolling:touch; align-content:start; align-items:start;
       background:#0b1220 !important;
     }
     html.pw-lib-bottom .lib-tabs .lib-acc-panel.lib-items { display:none !important; }
     html.pw-lib-bottom .item {
       background:#1e293b !important; border:1px solid rgba(148,163,184,.22) !important;
-      border-radius:10px !important; padding:6px 4px 4px !important;
-      gap:3px !important; min-height:0 !important; justify-content:flex-start !important;
-      box-shadow:none;
+      border-radius:10px !important; padding:8px 6px 6px !important;
+      gap:4px !important; min-height:118px !important; height:auto !important;
+      justify-content:flex-start !important; align-self:start !important;
+      overflow:visible !important; box-shadow:none;
     }
     html.pw-lib-bottom .item:hover,
     html.pw-lib-bottom .item:active {
@@ -1800,14 +1803,17 @@
     }
     html.pw-lib-bottom .item img,
     html.pw-lib-bottom .item .thumb {
-      width:92% !important; max-height:56px !important; margin:0 auto !important;
+      width:78% !important; max-height:72px !important; min-height:40px !important;
+      margin:2px auto 0 !important; flex:0 0 auto !important;
       background:#fff !important; border-radius:8px !important; padding:4px;
-      box-sizing:border-box;
+      box-sizing:border-box; object-fit:contain !important;
     }
     html.pw-lib-bottom .item > span:not(.thumb):not(.lib-add) {
-      font-size:10px !important; font-weight:700 !important; color:#e2e8f0 !important;
-      -webkit-line-clamp:1; line-clamp:1; min-height:1.15em; line-height:1.15;
-      overflow:hidden; text-overflow:ellipsis;
+      display:-webkit-box !important; -webkit-box-orient:vertical !important;
+      font-size:11px !important; font-weight:700 !important; color:#e2e8f0 !important;
+      -webkit-line-clamp:2; line-clamp:2; min-height:2.2em; line-height:1.15;
+      overflow:hidden; text-overflow:ellipsis; flex:0 0 auto !important;
+      max-width:100%;
     }
     /* Téléphone : vignettes seules — pas de bouton « + Ajouter ». */
     html.pw-lib-bottom .item .lib-add {
@@ -4610,16 +4616,19 @@
       text-overflow: clip !important;
       padding: 2px 4px !important;
     }
+    /* v91 : ne pas écraser les cartes (min-height:0 + overflow:hidden → barres blanches en all-cats). */
     html.pw-lib-bottom .item {
-      overflow: hidden !important;
-      align-self: stretch !important;
-      min-height: 0 !important;
+      overflow: visible !important;
+      align-self: start !important;
+      min-height: 118px !important;
+      height: auto !important;
       position: relative !important;
       z-index: 1 !important;
     }
     html.pw-lib-bottom .item img,
     html.pw-lib-bottom .item .thumb {
-      max-height: 56px !important;
+      max-height: 72px !important;
+      min-height: 40px !important;
       flex: 0 0 auto !important;
     }
     html.pw-lib-bottom .item .lib-add {
