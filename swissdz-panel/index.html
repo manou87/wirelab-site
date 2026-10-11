@@ -8,7 +8,10 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v134-exemples-scroll" />
+  <meta name="swissdz-rev" content="native-shell-8777-v137-knx-ets-controle" />
+  <!-- v137: ETS à la demande (pas au clic KNX) ; GA/IA uniques par instance ; exemple façade câblée ; Contrôle Expo via /oibt-trainer/ -->
+  <!-- v136: téléphone — feuille composants ~10 % plus basse (82vh, top plus bas sous le chrome) -->
+  <!-- v135: pinch = zoom viewport seulement (pas resize géométrique platine/composants) ; anti-jitter ; volets KNX ext visibles Free -->
   <!-- v134: Installations exemplaires — la liste de la modale centrale défile (molette + doigt), le plan derrière ne panne plus -->
   <!-- v133: ETS — chaque participant KNX (volet, slot façade, poussoir, actionneur, coupleur) a ses GA et noms d’objets -->
   <!-- v132: cordon PE continu ; mesures Fluke du plan = bornes réellement touchées (hors / sous tension) -->
@@ -628,15 +631,16 @@
       left:50% !important;
       right:auto !important;
       top:auto !important;
-      bottom:calc(var(--pw-foot-h, 56px) + 8px) !important;
-      width:min(312px, 78vw) !important;
-      max-width:78vw !important;
-      height:min(52vh, 440px) !important;
-      max-height:min(52vh, 440px) !important;
+      bottom:calc(var(--pw-foot-h, 56px) + 4px) !important;
+      width:min(96vw, 440px) !important;
+      max-width:96vw !important;
+      /* v136 : feuille ~10 % plus basse (top plus bas sous le chrome haut). */
+      height:min(78vh, 700px) !important;
+      max-height:min(78vh, 700px) !important;
       z-index:320 !important;
       grid-area:unset !important;
       transform:translate(-50%, 110%) !important;
-      border-radius:14px !important;
+      border-radius:14px 14px 10px 10px !important;
       border-top:1px solid var(--line) !important;
       box-shadow:0 -8px 28px rgba(15,23,42,.26) !important;
       overflow:hidden !important;
@@ -1702,7 +1706,7 @@
       background:rgba(15,23,42,.45); touch-action:manipulation;
     }
     html.pw-lib-bottom body.lib-open .lib-backdrop { display:block; }
-    /* v63 : feuille catalogue quasi plein écran (cartes photo + select catégorie). */
+    /* v88-lib-phone : feuille haute, grille 2 cols, vignettes + nom (pas de + Ajouter). */
     html.pw-lib-bottom .lib-side {
       position:absolute !important;
       grid-area:work !important;
@@ -1714,13 +1718,14 @@
       bottom:4px !important;
       width:min(440px, 96vw) !important;
       max-width:96vw !important;
-      height:min(82vh, 720px) !important;
-      max-height:min(82vh, 720px) !important;
+      /* v136 : ~10 % plus basse — top du tiroir plus bas sous le chrome. */
+      height:min(82vh, 740px) !important;
+      max-height:min(82vh, 740px) !important;
       transform:translate(-50%, 110%) !important;
       transition:transform .22s ease !important;
       border-right:none !important;
       border-top:1px solid rgba(148,163,184,.35) !important;
-      border-radius:18px 18px 12px 12px !important;
+      border-radius:14px 14px 10px 10px !important;
       box-shadow:0 -12px 40px rgba(15,23,42,.4) !important;
       overflow:hidden !important;
       pointer-events:none !important;
@@ -1733,68 +1738,65 @@
       pointer-events:auto !important;
       visibility:visible !important;
     }
+    /* En-tête compact : seul le × reste ; titre + hint masqués pour gagner de la hauteur. */
     html.pw-lib-bottom .lib-phone-head {
-      display:flex !important; align-items:flex-start; gap:10px;
-      padding:4px 2px 8px; margin:0;
+      display:flex !important; align-items:center; justify-content:flex-end; gap:0;
+      padding:0 0 2px; margin:0; min-height:0;
     }
     html.pw-lib-bottom .lib-phone-close {
-      flex:0 0 auto; width:36px; height:36px; border-radius:10px;
+      flex:0 0 auto; width:30px; height:30px; border-radius:8px;
       border:1px solid rgba(148,163,184,.35); background:rgba(30,41,59,.9);
-      color:#f8fafc; font-size:22px; line-height:1; font-weight:600;
+      color:#f8fafc; font-size:18px; line-height:1; font-weight:600;
       display:inline-flex; align-items:center; justify-content:center;
       touch-action:manipulation; -webkit-tap-highlight-color:transparent;
     }
-    html.pw-lib-bottom .lib-phone-titles {
-      flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px;
-    }
-    html.pw-lib-bottom .lib-phone-titles strong {
-      margin:0 !important; font-size:18px !important; font-weight:800 !important;
-      color:#f8fafc !important; letter-spacing:0 !important; text-transform:none !important;
-    }
-    html.pw-lib-bottom .lib-phone-titles span {
-      font-size:12px; font-weight:600; color:#94a3b8; line-height:1.25;
-    }
+    html.pw-lib-bottom .lib-phone-titles { display:none !important; }
+    html.pw-lib-bottom .lib-phone-titles strong,
+    html.pw-lib-bottom .lib-phone-titles span { display:none !important; }
     html.pw-lib-bottom .lib-desk-title,
     html.pw-lib-bottom .lib-tabs { display:none !important; }
     html.pw-lib-bottom .lib-cat-select-row {
-      display:block !important; margin:0 0 8px;
+      display:block !important; margin:0 0 4px;
     }
     html.pw-lib-bottom .lib-cat-select-row select {
-      width:100%; height:40px; border-radius:10px;
+      width:100%; height:34px; border-radius:8px;
       border:1px solid rgba(148,163,184,.35);
       background:#1e293b; color:#f1f5f9;
-      padding:0 12px; font-size:14px; font-weight:700;
+      padding:0 10px; font-size:13px; font-weight:700;
       outline:none; appearance:none;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-      background-repeat:no-repeat; background-position:right 12px center;
-      padding-right:32px;
+      background-repeat:no-repeat; background-position:right 10px center;
+      padding-right:28px;
     }
     html.pw-lib-bottom .lib-side-head {
-      flex:0 0 auto !important; padding:10px 12px 6px !important;
+      flex:0 0 auto !important; padding:6px 8px 4px !important;
       border-bottom:1px solid rgba(148,163,184,.2) !important;
       background:#0f172a !important;
     }
     html.pw-lib-bottom .lib-search-row input {
-      height:40px !important; font-size:14px !important; font-weight:650 !important;
-      border-radius:10px !important; padding-left:34px !important;
+      height:34px !important; font-size:13px !important; font-weight:650 !important;
+      border-radius:8px !important; padding-left:32px !important;
       background:#1e293b !important; color:#f1f5f9 !important;
       border-color:rgba(148,163,184,.35) !important;
     }
-    html.pw-lib-bottom .lib-search-row .lib-search-ico { color:#94a3b8 !important; left:10px !important; width:16px !important; height:16px !important; }
+    html.pw-lib-bottom .lib-search-row .lib-search-ico { color:#94a3b8 !important; left:10px !important; width:15px !important; height:15px !important; }
     html.pw-lib-bottom .lib-side > .lib-items,
     html.pw-lib-bottom .lib-phone-grid {
       display:grid !important; flex:1 1 auto !important; min-height:0 !important;
-      grid-template-columns:1fr 1fr !important; gap:10px !important;
-      padding:10px 12px 16px !important; overflow-y:auto !important;
-      -webkit-overflow-scrolling:touch; align-content:start;
+      /* 2 cols : lisible sur téléphone ; auto-rows évite l’écrasement (all-cats). */
+      grid-template-columns:1fr 1fr !important;
+      grid-auto-rows:auto !important; gap:8px !important;
+      padding:8px 10px 14px !important; overflow-y:auto !important;
+      -webkit-overflow-scrolling:touch; align-content:start; align-items:start;
       background:#0b1220 !important;
     }
     html.pw-lib-bottom .lib-tabs .lib-acc-panel.lib-items { display:none !important; }
     html.pw-lib-bottom .item {
       background:#1e293b !important; border:1px solid rgba(148,163,184,.22) !important;
-      border-radius:14px !important; padding:10px 8px 8px !important;
-      gap:6px !important; min-height:148px; justify-content:flex-start !important;
-      box-shadow:0 4px 14px rgba(0,0,0,.22);
+      border-radius:10px !important; padding:8px 6px 6px !important;
+      gap:4px !important; min-height:118px !important; height:auto !important;
+      justify-content:flex-start !important; align-self:start !important;
+      overflow:visible !important; box-shadow:none;
     }
     html.pw-lib-bottom .item:hover,
     html.pw-lib-bottom .item:active {
@@ -1802,21 +1804,23 @@
     }
     html.pw-lib-bottom .item img,
     html.pw-lib-bottom .item .thumb {
-      width:78% !important; max-height:88px !important; margin:2px auto 0 !important;
-      background:#fff !important; border-radius:10px !important; padding:6px;
-      box-sizing:border-box;
+      width:78% !important; max-height:72px !important; min-height:40px !important;
+      margin:2px auto 0 !important; flex:0 0 auto !important;
+      background:#fff !important; border-radius:8px !important; padding:4px;
+      box-sizing:border-box; object-fit:contain !important;
     }
     html.pw-lib-bottom .item > span:not(.thumb):not(.lib-add) {
-      font-size:12px !important; font-weight:700 !important; color:#e2e8f0 !important;
-      -webkit-line-clamp:2; min-height:2.4em;
+      display:-webkit-box !important; -webkit-box-orient:vertical !important;
+      font-size:11px !important; font-weight:700 !important; color:#e2e8f0 !important;
+      -webkit-line-clamp:2; line-clamp:2; min-height:2.2em; line-height:1.15;
+      overflow:hidden; text-overflow:ellipsis; flex:0 0 auto !important;
+      max-width:100%;
     }
+    /* Téléphone : vignettes seules — pas de bouton « + Ajouter ». */
     html.pw-lib-bottom .item .lib-add {
-      display:inline-flex !important; align-items:center; justify-content:center; gap:4px;
-      margin-top:auto; width:100%; height:32px; border-radius:9px;
-      background:#2563eb; color:#fff; font-size:12px; font-weight:800;
-      letter-spacing:.01em; pointer-events:none;
+      display:none !important;
     }
-    html.pw-lib-bottom .item .lib-add::before { content:"+"; font-size:15px; font-weight:900; line-height:1; }
+    html.pw-lib-bottom .item .lib-add::before { content:none; }
     html.pw-lib-bottom .lib-examples {
       background:#0b1220 !important; color:#e2e8f0 !important;
       flex:1 1 auto; min-height:0; overflow:auto; padding:10px 12px;
@@ -2795,10 +2799,31 @@
       display:flex; flex-direction:column; gap:4px; align-items:center; justify-content:center;
       width:100%; min-width:0; max-width:none; text-align:center;
       margin:0; border:1px solid #eef2f7; border-radius:10px; padding:8px 6px;
-      background:#fafbfc; cursor:pointer;
+      background:#fafbfc; cursor:grab;
       touch-action:manipulation; -webkit-tap-highlight-color:transparent;
     }
+    .item:active { cursor:grabbing; }
     .item:hover { border-color:#bfdbfe; background:#f8fbff; }
+    .lib-ghost {
+      position:fixed; z-index:5800; pointer-events:none;
+      transform:translate(-50%,-55%);
+      width:72px; max-width:22vw; padding:6px; border-radius:10px;
+      border:1.5px solid #2563eb; background:#fff;
+      box-shadow:0 10px 28px rgba(15,23,42,.28);
+      display:flex; flex-direction:column; align-items:center; gap:4px;
+      font-size:10px; font-weight:800; color:#0f172a; text-align:center;
+    }
+    .lib-ghost img, .lib-ghost .thumb {
+      width:100%; max-height:48px; object-fit:contain; display:block;
+    }
+    body.lib-palette-drag #board {
+      outline:2px dashed rgba(37,99,235,.55);
+      outline-offset:-2px;
+    }
+    body.lib-palette-drag #board.lib-drop-hot {
+      outline-color:#2563eb;
+      background-color:rgba(37,99,235,.04);
+    }
     .item > span:not(.thumb) {
       font-size:11px; font-weight:650; color:#475569; line-height:1.2;
       max-width:100%; overflow:hidden;
@@ -2859,6 +2884,11 @@
       pointer-events:none !important;
       transition:none !important;
       animation:none !important;
+    }
+    /* v135 : poignées resize invisibles/inertes pendant pinch — évite resize géométrique vs zoom. */
+    #board.is-pinching .rhandle {
+      display:none !important;
+      pointer-events:none !important;
     }
     /* Spacer = marge pan (fond uni). Grille UNIQUEMENT dans #boardWorld. */
     #boardZoomSpacer {
@@ -2965,9 +2995,10 @@
       color:var(--muted); font-size:15px; pointer-events:none; text-align:center; padding:24px;
       z-index:3;
     }
-    /* Stacking v84: rail(8) → faces sous fils(20–50) → fils(55) → faces devant fils(56–58)
-       → fluke-leads(59) → pastilles(70). Devant = cover fils ; Derrière = fils visibles.
-       v42 inchangé: waypoints figés + path.hit off pendant drag module. */
+    /* Stacking v84/v137: rail(8) → faces sous fils(20–50) → fils(55) → faces devant fils(56–58)
+       → fluke-leads(59) → pastilles(70) → goulottes(80–85, couvrent fils + modules).
+       Devant = cover fils ; Derrière = fils visibles. */
+
     /* Image pure : pas de bande/bordure ; sélection = outline léger. */
     .dev {
       position:absolute; border:none; background:transparent; border-radius:0;
@@ -3343,6 +3374,24 @@
     }
     .dev.barrette-dev {
       background:transparent; box-shadow:none; overflow:visible;
+    }
+    /* Goulotte PVC : couvre fils + modules (z CSS 80–85).
+       overflow:visible — sinon les .rhandle sont clippés (drag au lieu de resize). */
+    .dev.goulotte {
+      background:transparent; box-shadow:none;
+      overflow:visible; border-radius:0;
+      z-index:80;
+    }
+    .dev.sel.goulotte { z-index:85; }
+    .dev.goulotte img {
+      width:100%; height:100%; object-fit:fill; display:block; pointer-events:none;
+      border-radius:4px; box-shadow:0 2px 5px rgba(15,23,42,.28);
+    }
+    .dev.goulotte .rhandle { z-index:120; }
+    .thumb.goulotte-t {
+      background:linear-gradient(180deg,#e5e7eb 0%,#9ca3af 45%,#6b7280 100%);
+      color:#111827; font:700 9px ui-sans-serif,system-ui,sans-serif;
+      letter-spacing:.02em; display:flex; align-items:center; justify-content:center;
     }
     .barrette-face {
       position:absolute; inset:8% 4%;
@@ -4587,23 +4636,23 @@
       text-overflow: clip !important;
       padding: 2px 4px !important;
     }
+    /* v91 : ne pas écraser les cartes (min-height:0 + overflow:hidden → barres blanches en all-cats). */
     html.pw-lib-bottom .item {
-      overflow: hidden !important;
-      align-self: stretch !important;
-      min-height: 168px !important;
+      overflow: visible !important;
+      align-self: start !important;
+      min-height: 118px !important;
+      height: auto !important;
       position: relative !important;
       z-index: 1 !important;
     }
     html.pw-lib-bottom .item img,
     html.pw-lib-bottom .item .thumb {
       max-height: 72px !important;
+      min-height: 40px !important;
       flex: 0 0 auto !important;
     }
     html.pw-lib-bottom .item .lib-add {
-      flex: 0 0 auto !important;
-      margin-top: auto !important;
-      position: relative !important;
-      z-index: 2 !important;
+      display: none !important;
     }
     .lib-tech-close {
       display: block; width: 100%; margin-top: 8px;
@@ -5461,7 +5510,7 @@
           <button type="button" id="btnLibClose" class="lib-phone-close" data-i18n-aria="libCloseAria" aria-label="Fermer">×</button>
           <div class="lib-phone-titles">
             <strong data-i18n="libPhoneTitle">Composants</strong>
-            <span data-i18n="libPhoneHint">Toucher pour ajouter · glisser possible</span>
+            <span data-i18n="libPhoneHint">Toucher = fiche · glisser sur le plan</span>
           </div>
         </div>
         <div class="lib-search-row">
@@ -6992,6 +7041,13 @@
       rail_din_35: {name:"Rail DIN 35 mm (TH35)",prefix:"X",cat:"Structure",w:473,h:103,kind:"rail",image:"assets/rail-din-35-swissdz.png",badge:"TH35",terminals:[]},
       rail_din_long: {name:"Rail DIN long perforé",prefix:"X",cat:"Structure",w:715,h:189,kind:"rail",image:"assets/rail-din-long-swissdz.png",badge:"Long",terminals:[]},
       rail_din_embouts: {name:"Rail DIN + embouts",prefix:"X",cat:"Structure",w:547,h:110,kind:"rail",image:"assets/rail-din-embouts-swissdz.png",badge:"Embouts",terminals:[]},
+      /* Goulottes PVC — kind goulotte + overWires : calque au-dessus des fils (masque le câblage). */
+      goulotte_h_240: {name:"Goulotte horizontale 240",nameEn:"Horizontal trunking 240",prefix:"X",cat:"Goulotte",w:240,h:34,kind:"goulotte",overWires:true,image:"assets/goulotte-h-240.svg?v=edz1",badge:"H240",terminals:[]},
+      goulotte_h_360: {name:"Goulotte horizontale 360",nameEn:"Horizontal trunking 360",prefix:"X",cat:"Goulotte",w:360,h:34,kind:"goulotte",overWires:true,image:"assets/goulotte-h-360.svg?v=edz1",badge:"H360",terminals:[]},
+      goulotte_h_480: {name:"Goulotte horizontale 480",nameEn:"Horizontal trunking 480",prefix:"X",cat:"Goulotte",w:480,h:34,kind:"goulotte",overWires:true,image:"assets/goulotte-h-480.svg?v=edz1",badge:"H480",terminals:[]},
+      goulotte_v_280: {name:"Goulotte verticale 280",nameEn:"Vertical trunking 280",prefix:"X",cat:"Goulotte",w:34,h:280,kind:"goulotte",overWires:true,image:"assets/goulotte-v-280.svg?v=edz1",badge:"V280",terminals:[]},
+      goulotte_v_420: {name:"Goulotte verticale 420",nameEn:"Vertical trunking 420",prefix:"X",cat:"Goulotte",w:34,h:420,kind:"goulotte",overWires:true,image:"assets/goulotte-v-420.svg?v=edz1",badge:"V420",terminals:[]},
+      goulotte_angle: {name:"Angle de goulotte",nameEn:"Trunking corner",prefix:"X",cat:"Goulotte",w:48,h:48,kind:"goulotte",overWires:true,image:"assets/goulotte-angle.svg?v=edz1",badge:"∠",terminals:[]},
       /* L/N = uniquement via compteur Sonelgaz — pas de pastilles source L/N dans la lib. PE Terre seul. */
       pe: {name:"Terre PE",prefix:"PE",cat:"Borniers",w:56,h:56,kind:"pe",terminals:[{id:"PE",nx:0.5,ny:0.5,direction:"left"}],badge:"PE"},
       /* Tête de réseau : compteur → L+N uniquement (jamais PE). PE = prise de terre / bornier PE. Empilable avec AGCP. */
@@ -7100,6 +7156,13 @@
       ]},
       borniers: {name:"Borniers N / PE SwissDz",prefix:"X",cat:"Borniers",w:140,h:90,image:"assets/borniers.png",iec:"X",terminals:[{id:"N",nx:0.3194,ny:0.3191,direction:"top"},{id:"PE",nx:0.3194,ny:0.7211,direction:"bottom"}]},
       peigne: {name:"Peigne d'alimentation SwissDz",prefix:"X",cat:"Borniers",w:200,h:80,image:"assets/peigne-swissdz.png",badge:"Peigne",iec:"X",bus:true,terminals:[{id:"IN",nx:0.0572,ny:0.5039,direction:"left"},{id:"1",nx:0.2484,ny:0.351,direction:"top"},{id:"2",nx:0.4497,ny:0.351,direction:"top"},{id:"3",nx:0.6509,ny:0.351,direction:"top"},{id:"4",nx:0.8522,ny:0.351,direction:"top"}]},
+      /* Peignes fourche — pas 36 px / module (assets/_gen_peigne_fork.py). bus = toutes dents en parallèle. */
+      peigne_1p_x6: {name:"Peigne fourche 1P ×6",nameEn:"1P fork comb ×6",prefix:"X",cat:"Borniers",w:216,h:42,image:"assets/peigne-fork-1p-x6.png",badge:"1P×6",iec:"X",bus:true,terminals:[{id:"IN",nx:0.04,ny:0.42,direction:"left"},{id:"1",nx:0.0833,ny:0.92,direction:"bottom"},{id:"2",nx:0.25,ny:0.92,direction:"bottom"},{id:"3",nx:0.4167,ny:0.92,direction:"bottom"},{id:"4",nx:0.5833,ny:0.92,direction:"bottom"},{id:"5",nx:0.75,ny:0.92,direction:"bottom"},{id:"6",nx:0.9167,ny:0.92,direction:"bottom"}]},
+      peigne_1p_x12: {name:"Peigne fourche 1P ×12",nameEn:"1P fork comb ×12",prefix:"X",cat:"Borniers",w:432,h:42,image:"assets/peigne-fork-1p-x12.png",badge:"1P×12",iec:"X",bus:true,terminals:[{id:"IN",nx:0.03,ny:0.42,direction:"left"},{id:"1",nx:0.0417,ny:0.92,direction:"bottom"},{id:"2",nx:0.125,ny:0.92,direction:"bottom"},{id:"3",nx:0.2083,ny:0.92,direction:"bottom"},{id:"4",nx:0.2917,ny:0.92,direction:"bottom"},{id:"5",nx:0.375,ny:0.92,direction:"bottom"},{id:"6",nx:0.4583,ny:0.92,direction:"bottom"},{id:"7",nx:0.5417,ny:0.92,direction:"bottom"},{id:"8",nx:0.625,ny:0.92,direction:"bottom"},{id:"9",nx:0.7083,ny:0.92,direction:"bottom"},{id:"10",nx:0.7917,ny:0.92,direction:"bottom"},{id:"11",nx:0.875,ny:0.92,direction:"bottom"},{id:"12",nx:0.9583,ny:0.92,direction:"bottom"}]},
+      peigne_3p_x1: {name:"Peigne fourche 3P ×1",nameEn:"3P fork comb ×1",prefix:"X",cat:"Borniers",w:108,h:42,image:"assets/peigne-fork-3p-x1.png",badge:"3P×1",iec:"X",bus:true,terminals:[{id:"IN",nx:0.06,ny:0.42,direction:"left"},{id:"1",nx:0.1667,ny:0.92,direction:"bottom"},{id:"3",nx:0.5,ny:0.92,direction:"bottom"},{id:"5",nx:0.8333,ny:0.92,direction:"bottom"}]},
+      peigne_3p_x2: {name:"Peigne fourche 3P ×2",nameEn:"3P fork comb ×2",prefix:"X",cat:"Borniers",w:216,h:42,image:"assets/peigne-fork-3p-x2.png",badge:"3P×2",iec:"X",bus:true,terminals:[{id:"IN",nx:0.04,ny:0.42,direction:"left"},{id:"1",nx:0.0833,ny:0.92,direction:"bottom"},{id:"3",nx:0.25,ny:0.92,direction:"bottom"},{id:"5",nx:0.4167,ny:0.92,direction:"bottom"},{id:"7",nx:0.5833,ny:0.92,direction:"bottom"},{id:"9",nx:0.75,ny:0.92,direction:"bottom"},{id:"11",nx:0.9167,ny:0.92,direction:"bottom"}]},
+      peigne_3p_x3: {name:"Peigne fourche 3P ×3",nameEn:"3P fork comb ×3",prefix:"X",cat:"Borniers",w:324,h:42,image:"assets/peigne-fork-3p-x3.png",badge:"3P×3",iec:"X",bus:true,terminals:[{id:"IN",nx:0.035,ny:0.42,direction:"left"},{id:"1",nx:0.0556,ny:0.92,direction:"bottom"},{id:"3",nx:0.1667,ny:0.92,direction:"bottom"},{id:"5",nx:0.2778,ny:0.92,direction:"bottom"},{id:"7",nx:0.3889,ny:0.92,direction:"bottom"},{id:"9",nx:0.5,ny:0.92,direction:"bottom"},{id:"11",nx:0.6111,ny:0.92,direction:"bottom"},{id:"13",nx:0.7222,ny:0.92,direction:"bottom"},{id:"15",nx:0.8333,ny:0.92,direction:"bottom"},{id:"17",nx:0.9444,ny:0.92,direction:"bottom"}]},
+      peigne_3p_x4: {name:"Peigne fourche 3P ×4",nameEn:"3P fork comb ×4",prefix:"X",cat:"Borniers",w:432,h:42,image:"assets/peigne-fork-3p-x4.png",badge:"3P×4",iec:"X",bus:true,terminals:[{id:"IN",nx:0.03,ny:0.42,direction:"left"},{id:"1",nx:0.0417,ny:0.92,direction:"bottom"},{id:"3",nx:0.125,ny:0.92,direction:"bottom"},{id:"5",nx:0.2083,ny:0.92,direction:"bottom"},{id:"7",nx:0.2917,ny:0.92,direction:"bottom"},{id:"9",nx:0.375,ny:0.92,direction:"bottom"},{id:"11",nx:0.4583,ny:0.92,direction:"bottom"},{id:"13",nx:0.5417,ny:0.92,direction:"bottom"},{id:"15",nx:0.625,ny:0.92,direction:"bottom"},{id:"17",nx:0.7083,ny:0.92,direction:"bottom"},{id:"19",nx:0.7917,ny:0.92,direction:"bottom"},{id:"21",nx:0.875,ny:0.92,direction:"bottom"},{id:"23",nx:0.9583,ny:0.92,direction:"bottom"}]},
       /* Gris 3-Pole 40A 400V~ rotatif I-ON — retiré de la lib UI. */
       sectionneur_fusible: {name:"Sectionneur-fusible 3P SwissDz",prefix:"QS",cat:"Sectionneurs",hideFromLib:true,w:124,h:172,din:true,image:"assets/sectionneur-fusible-swissdz.png",badge:"SF",iec:"QS",terminals:[{id:"1",nx:0.1552,ny:0.11,direction:"top"},{id:"2",nx:0.186,ny:0.9,direction:"bottom"},{id:"3",nx:0.4745,ny:0.11,direction:"top"},{id:"4",nx:0.4745,ny:0.9,direction:"bottom"},{id:"5",nx:0.8454,ny:0.11,direction:"top"},{id:"6",nx:0.8351,ny:0.9,direction:"bottom"}],pair:["1","2"],pairs:[["1","2"],["3","4"],["5","6"]]},
       selecteur: {name:"Sélecteur Man/0/Auto SwissDz",prefix:"S",cat:"Boutonnerie",w:96,h:96,image:"assets/selecteur-dial-base.png",thumb:"assets/selecteur-swissdz.png",badge:"M-0-A",iec:"S",selector:true,knobImage:"assets/selecteur-knob.png",knobAngles:{man:-55,"0":180,auto:55},terminals:[{id:"1",nx:0.2974,ny:0.8869,direction:"bottom"},{id:"2",nx:0.501,ny:0.8869,direction:"bottom"},{id:"3",nx:0.7046,ny:0.8869,direction:"bottom"}]},
@@ -7249,7 +7312,7 @@
          Pas de bornes Monter/Descendre. knxRoller = mêmes GA qu’un canal knxShutter, sans L→U/D.
          roller.pos 0 = fermé à la pose, 1 = ouvert.
          v123 : touches Monter/Arrêt/Descendre inertes tant que L, N, PE et BUS ne sont pas raccordés. */
-      fenetre_volet: {name:"Fenêtre + volet roulant",nameEn:"Window + roller shutter",prefix:"VR",cat:"Domotique KNX",w:210,h:332,image:"assets/electrodz/fenetre_volet.png?v=v121-fenetre-knx",badge:"Volet",iec:"VR",rollerBlind:true,knxRoller:true,busLed:{nx:0.08,ny:0.045},rollerOpening:{nx:0.168,ny:0.218,nw:0.652,nh:0.640},terminals:[
+      fenetre_volet: {name:"Volet KNX extérieur (fenêtre)",nameEn:"KNX exterior shutter (window)",nameAr:"شباك خارجي KNX",prefix:"VR",cat:"Domotique KNX",w:210,h:332,image:"assets/electrodz/fenetre_volet.png?v=v121-fenetre-knx",badge:"Volet ext",iec:"VR",rollerBlind:true,knxRoller:true,busLed:{nx:0.08,ny:0.045},rollerOpening:{nx:0.168,ny:0.218,nw:0.652,nh:0.640},terminals:[
         {id:"L",nx:0.28,ny:0.04,direction:"top"},
         {id:"N",nx:0.46,ny:0.04,direction:"top"},
         {id:"PE",nx:0.64,ny:0.04,direction:"top"},
@@ -8343,6 +8406,7 @@
     const TIER_FREE_CATS_ALL = new Set([
       "Alimentation",
       "Structure",
+      "Goulotte",
       "Borniers",
       "Disjoncteurs modulaires",
       "Différentiel",
@@ -9058,6 +9122,8 @@
           drop.add(i.uid);
           return;
         }
+        /* Goulottes toujours au calque couvercle (devant fils + modules). */
+        if (def.kind === "goulotte" && !(Number(i.z) >= 1000)) i.z = 1000;
         if (def.thermal) {
           if (i.thermalIr == null && THERMAL_IR_FROM_TYPE[old] != null) {
             i.thermalIr = THERMAL_IR_FROM_TYPE[old];
@@ -9496,6 +9562,10 @@
         return { w: Math.max(70, Math.round(def.w * 0.4)), h: Math.max(90, Math.round(def.h * 0.4)) };
       }
       if (def && def.houseFacade) return { w: 480, h: 390 };
+      /* Goulotte : longueur ET section (épaisseur) libres. */
+      if (def && def.kind === "goulotte") {
+        return { w: 20, h: 20 };
+      }
       return { w: 40, h: 40 };
     }
     /** Tout composant placé peut être redimensionné (plus seulement din/rail). */
@@ -9572,11 +9642,15 @@
     function rectsOverlap(a, b) {
       return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
     }
-    /** Composants solides (KNX inclus) — pas rails / platines / barrettes / supports PV. */
+    /** Composants solides (KNX inclus) — pas rails / platines / goulottes / barrettes / supports PV. */
     function isCollidableItem(item) {
       const def = LIB[item && item.type];
-      return !!(def && def.kind !== "rail" && def.kind !== "platine" && def.kind !== "barrette"
-        && !def.pvSupport && !isPlatine(item));
+      return !!(def && def.kind !== "rail" && def.kind !== "platine" && def.kind !== "goulotte"
+        && def.kind !== "barrette" && !def.pvSupport && !isPlatine(item));
+    }
+    function isGoulotte(item) {
+      const def = LIB[item && item.type];
+      return !!(def && def.kind === "goulotte");
     }
     /* Supports PV : case = face module 150×233, écart 10 px. Les panneaux épousent la case. */
     const PV_CELL_W = 150;
@@ -10639,11 +10713,14 @@
     /* Déclaré tôt : utilisé pendant pinch (défini avant les handlers). */
     var boardTouchPinch = null;
     var boardPinchPtrs = new Map();
+    var boardZoomRaf = 0;
+    var boardZoomPend = null;
     /*
      * v108 : zoom 1.0.1 + spacer FIGÉ pendant pinch.
      * Cause user : plan vide fluide ; dès qu’un .dev (photo) est posé → tremblement.
      * Resize spacer frame-à-frame + scale des PNG = thrash WebKit. Pendant pinch =
      * uniquement scale(#boardWorld) + scroll. Settle spacer à la fin.
+     * v135 : coalesce rAF pendant pinch (anti-vibration) ; resize géométrique interdit.
      */
     function ensurePinchSpacerRoom(zNow) {
       const spacer = document.getElementById("boardZoomSpacer");
@@ -10716,18 +10793,50 @@
     function setBoardZoom(next) {
       setBoardZoomAt(next, null, null);
     }
-    /* Zoom ancré sous curseur/doigts — exact 1.0.1 (recalcule ax/ay chaque frame). */
+    /* Zoom ancré sous curseur/doigts — viewport only (jamais item.w/h). */
     function setBoardZoomAt(next, clientX, clientY, opts) {
       const z0 = boardZoom();
       const z1 = clampBoardZoom(next);
       const rect = board.getBoundingClientRect();
       const pad = BOARD_PAN_PAD;
-      const ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
-      const oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
-      const ax = (board.scrollLeft + ox - pad) / z0;
-      const ay = (board.scrollTop + oy - pad) / z0;
-      if (Math.abs(z1 - z0) < 1e-9) {
+      const pinching = !!(opts && opts.livePinch) || board.classList.contains("is-pinching");
+      let ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
+      let oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
+      /* Ancre monde figée au début du pinch (évite oscillation si doigts bougent). */
+      let ax, ay;
+      if (pinching && boardTouchPinch && Number.isFinite(boardTouchPinch.ax)) {
+        ax = boardTouchPinch.ax;
+        ay = boardTouchPinch.ay;
+        if (Number.isFinite(boardTouchPinch.ox0)) ox = boardTouchPinch.ox0;
+        if (Number.isFinite(boardTouchPinch.oy0)) oy = boardTouchPinch.oy0;
+      } else {
+        ax = (board.scrollLeft + ox - pad) / z0;
+        ay = (board.scrollTop + oy - pad) / z0;
+      }
+      if (Math.abs(z1 - z0) < 1e-9 && !pinching) {
         applyBoardZoomStyles(opts);
+        return;
+      }
+      if (pinching) {
+        if (boardTouchPinch && !Number.isFinite(boardTouchPinch.ax)) {
+          boardTouchPinch.ax = ax;
+          boardTouchPinch.ay = ay;
+          boardTouchPinch.ox0 = ox;
+          boardTouchPinch.oy0 = oy;
+        }
+        boardZoomPend = { z1: z1, ox: ox, oy: oy, ax: ax, ay: ay, pad: pad };
+        if (!boardZoomRaf) {
+          boardZoomRaf = requestAnimationFrame(function () {
+            boardZoomRaf = 0;
+            const p = boardZoomPend;
+            boardZoomPend = null;
+            if (!p) return;
+            state.boardZoom = p.z1;
+            applyBoardZoomStyles({ livePinch: true });
+            board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
+            board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
+          });
+        }
         return;
       }
       state.boardZoom = z1;
@@ -10774,23 +10883,87 @@
       }
       return pref || "1.1.0";
     }
-    function defaultKnxKeysProg() {
-      /* Défaut poussoir + actionneur volet : T1/T2 = canal 1, T3/T4 = canal 2 */
+    /** GA déjà prises sur le plan (objets de communication existants). */
+    function collectUsedGas() {
+      const used = new Set();
+      const take = (g) => { const n = normGa(g); if (n) used.add(n); };
+      const takeObj = (o) => {
+        if (!o || typeof o !== "object") return;
+        ["ga", "gaUp", "gaDown", "gaStop", "gaOn", "gaLevel", "gaSet", "gaHeat", "gaStrike", "gaVideo"]
+          .forEach((k) => take(o[k]));
+      };
+      const takeMap = (m) => {
+        if (!m || typeof m !== "object") return;
+        Object.keys(m).forEach((k) => takeObj(m[k]));
+      };
+      state.items.forEach((it) => {
+        takeMap(it.knxKeysProg);
+        takeMap(it.knxChProg);
+        takeMap(it.knxShutterProg);
+        takeObj(it.knxRollerProg);
+        takeObj(it.knxDimProg);
+        takeObj(it.knxPresenceProg);
+        takeObj(it.knxTempProg);
+        takeObj(it.knxThermoProg);
+        takeMap(it.knxBinProg);
+        if (it.facade && it.facade.prog) takeMap(it.facade.prog);
+      });
+      return used;
+    }
+    /** Prochaine adresse de groupe libre (main/mid/sub). prefer si encore libre.
+     *  extraUsed : Set mutable pour enchaîner plusieurs allocations avant écriture sur l’item. */
+    function nextKnxGa(main, mid, prefer, extraUsed) {
+      const used = extraUsed || collectUsedGas();
+      const pref = prefer ? normGa(prefer) : "";
+      if (pref && !used.has(pref)) { used.add(pref); return pref; }
+      const m = (main | 0) || 1;
+      const d = (mid | 0);
+      for (let z = 1; z < 2000; z++) {
+        const a = m + "/" + d + "/" + z;
+        if (!used.has(a)) { used.add(a); return a; }
+      }
+      return pref || (m + "/" + d + "/1");
+    }
+    function allocKnxGaTriple(main, mid, preferUp, preferDown, preferStop) {
+      const used = collectUsedGas();
       return {
-        1: { fn: "up", ga: "1/2/1" },
-        2: { fn: "down", ga: "1/2/2" },
-        3: { fn: "up", ga: "1/2/4" },
-        4: { fn: "down", ga: "1/2/5" }
+        gaUp: nextKnxGa(main, mid, preferUp, used),
+        gaDown: nextKnxGa(main, mid, preferDown, used),
+        gaStop: nextKnxGa(main, mid, preferStop, used)
+      };
+    }
+    function defaultKnxKeysProg() {
+      /* Défaut poussoir volet : T1/T2 = canal 1, T3/T4 = canal 2 — GA uniques à l’allocation. */
+      const used = collectUsedGas();
+      return {
+        1: { fn: "up", ga: nextKnxGa(1, 2, "1/2/1", used) },
+        2: { fn: "down", ga: nextKnxGa(1, 2, "1/2/2", used) },
+        3: { fn: "up", ga: nextKnxGa(1, 2, "1/2/4", used) },
+        4: { fn: "down", ga: nextKnxGa(1, 2, "1/2/5", used) }
       };
     }
     function defaultKnxChProg() {
-      return { 1: { ga: "1/1/1" }, 2: { ga: "1/1/2" }, 3: { ga: "1/1/3" }, 4: { ga: "1/1/4" } };
+      const used = collectUsedGas();
+      return {
+        1: { ga: nextKnxGa(1, 1, "1/1/1", used) },
+        2: { ga: nextKnxGa(1, 1, "1/1/2", used) },
+        3: { ga: nextKnxGa(1, 1, "1/1/3", used) },
+        4: { ga: nextKnxGa(1, 1, "1/1/4", used) }
+      };
     }
     function defaultKnxShutterProg() {
-      return {
-        1: { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" },
-        2: { gaUp: "1/2/4", gaDown: "1/2/5", gaStop: "1/2/6" }
+      const used = collectUsedGas();
+      const c1 = {
+        gaUp: nextKnxGa(1, 2, "1/2/1", used),
+        gaDown: nextKnxGa(1, 2, "1/2/2", used),
+        gaStop: nextKnxGa(1, 2, "1/2/3", used)
       };
+      const c2 = {
+        gaUp: nextKnxGa(1, 2, "1/2/4", used),
+        gaDown: nextKnxGa(1, 2, "1/2/5", used),
+        gaStop: nextKnxGa(1, 2, "1/2/6", used)
+      };
+      return { 1: c1, 2: c2 };
     }
     function knxBinaryIds(def) {
       const hits = (def && def.knxBinHits) || [];
@@ -10823,7 +10996,11 @@
         if (!item.knxToggle) item.knxToggle = { 1: false, 2: false, 3: false, 4: false };
         if (!item.knxKeysProg) item.knxKeysProg = defaultKnxKeysProg();
         [1, 2, 3, 4].forEach((n) => {
-          if (!item.knxKeysProg[n]) item.knxKeysProg[n] = { fn: "switch", ga: "1/0/" + n };
+          if (!item.knxKeysProg[n]) {
+            item.knxKeysProg[n] = { fn: "switch", ga: nextKnxGa(1, 0, "1/0/" + n) };
+          } else if (!normGa(item.knxKeysProg[n].ga)) {
+            item.knxKeysProg[n].ga = nextKnxGa(1, 0, "1/0/" + n);
+          }
           knxEnsureName(item.knxKeysProg[n], "name", "Touche " + n);
         });
       }
@@ -10831,7 +11008,11 @@
         if (!item.knxCh) item.knxCh = { 1: false, 2: false, 3: false, 4: false };
         if (!item.knxChProg) item.knxChProg = defaultKnxChProg();
         [1, 2, 3, 4].forEach((n) => {
-          if (!item.knxChProg[n]) item.knxChProg[n] = { ga: "1/1/" + n };
+          if (!item.knxChProg[n]) {
+            item.knxChProg[n] = { ga: nextKnxGa(1, 1, "1/1/" + n) };
+          } else if (!normGa(item.knxChProg[n].ga)) {
+            item.knxChProg[n].ga = nextKnxGa(1, 1, "1/1/" + n);
+          }
           knxEnsureName(item.knxChProg[n], "name", "Sortie " + n);
         });
       }
@@ -10839,38 +11020,68 @@
         if (!item.knxShutter) item.knxShutter = { 1: { dir: "stop", pos: 0.35 }, 2: { dir: "stop", pos: 0.35 } };
         if (!item.knxShutterProg) item.knxShutterProg = defaultKnxShutterProg();
         [1, 2].forEach((n) => {
-          const p = item.knxShutterProg[n];
-          if (!p) return;
+          let p = item.knxShutterProg[n];
+          if (!p) {
+            const base = 1 + (n - 1) * 3;
+            p = allocKnxGaTriple(1, 2, "1/2/" + base, "1/2/" + (base + 1), "1/2/" + (base + 2));
+            item.knxShutterProg[n] = p;
+          } else {
+            if (!normGa(p.gaUp)) p.gaUp = nextKnxGa(1, 2);
+            if (!normGa(p.gaDown)) p.gaDown = nextKnxGa(1, 2);
+            if (!normGa(p.gaStop)) p.gaStop = nextKnxGa(1, 2);
+          }
           knxEnsureName(p, "nameUp", "Volet " + n + " montée");
           knxEnsureName(p, "nameDown", "Volet " + n + " descente");
           knxEnsureName(p, "nameStop", "Volet " + n + " arrêt");
         });
       }
       if (def.knxRoller) {
-        if (!item.knxRollerProg) item.knxRollerProg = { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" };
+        /* Chaque volet extérieur (fenetre_volet) reçoit ses propres GA — pas de collision entre instances. */
+        if (!item.knxRollerProg) {
+          item.knxRollerProg = allocKnxGaTriple(1, 2, "1/2/1", "1/2/2", "1/2/3");
+        } else {
+          const p = item.knxRollerProg;
+          if (!normGa(p.gaUp)) p.gaUp = nextKnxGa(1, 2);
+          if (!normGa(p.gaDown)) p.gaDown = nextKnxGa(1, 2);
+          if (!normGa(p.gaStop)) p.gaStop = nextKnxGa(1, 2);
+        }
         knxEnsureName(item.knxRollerProg, "nameUp", "Montée");
         knxEnsureName(item.knxRollerProg, "nameDown", "Descente");
         knxEnsureName(item.knxRollerProg, "nameStop", "Arrêt");
       }
       if (def.knxDimmer || def.knxDali) {
         if (!item.knxDim) item.knxDim = { on: false, level: 80 };
-        if (!item.knxDimProg) item.knxDimProg = { gaOn: "1/3/1", gaLevel: "1/3/2" };
+        if (!item.knxDimProg) {
+          const used = collectUsedGas();
+          item.knxDimProg = { gaOn: nextKnxGa(1, 3, "1/3/1", used), gaLevel: nextKnxGa(1, 3, "1/3/2", used) };
+        } else {
+          if (!normGa(item.knxDimProg.gaOn)) item.knxDimProg.gaOn = nextKnxGa(1, 3);
+          if (!normGa(item.knxDimProg.gaLevel)) item.knxDimProg.gaLevel = nextKnxGa(1, 3);
+        }
         knxEnsureName(item.knxDimProg, "nameOn", "ON/OFF");
         knxEnsureName(item.knxDimProg, "nameLevel", "Niveau");
       }
       if (def.knxPresence) {
         if (item.knxPresence == null) item.knxPresence = false;
-        if (!item.knxPresenceProg) item.knxPresenceProg = { ga: "1/4/1" };
+        if (!item.knxPresenceProg) item.knxPresenceProg = { ga: nextKnxGa(1, 4, "1/4/1") };
+        else if (!normGa(item.knxPresenceProg.ga)) item.knxPresenceProg.ga = nextKnxGa(1, 4);
         knxEnsureName(item.knxPresenceProg, "name", "Présence");
       }
       if (def.knxTemp) {
         if (item.knxTemp == null) item.knxTemp = 21.5;
-        if (!item.knxTempProg) item.knxTempProg = { ga: "1/5/1" };
+        if (!item.knxTempProg) item.knxTempProg = { ga: nextKnxGa(1, 5, "1/5/1") };
+        else if (!normGa(item.knxTempProg.ga)) item.knxTempProg.ga = nextKnxGa(1, 5);
         knxEnsureName(item.knxTempProg, "name", "Température");
       }
       if (def.knxThermo) {
         if (!item.knxThermo) item.knxThermo = { set: 20, room: 21, heat: false };
-        if (!item.knxThermoProg) item.knxThermoProg = { gaSet: "1/6/1", gaHeat: "1/6/2" };
+        if (!item.knxThermoProg) {
+          const used = collectUsedGas();
+          item.knxThermoProg = { gaSet: nextKnxGa(1, 6, "1/6/1", used), gaHeat: nextKnxGa(1, 6, "1/6/2", used) };
+        } else {
+          if (!normGa(item.knxThermoProg.gaSet)) item.knxThermoProg.gaSet = nextKnxGa(1, 6);
+          if (!normGa(item.knxThermoProg.gaHeat)) item.knxThermoProg.gaHeat = nextKnxGa(1, 6);
+        }
         knxEnsureName(item.knxThermoProg, "nameSet", "Consigne");
         knxEnsureName(item.knxThermoProg, "nameHeat", "Chauffage");
       }
@@ -10879,8 +11090,11 @@
         if (!item.knxBinProg || typeof item.knxBinProg !== "object") item.knxBinProg = {};
         knxBinaryIds(def).forEach((n) => {
           if (item.knxBin[n] == null) item.knxBin[n] = false;
-          if (!item.knxBinProg[n]) item.knxBinProg[n] = { ga: "1/7/" + n, name: "Entrée " + n };
-          else knxEnsureName(item.knxBinProg[n], "name", "Entrée " + n);
+          if (!item.knxBinProg[n]) item.knxBinProg[n] = { ga: nextKnxGa(1, 7, "1/7/" + n), name: "Entrée " + n };
+          else {
+            if (!normGa(item.knxBinProg[n].ga)) item.knxBinProg[n].ga = nextKnxGa(1, 7, "1/7/" + n);
+            knxEnsureName(item.knxBinProg[n], "name", "Entrée " + n);
+          }
         });
       }
       if (def.houseFacade) {
@@ -11326,22 +11540,31 @@
       };
       return map[slotId] || "";
     }
-    /* Défauts GA. La simulation lit item.facade.prog[slot] — un autre participant ne partage pas cet objet. */
+    /* Défauts GA. Allocation nextKnxGa : 2e façade / slots ajoutés n’entrent pas en collision. */
     function defaultFacadeSlotProg(slotId, kind) {
       if (kind === "volet" || kind === "garage") {
-        const p = facadeRollerProg(slotId) || { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" };
+        const prefer = facadeRollerProg(slotId) || { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" };
         const lab = (kind === "garage" ? "Garage " : "Volet ") + slotId;
+        const g = allocKnxGaTriple(1, 2, prefer.gaUp, prefer.gaDown, prefer.gaStop);
         return {
           nameUp: lab + " montée", nameDown: lab + " descente", nameStop: lab + " arrêt",
-          gaUp: p.gaUp, gaDown: p.gaDown, gaStop: p.gaStop
+          gaUp: g.gaUp, gaDown: g.gaDown, gaStop: g.gaStop
         };
       }
-      if (kind === "light") return { name: "Lampe " + slotId, ga: facadeLightGa(slotId) || "1/1/40" };
-      if (kind === "door") {
-        return { nameStrike: "Gâche", gaStrike: "1/1/30", nameVideo: "Visiophone", gaVideo: "1/1/31" };
+      if (kind === "light") {
+        return { name: "Lampe " + slotId, ga: nextKnxGa(1, 1, facadeLightGa(slotId) || "1/1/40") };
       }
-      if (kind === "meteo") return { name: "Station météo", ga: "1/5/10" };
-      if (kind === "pv") return { name: "Solaire " + slotId, ga: slotId === "pv2" ? "1/8/2" : "1/8/1" };
+      if (kind === "door") {
+        const used = collectUsedGas();
+        return {
+          nameStrike: "Gâche", gaStrike: nextKnxGa(1, 1, "1/1/30", used),
+          nameVideo: "Visiophone", gaVideo: nextKnxGa(1, 1, "1/1/31", used)
+        };
+      }
+      if (kind === "meteo") return { name: "Station météo", ga: nextKnxGa(1, 5, "1/5/10") };
+      if (kind === "pv") {
+        return { name: "Solaire " + slotId, ga: nextKnxGa(1, 8, slotId === "pv2" ? "1/8/2" : "1/8/1") };
+      }
       return null;
     }
     function ensureFacadeProg(item) {
@@ -12166,21 +12389,18 @@
       try { ensureEtsFrameGeom(true); } catch (_) {}
       syncEtsLayout();
     }
-    /** Sélection plan : ouvre le cadre ETS déjà existant sur CE participant (et ce slot façade). */
+    /** Sélection plan : mémorise le participant ; n’ouvre PAS ETS (btn ETS bas / Menu uniquement). */
     function focusEtsOnKnx(item, slotId) {
       if (!item || state.mode === "wire") return;
       const def = LIB[item.type];
       if (!def || !isKnxDevice(def)) return;
       state.etsSelUid = item.uid;
       state.etsSelSlot = slotId || "";
+      ensureKnxProgram(item);
+      /* Clic / sélection KNX : jamais d’auto-ouverture du cadre ETS. */
+      if (!state.etsOpen) return;
       state.etsTab = "params";
       state.etsProgMode = "params";
-      ensureKnxProgram(item);
-      if (!state.etsOpen) {
-        if (!tierAtLeast("silver")) return;
-        state.etsOpen = true;
-        try { ensureEtsFrameGeom(!state.etsFrame); } catch (_) {}
-      }
       syncEtsLayout();
     }
     function collectKnxLinks() {
@@ -15552,22 +15772,129 @@
         ladder: { rungs: rungs }
       };
     }
+    /**
+     * Tableau maison NF C 15-100 (esprit) — platine + 3 rails DIN, AGCP, 2 DDR,
+     * disjoncteurs, peignes, borniers N/PE, terre, goulottes masquant les fils.
+     */
     function exampleMaisonProject() {
+      /* Tableau résidentiel type NF C 15-100 sur platine :
+         compteur → AGCP → 2 DDR 30 mA type A → disjoncteurs / peignes → N/PE + terre.
+         Goulottes au-dessus des nappes de fils. */
+      const gou = (uid, type, tag, x, y, w, h) => ({
+        uid, type, tag, x, y, w, h, z: 1000, closed: true, pressed: false
+      });
       return {
-        name: "tableau-maison",
+        name: "tableau-maison-nfc15100",
         items: [
-          { uid: "r1", type: "rail_din_35", tag: "X1", x: 40, y: 300, closed: true, pressed: false },
-          exIt("c1", "compteur_sonelgaz", "P1", 64, 36),
-          exIt("c2", "edz_schneider_acti9_ic60n_2p_c16", "QF1", 88, 248),
-          exIt("c3", "edz_piloto_led_blanco", "HL1", 300, 250)
+          /* Platine de montage (fond de tableau) */
+          {
+            uid: "pl1", type: "edz_tablero_residencial_12p", tag: "X0",
+            x: 40, y: 100, w: 760, h: 980, plateColor: "gris",
+            closed: true, pressed: false
+          },
+          /* Compteur amont */
+          exIt("p1", "compteur_sonelgaz", "P1", 80, 8),
+          /* 3 rails DIN sur la platine */
+          { uid: "r1", type: "rail_din_35", tag: "X1", x: 100, y: 290, closed: true, pressed: false },
+          { uid: "r2", type: "rail_din_35", tag: "X2", x: 100, y: 520, closed: true, pressed: false },
+          { uid: "r3", type: "rail_din_35", tag: "X3", x: 100, y: 750, closed: true, pressed: false },
+          /* Rangée 1 — AGCP + 2 DDR 30 mA + SPD */
+          exIt("qa1", "agcp_principal", "QA1", 120, 255),
+          exIt("qi1", "edz_abb_f202_a", "QI1", 220, 255),
+          exIt("qi2", "edz_abb_f202_a", "QI2", 310, 255),
+          exIt("spd1", "spd", "FV1", 400, 255),
+          /* Rangée 2 — sous QI1 : éclairage ×2, prises ×2, VMC */
+          {
+            uid: "pg1", type: "peigne_1p_x6", tag: "X4",
+            x: 120, y: 478, closed: true, pressed: false
+          },
+          exIt("qf1", "edz_schneider_acti9_ic60n_1p_c16", "QF1", 120, 485),
+          exIt("qf2", "edz_schneider_acti9_ic60n_1p_c16", "QF2", 156, 485),
+          exIt("qf3", "edz_schneider_acti9_ic60n_2p_c16", "QF3", 192, 485),
+          exIt("qf4", "edz_schneider_acti9_ic60n_2p_c16", "QF4", 280, 485),
+          exIt("qf5", "edz_schneider_acti9_ic60n_1p_c16", "QF5", 368, 485),
+          /* Rangée 3 — sous QI2 : cuisine 20A, LL, CE, plaque 32A, divers */
+          {
+            uid: "pg2", type: "peigne_1p_x6", tag: "X5",
+            x: 120, y: 708, closed: true, pressed: false
+          },
+          exIt("qf6", "edz_schneider_acti9_ic60n_2p_c16", "QF6", 120, 715),
+          exIt("qf7", "edz_schneider_acti9_ic60n_2p_c16", "QF7", 200, 715),
+          exIt("qf8", "edz_schneider_acti9_ic60n_2p_c16", "QF8", 280, 715),
+          exIt("qf9", "edz_itm_2p_c32", "QF9", 360, 715),
+          exIt("qf10", "edz_schneider_acti9_ic60n_1p_c16", "QF10", 430, 715),
+          /* Borniers N/PE + prise de terre */
+          exIt("xb1", "borniers", "X6", 120, 950),
+          exIt("pe1", "pe", "PE1", 300, 965),
+          /* Goulottes — masquent les fils entre rails / côtés */
+          gou("gh1", "goulotte_h_480", "X7", 100, 438, 480, 34),
+          gou("gh2", "goulotte_h_480", "X8", 100, 668, 480, 34),
+          gou("gh3", "goulotte_h_480", "X9", 100, 910, 480, 34),
+          gou("gv1", "goulotte_v_420", "X10", 64, 290, 34, 420),
+          gou("gv2", "goulotte_v_420", "X11", 620, 290, 34, 420),
+          gou("ga1", "goulotte_angle", "X12", 64, 438, 48, 48),
+          gou("ga2", "goulotte_angle", "X13", 606, 438, 48, 48),
+          /* Charges pédagogiques (Play) — éclairage / voyants / prise simulée */
+          exIt("hl1", "lampe", "HL1", 820, 420),
+          exIt("hl2", "lampe", "HL2", 820, 560),
+          exIt("hl3", "edz_piloto_led_blanco", "HL3", 820, 700),
+          exIt("hl4", "voyant", "HL4", 820, 820),
+          exIt("hl5", "edz_piloto_led_blanco", "HL5", 940, 700)
         ],
         wires: [
-          exW("w1", 1, "c1", "L", "c2", "1", EX_L, 2.5),
-          exW("w2", 2, "c1", "N", "c2", "3", EX_N, 2.5),
-          exW("w3", 3, "c2", "2", "c3", "X1", EX_L, 1.5),
-          exW("w4", 4, "c2", "4", "c3", "X2", EX_N, 1.5)
+          /* Arrivée compteur → AGCP */
+          exW("w1", 1, "p1", "L", "qa1", "L", EX_L, 6),
+          exW("w2", 2, "p1", "N", "qa1", "N", EX_N, 6),
+          /* AGCP → DDR1 / DDR2 (répartition) */
+          exW("w3", 3, "qa1", "L'", "qi1", "1", EX_L, 6),
+          exW("w4", 4, "qa1", "N'", "qi1", "3", EX_N, 6),
+          exW("w5", 5, "qa1", "L'", "qi2", "1", EX_L, 6),
+          exW("w6", 6, "qa1", "N'", "qi2", "3", EX_N, 6),
+          /* SPD amont + terre */
+          exW("w7", 7, "qa1", "L'", "spd1", "1", EX_L, 2.5),
+          exW("w8", 8, "qa1", "N'", "spd1", "2", EX_N, 2.5),
+          exW("w9", 9, "spd1", "PE", "pe1", "PE", EX_PE, 6),
+          /* DDR1 → peigne rangée 2 + N bornier */
+          exW("w10", 10, "qi1", "2", "pg1", "IN", EX_L, 2.5),
+          exW("w11", 11, "qi1", "4", "xb1", "N", EX_N, 2.5),
+          exW("w12", 12, "pg1", "1", "qf1", "1", EX_L, 1.5),
+          exW("w13", 13, "pg1", "2", "qf2", "1", EX_L, 1.5),
+          exW("w14", 14, "pg1", "3", "qf3", "1", EX_L, 2.5),
+          exW("w15", 15, "pg1", "4", "qf4", "1", EX_L, 2.5),
+          exW("w16", 16, "pg1", "5", "qf5", "1", EX_L, 1.5),
+          exW("w17", 17, "xb1", "N", "qf3", "3", EX_N, 2.5),
+          exW("w18", 18, "xb1", "N", "qf4", "3", EX_N, 2.5),
+          /* DDR2 → peigne rangée 3 */
+          exW("w19", 19, "qi2", "2", "pg2", "IN", EX_L, 2.5),
+          exW("w20", 20, "qi2", "4", "xb1", "N", EX_N, 2.5),
+          exW("w21", 21, "pg2", "1", "qf6", "1", EX_L, 2.5),
+          exW("w22", 22, "pg2", "2", "qf7", "1", EX_L, 2.5),
+          exW("w23", 23, "pg2", "3", "qf8", "1", EX_L, 2.5),
+          exW("w24", 24, "pg2", "4", "qf9", "1", EX_L, 6),
+          exW("w25", 25, "pg2", "5", "qf10", "1", EX_L, 1.5),
+          exW("w26", 26, "xb1", "N", "qf6", "3", EX_N, 2.5),
+          exW("w27", 27, "xb1", "N", "qf7", "3", EX_N, 2.5),
+          exW("w28", 28, "xb1", "N", "qf8", "3", EX_N, 2.5),
+          exW("w29", 29, "xb1", "N", "qf9", "3", EX_N, 6),
+          /* Départs → charges */
+          exW("w30", 30, "qf1", "2", "hl1", "L", EX_L, 1.5),
+          exW("w31", 31, "xb1", "N", "hl1", "N", EX_N, 1.5),
+          exW("w32", 32, "qf2", "2", "hl2", "L", EX_L, 1.5),
+          exW("w33", 33, "xb1", "N", "hl2", "N", EX_N, 1.5),
+          exW("w34", 34, "qf3", "2", "hl3", "X1", EX_L, 2.5),
+          exW("w35", 35, "xb1", "N", "hl3", "X2", EX_N, 2.5),
+          exW("w36", 36, "qf6", "2", "hl4", "X1", EX_L, 2.5),
+          exW("w37", 37, "xb1", "N", "hl4", "X2", EX_N, 2.5),
+          exW("w38", 38, "qf10", "2", "hl5", "X1", EX_L, 1.5),
+          exW("w39", 39, "xb1", "N", "hl5", "X2", EX_N, 1.5),
+          /* Terre */
+          exW("w40", 40, "pe1", "PE", "xb1", "PE", EX_PE, 6)
         ],
-        counts: { X: 1, P: 1, QF: 1, H: 1 }, seq: 10, wireNo: 5
+        counts: {
+          X: 14, P: 1, QA: 1, QI: 2, FV: 1, QF: 10, PE: 1, HL: 5
+        },
+        seq: 70,
+        wireNo: 41
       };
     }
     /** Installation PV mono : string 6×400 W, coffret DC+SPD, QS, Huawei 3 kW, compteur ↔, IDR ABB, iC60N, PE. */
@@ -15824,19 +16151,219 @@
       };
     }
     function exampleFacadeKnxProject() {
+      /* Tutorat KNX : GTL (alim + coupleur IP + poussoirs) + façade maison câblée
+         + 2 volets extérieurs avec IA/GA distinctes. Topology TP daisy-chain professionnelle. */
       const g = facadeGeom(4);
+      const facState = facadeFullState(4);
+      const facProg = {};
+      g.slots.forEach((s) => {
+        if (!facState.eq[s.id]) return;
+        if (s.kind === "volet" || s.kind === "garage") {
+          const p = facadeRollerProg(s.id) || { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" };
+          const lab = (s.kind === "garage" ? "Garage " : "Volet ") + s.id;
+          facProg[s.id] = {
+            nameUp: lab + " montée", nameDown: lab + " descente", nameStop: lab + " arrêt",
+            gaUp: p.gaUp, gaDown: p.gaDown, gaStop: p.gaStop
+          };
+        } else if (s.kind === "light") {
+          facProg[s.id] = { name: "Lampe " + s.id, ga: facadeLightGa(s.id) || "1/1/40" };
+        } else if (s.kind === "door") {
+          facProg[s.id] = { nameStrike: "Gâche", gaStrike: "1/1/30", nameVideo: "Visiophone", gaVideo: "1/1/31" };
+        } else if (s.kind === "meteo") {
+          facProg[s.id] = { name: "Station météo", ga: "1/5/10" };
+        } else if (s.kind === "pv") {
+          facProg[s.id] = { name: "Solaire " + s.id, ga: s.id === "pv2" ? "1/8/2" : "1/8/1" };
+        }
+      });
+      facState.prog = facProg;
+      /* Démo ciblée : retirer lampes intermédiaires / PV non câblés (reste tutor-ready). */
+      ["ei1", "ei2", "ei3", "e3", "e4", "pv1", "pv2"].forEach((id) => {
+        delete facState.eq[id];
+        if (facState.roller) delete facState.roller[id];
+        if (facState.light) delete facState.light[id];
+        delete facProg[id];
+      });
+      /* Poussoir éclairage façade : e1, e2, ed, gâche */
+      const pushLight = {
+        1: { fn: "switch", ga: "1/1/11", name: "Applique e1" },
+        2: { fn: "switch", ga: "1/1/13", name: "Applique e2" },
+        3: { fn: "switch", ga: "1/1/20", name: "Applique entrée" },
+        4: { fn: "switch", ga: "1/1/30", name: "Gâche porte" }
+      };
+      /* Poussoir volets : v1 montée/descente, v2 montée/descente */
+      const pushShut = {
+        1: { fn: "up", ga: "1/2/1", name: "Volet v1 ↑" },
+        2: { fn: "down", ga: "1/2/2", name: "Volet v1 ↓" },
+        3: { fn: "up", ga: "1/2/4", name: "Volet v2 ↑" },
+        4: { fn: "down", ga: "1/2/5", name: "Volet v2 ↓" }
+      };
+      const wires = [];
+      let wn = 1;
+      const addW = (aUid, aTerm, bUid, bTerm, color, section) => {
+        wires.push(exW("w" + wn, wn, aUid, aTerm, bUid, bTerm, color, section));
+        wn++;
+      };
+      /* Alim 230 V */
+      addW("p1", "L", "qf1", "1", EX_L, 2.5);
+      addW("p1", "N", "qf1", "3", EX_N, 2.5);
+      addW("qf1", "2", "g1", "L", EX_L, 1.5);
+      addW("qf1", "4", "g1", "N", EX_N, 1.5);
+      addW("g1", "PE", "pe1", "PE", EX_PE, 2.5);
+      addW("pe1", "PE", "x2", "PE", EX_PE, 2.5);
+      addW("qf1", "4", "x2", "N", EX_N, 1.5);
+      /* Bus KNX daisy-chain GTL → poussoirs → façade → volets libres */
+      addW("g1", "BUS", "ik1", "BUS", EX_BUS, 0.8);
+      addW("ik1", "BUS", "ip1", "BUS", EX_BUS, 0.8);
+      addW("ip1", "BUS", "s1", "BUS", EX_BUS, 0.8);
+      addW("s1", "BUS", "s2", "BUS", EX_BUS, 0.8);
+      addW("s2", "BUS", "fac1", "v1.BUS", EX_BUS, 0.8);
+      addW("fac1", "v1.BUS", "fac1", "v2.BUS", EX_BUS, 0.8);
+      addW("fac1", "v2.BUS", "fac1", "v3.BUS", EX_BUS, 0.8);
+      addW("fac1", "v3.BUS", "fac1", "v4.BUS", EX_BUS, 0.8);
+      addW("fac1", "v4.BUS", "fac1", "e1.BUS", EX_BUS, 0.8);
+      addW("fac1", "e1.BUS", "fac1", "e2.BUS", EX_BUS, 0.8);
+      addW("fac1", "e2.BUS", "fac1", "ed.BUS", EX_BUS, 0.8);
+      addW("fac1", "ed.BUS", "fac1", "eg1.BUS", EX_BUS, 0.8);
+      addW("fac1", "eg1.BUS", "fac1", "eg2.BUS", EX_BUS, 0.8);
+      addW("fac1", "eg2.BUS", "fac1", "g1.BUS", EX_BUS, 0.8);
+      addW("fac1", "g1.BUS", "fac1", "g2.BUS", EX_BUS, 0.8);
+      addW("fac1", "g2.BUS", "fac1", "porte.BUS", EX_BUS, 0.8);
+      addW("fac1", "porte.BUS", "fac1", "meteo.BUS", EX_BUS, 0.8);
+      addW("fac1", "meteo.BUS", "vr1", "BUS", EX_BUS, 0.8);
+      addW("vr1", "BUS", "vr2", "BUS", EX_BUS, 0.8);
+      /* Force façade : L/N/PE sur volets, lampes clés, garages, porte */
+      const powerSlots = ["v1", "v2", "v3", "v4", "e1", "e2", "ed", "eg1", "eg2", "g1", "g2", "porte"];
+      powerSlots.forEach((sid, i) => {
+        const fromL = i === 0 ? ["qf1", "2"] : ["fac1", powerSlots[i - 1] + ".L"];
+        const fromN = i === 0 ? ["x2", "N"] : ["fac1", powerSlots[i - 1] + ".N"];
+        addW(fromL[0], fromL[1], "fac1", sid + ".L", EX_L, 1.5);
+        addW(fromN[0], fromN[1], "fac1", sid + ".N", EX_N, 1.5);
+        /* PE : volets + garages uniquement (bornes PE sur ces slots). */
+        if (/^v\d+$/.test(sid) || /^g\d+$/.test(sid)) {
+          const prevPe = powerSlots.slice(0, i).reverse().find((p) => /^v\d+$/.test(p) || /^g\d+$/.test(p));
+          if (!prevPe) addW("pe1", "PE", "fac1", sid + ".PE", EX_PE, 2.5);
+          else addW("fac1", prevPe + ".PE", "fac1", sid + ".PE", EX_PE, 2.5);
+        }
+      });
+      /* Volets libres L/N/PE */
+      addW("qf1", "2", "vr1", "L", EX_L, 1.5);
+      addW("x2", "N", "vr1", "N", EX_N, 1.5);
+      addW("pe1", "PE", "vr1", "PE", EX_PE, 2.5);
+      addW("qf1", "2", "vr2", "L", EX_L, 1.5);
+      addW("x2", "N", "vr2", "N", EX_N, 1.5);
+      addW("pe1", "PE", "vr2", "PE", EX_PE, 2.5);
       return {
-        name: "facade-knx",
-        items: [{
-          uid: "fac1", type: "facade_maison", tag: "FH1",
-          x: 120, y: 40, closed: true, pressed: false,
-          w: g.w, h: g.h,
-          facade: facadeFullState(4)
-        }],
-        wires: [],
-        counts: { FH: 1 },
-        seq: 2,
-        wireNo: 1
+        name: "facade-knx-tutor",
+        items: [
+          exIt("p1", "compteur_sonelgaz", "P1", 36, 20),
+          exIt("qf1", "edz_schneider_acti9_ic60n_2p_c16", "QF1", 88, 210),
+          { uid: "r1", type: "rail_din_35", tag: "X1", x: 190, y: 228, closed: true, pressed: false },
+          {
+            uid: "g1", type: "edz_schneider_mtn684064", tag: "G1",
+            x: 210, y: 178, closed: true, pressed: false, physAddr: "1.1.0"
+          },
+          {
+            uid: "ik1", type: "edz_hager_tyfs120", tag: "IK1",
+            x: 368, y: 178, closed: true, pressed: false, physAddr: "1.1.1"
+          },
+          {
+            uid: "ip1", type: "edz_schneider_mtn680329", tag: "IP1",
+            x: 422, y: 178, closed: true, pressed: false, physAddr: "1.1.2"
+          },
+          {
+            uid: "s1", type: "edz_hager_wkt304", tag: "S1",
+            x: 560, y: 40, closed: true, pressed: false,
+            physAddr: "1.1.10",
+            knxToggle: { 1: false, 2: false, 3: false, 4: false },
+            knxKeysProg: pushLight
+          },
+          {
+            uid: "s2", type: "edz_hager_wkt304", tag: "S2",
+            x: 700, y: 40, closed: true, pressed: false,
+            physAddr: "1.1.11",
+            knxToggle: { 1: false, 2: false, 3: false, 4: false },
+            knxKeysProg: pushShut
+          },
+          exIt("x2", "borniers", "X2", 36, 420),
+          exIt("pe1", "pe", "PE1", 200, 440),
+          {
+            uid: "fac1", type: "facade_maison", tag: "FH1",
+            x: 40, y: 520, closed: true, pressed: false,
+            w: g.w, h: g.h, physAddr: "1.1.13",
+            facade: facState
+          },
+          {
+            uid: "vr1", type: "fenetre_volet", tag: "VR1",
+            x: g.w + 80, y: 520, closed: true, pressed: false,
+            physAddr: "1.1.20",
+            roller: { dir: "stop", pos: 0 },
+            knxRollerProg: {
+              gaUp: "1/2/40", gaDown: "1/2/41", gaStop: "1/2/42",
+              nameUp: "VR1 montée", nameDown: "VR1 descente", nameStop: "VR1 arrêt"
+            }
+          },
+          {
+            uid: "vr2", type: "fenetre_volet", tag: "VR2",
+            x: g.w + 310, y: 520, closed: true, pressed: false,
+            physAddr: "1.1.21",
+            roller: { dir: "stop", pos: 0 },
+            knxRollerProg: {
+              gaUp: "1/2/43", gaDown: "1/2/44", gaStop: "1/2/45",
+              nameUp: "VR2 montée", nameDown: "VR2 descente", nameStop: "VR2 arrêt"
+            }
+          }
+        ],
+        wires: wires,
+        knx: {
+          projectName: "Façade maison KNX — tutorat",
+          lineMedia: "IP",
+          createLine: true,
+          lineType: "TP",
+          gaStyle: "3",
+          integMode: "S",
+          mainGroups: [
+            {
+              id: 1, name: "ECLAIRAGE",
+              mid: [{
+                id: 1, name: "Façade",
+                gas: [
+                  { a: "1/1/11", n: "Applique e1" },
+                  { a: "1/1/13", n: "Applique e2" },
+                  { a: "1/1/20", n: "Applique entrée" },
+                  { a: "1/1/30", n: "Gâche porte" }
+                ]
+              }]
+            },
+            {
+              id: 2, name: "VOLETS / STORES",
+              mid: [{
+                id: 1, name: "Façade + libres",
+                gas: [
+                  { a: "1/2/1", n: "Volet v1 montée" },
+                  { a: "1/2/2", n: "Volet v1 descente" },
+                  { a: "1/2/4", n: "Volet v2 montée" },
+                  { a: "1/2/5", n: "Volet v2 descente" },
+                  { a: "1/2/40", n: "VR1 montée" },
+                  { a: "1/2/41", n: "VR1 descente" },
+                  { a: "1/2/43", n: "VR2 montée" },
+                  { a: "1/2/44", n: "VR2 descente" }
+                ]
+              }]
+            },
+            { id: 3, name: "AUTOMATISMES", mid: [] }
+          ],
+          building: {
+            name: "Villa démo façade KNX",
+            rooms: [
+              { id: "gtl", name: "Local Elec / GTL" },
+              { id: "facade", name: "Façade" },
+              { id: "jardin", name: "Jardin / volets libres" }
+            ]
+          }
+        },
+        counts: { P: 1, QF: 1, X: 2, G: 1, IK: 1, IP: 1, S: 2, FH: 1, VR: 2, PE: 1 },
+        seq: 40,
+        wireNo: wn
       };
     }
     function exampleCatalog() {
@@ -18026,6 +18553,7 @@
     const CAT_ORDER = [
       "Alimentation",
       "Structure",
+      "Goulotte",
       "Borniers",
       "Disjoncteurs modulaires",
       "Différentiel",
@@ -18125,8 +18653,19 @@
       if (!q) return true;
       const disp = (libDisplayName(id, def) || "").toLowerCase();
       const name = ((def && def.name) || "").toLowerCase();
+      const nameEn = ((def && def.nameEn) || "").toLowerCase();
       const badge = ((def && def.badge) || "").toLowerCase();
-      return disp.indexOf(q) >= 0 || name.indexOf(q) >= 0 || badge.indexOf(q) >= 0 || String(id).toLowerCase().indexOf(q) >= 0;
+      const idL = String(id).toLowerCase();
+      if (disp.indexOf(q) >= 0 || name.indexOf(q) >= 0 || nameEn.indexOf(q) >= 0
+          || badge.indexOf(q) >= 0 || idL.indexOf(q) >= 0) return true;
+      /* Synonymes recherche téléphone : « volet knx ext », « shutter », façade… */
+      const hay = disp + " " + name + " " + nameEn + " " + badge + " " + idL;
+      if ((/volet|shutter|roller|fenetre|fenêtre/.test(q) || /volet|shutter|roller/.test(hay))
+          && (def && (def.knxRoller || def.knxShutter || def.rollerBlind || idL.indexOf("volet") >= 0))) {
+        if (/ext|exter|extérieur|exterior|fenetre|fenêtre|window|knx|volet|shutter/.test(q)) return true;
+      }
+      if (/facade|façade|maison|house/.test(q) && def && def.houseFacade) return true;
+      return false;
     }
     function libCatVisibleEntries(cat) {
       const q = libQuery();
@@ -18197,6 +18736,8 @@
         b.innerHTML = `<span class="thumb barrette-t">${holes}</span><span>${disp}</span>`;
       } else if (def.kind === "rail") {
         b.innerHTML = `<span class="thumb rail-t">DIN</span><span>${disp}</span>`;
+      } else if (def.kind === "goulotte") {
+        b.innerHTML = `<span class="thumb goulotte-t">${(def.badge || "GOU").slice(0, 4)}</span><span>${disp}</span>`;
       } else if (def.kind === "pe") {
         b.innerHTML = `<span class="thumb" style="background:repeating-linear-gradient(-45deg,#c4d600 0 4px,#008c45 4px 8px);padding:2px">${peSymbolSvg()}</span><span>${disp}</span>`;
       } else if (def.pumpWell) {
@@ -18208,13 +18749,139 @@
       addLab.className = "lib-add";
       addLab.textContent = tOr("libAdd", "Ajouter");
       b.appendChild(addLab);
+      b.dataset.libType = id;
       b.onclick = () => {
+        if (b._libSkipClick) { b._libSkipClick = false; return; }
         if (!isTypeUnlocked(id)) { openTierGate(); return; }
-        /* v87 : 1er clic = fiche technique ; Ajouter (dans la fiche) pose sur le plan. */
+        /* v87 : 1er clic = fiche technique ; glisser sur le plan = pose directe. */
         openLibTechSheet(id);
       };
       target.appendChild(b);
     }
+
+    (function initLibPaletteDrag() {
+      const lib = document.getElementById("libTop");
+      if (!lib || lib.dataset.libDragBound === "1") return;
+      lib.dataset.libDragBound = "1";
+      let drag = null;
+      function overBoard(x, y) {
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+        try {
+          const r = board.getBoundingClientRect();
+          if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return true;
+        } catch (_) {}
+        let el = null;
+        try { el = document.elementFromPoint(x, y); } catch (_) {}
+        return !!(el && el.closest && el.closest("#board"));
+      }
+      function setBoardHot(on) {
+        try { board.classList.toggle("lib-drop-hot", !!on); } catch (_) {}
+      }
+      function cleanup() {
+        if (drag && drag.ghost && drag.ghost.parentNode) drag.ghost.parentNode.removeChild(drag.ghost);
+        document.body.classList.remove("lib-palette-drag");
+        setBoardHot(false);
+        drag = null;
+      }
+      function unbindDoc() {
+        document.removeEventListener("pointermove", onMove);
+        document.removeEventListener("pointerup", endDrag);
+        document.removeEventListener("pointercancel", onCancel);
+      }
+      function makeGhost(btn) {
+        const g = document.createElement("div");
+        g.className = "lib-ghost";
+        const img = btn.querySelector("img, .thumb, .fluke-lib-face");
+        if (img) g.appendChild(img.cloneNode(true));
+        const lab = document.createElement("span");
+        const name = btn.querySelector("span:not(.thumb):not(.lib-add):not(.fluke-lib-face)");
+        lab.textContent = (name && name.textContent) || btn.dataset.libType || "";
+        g.appendChild(lab);
+        document.body.appendChild(g);
+        return g;
+      }
+      function onMove(ev) {
+        if (!drag || ev.pointerId !== drag.pointerId) return;
+        const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+        if (!drag.moved) {
+          if (dx * dx + dy * dy < 64) return;
+          /* Scroll vertical dans la biblio → ne pas démarrer le drag. */
+          if (Math.abs(dy) >= Math.abs(dx) * 1.15) {
+            unbindDoc();
+            cleanup();
+            return;
+          }
+          drag.moved = true;
+          drag.btn._libSkipClick = true;
+          document.body.classList.add("lib-palette-drag");
+          drag.ghost = makeGhost(drag.btn);
+          try { drag.btn.setPointerCapture(ev.pointerId); } catch (_) {}
+          try { closeLibTechSheet(); } catch (_) {}
+        }
+        drag.lastX = ev.clientX;
+        drag.lastY = ev.clientY;
+        if (drag.ghost) {
+          drag.ghost.style.left = ev.clientX + "px";
+          drag.ghost.style.top = ev.clientY + "px";
+        }
+        setBoardHot(overBoard(ev.clientX, ev.clientY));
+        if (ev.cancelable) ev.preventDefault();
+      }
+      function finishDrop(type, btn, x, y) {
+        btn._libSkipClick = true;
+        if (!overBoard(x, y)) return;
+        if (!isTypeUnlocked(type)) { openTierGate(); return; }
+        add(type, { x: x, y: y });
+        try { closeMobileLib(); } catch (_) {}
+      }
+      function endDrag(ev) {
+        if (!drag || ev.pointerId !== drag.pointerId) return;
+        const moved = drag.moved;
+        const type = drag.type;
+        const btn = drag.btn;
+        const x = Number.isFinite(ev.clientX) ? ev.clientX : drag.lastX;
+        const y = Number.isFinite(ev.clientY) ? ev.clientY : drag.lastY;
+        unbindDoc();
+        cleanup();
+        if (!moved) return;
+        finishDrop(type, btn, x, y);
+      }
+      function onCancel(ev) {
+        if (!drag || ev.pointerId !== drag.pointerId) return;
+        const moved = drag.moved;
+        const type = drag.type;
+        const btn = drag.btn;
+        const x = drag.lastX, y = drag.lastY;
+        unbindDoc();
+        cleanup();
+        /* pointercancel (capture / touch) : quand même poser si dernier point sur le plan. */
+        if (!moved) return;
+        finishDrop(type, btn, x, y);
+      }
+      lib.addEventListener("pointerdown", (ev) => {
+        if (ev.button) return;
+        const b = ev.target.closest("button.item[data-lib-type]");
+        if (!b || !lib.contains(b)) return;
+        const type = b.dataset.libType;
+        if (!type || !LIB[type]) return;
+        drag = {
+          type: type,
+          btn: b,
+          x: ev.clientX,
+          y: ev.clientY,
+          lastX: ev.clientX,
+          lastY: ev.clientY,
+          moved: false,
+          pointerId: ev.pointerId,
+          ghost: null
+        };
+        document.addEventListener("pointermove", onMove, { passive: false });
+        document.addEventListener("pointerup", endDrag);
+        document.addEventListener("pointercancel", onCancel);
+      });
+    })();
+
+
     function appendPaletteSection(cat, n, host) {
       const target = host || palette;
       if (!target) return;
@@ -18654,6 +19321,30 @@
       item.x = x0;
       item.y = y0;
     }
+    /** Pose sous le pointeur (drag & drop biblio → plan). */
+    function placeAtClient(item, clientX, clientY) {
+      if (!item || clientX == null || clientY == null) {
+        placeBesideAligned(item);
+        return;
+      }
+      let over = null;
+      try { over = document.elementFromPoint(clientX, clientY); } catch (_) {}
+      if (!over || !over.closest || !over.closest("#board")) {
+        placeBesideAligned(item);
+        return;
+      }
+      const pt = boardPointFromClient(clientX, clientY);
+      const sz = itemSize(item);
+      let x = pt.x - sz.w / 2;
+      let y = pt.y - sz.h / 2;
+      if (!Number.isFinite(x)) x = 8;
+      if (!Number.isFinite(y)) y = 8;
+      x = Math.max(0, x);
+      y = Math.max(0, y);
+      try { x = resolveDinX(item, x, y); } catch (_) {}
+      item.x = x;
+      item.y = y;
+    }
     /**
      * v53-place-beside-align : à l’ajout, si de la place → à côté du composant
      * sélectionné / dernier posé, même alignement Y (haut). Sinon centre viewport.
@@ -18769,12 +19460,16 @@
       }
       if (def.pvCable) item.lengthM = Number(def.lengthM) > 0 ? Number(def.lengthM) : 10;
       if (motorHasSixLeadPlate(def)) applyMotorBarPreset(item, "delta");
+      /* Goulottes / overWires : calque devant fils + modules (z ≥ 1000 → CSS 80–85). */
+      if (def.overWires || def.kind === "goulotte") item.z = 1000;
       return item;
     }
-    function add(type) {
+    function add(type, atClient) {
       if (!isTypeUnlocked(type)) { openTierGate(); return; }
       const def = LIB[type];
       if (!def) return;
+      const drop = atClient && Number.isFinite(atClient.x) && Number.isFinite(atClient.y)
+        ? atClient : null;
       if (def.kind === "barrette") {
         const host = state.selected && find(state.selected);
         if (host && isMotorDef(host.type, LIB[host.type]) && nextBarTermsOnMotor(host, def.holes || 2)) {
@@ -18794,7 +19489,8 @@
         if (!isTypeUnlocked(kmType) || !isTypeUnlocked(frType)) { openTierGate(); return; }
         pushHistory();
         const km = makeLibBoardItem(kmType);
-        placeBesideAligned(km);
+        if (drop) placeAtClient(km, drop.x, drop.y);
+        else placeBesideAligned(km);
         state.items.push(km);
         const fr = makeLibBoardItem(frType);
         attachFrUnderKm(km, fr);
@@ -18809,8 +19505,9 @@
       }
       pushHistory();
       const item = makeLibBoardItem(type);
-      /* v53 : à côté + même alignement Y si place, sinon centre viewport. */
-      placeBesideAligned(item);
+      /* Drag & drop : sous le doigt/souris. Sinon à côté / centre viewport. */
+      if (drop) placeAtClient(item, drop.x, drop.y);
+      else placeBesideAligned(item);
       state.items.push(item);
       if (isKnxDevice(def)) ensureKnxProgram(item);
       setSelection([item.uid], item.uid);
@@ -19123,7 +19820,7 @@
     }
     function proxCanBeTarget(item, def) {
       if (!item || !def) return false;
-      if (def.kind === "rail" || def.kind === "barrette") return false;
+      if (def.kind === "rail" || def.kind === "barrette" || def.kind === "goulotte") return false;
       return true;
     }
     function updateProxHits() {
@@ -19578,15 +20275,20 @@
       item.z = min - 1;
       return true;
     }
-    /** Map uid → CSS z-index. Sous fils: 20–50 ; sur fils: 56–58 ; pastilles: 70. */
+    /** Map uid → CSS z-index.
+     *  Sous fils: 20–50 ; sur fils: 56–58 ; pastilles: 70 ; goulottes: 80–85
+     *  (couvrent modules + fils — comme un couvercle PVC réel). */
     function computeDevCssZByUid() {
       const UNDER_LO = 20, UNDER_HI = 50;
       const OVER_LO = 56, OVER_HI = 58;
+      const GOU_LO = 80, GOU_HI = 85;
       const under = [];
       const over = [];
+      const gou = [];
       state.items.forEach((it) => {
         const def = LIB[it.type];
         if (def && def.kind === "rail") return;
+        if (def && def.kind === "goulotte") { gou.push(it); return; }
         if (itemOverWires(it)) over.push(it);
         else under.push(it);
       });
@@ -19600,6 +20302,7 @@
       };
       under.sort(byKey);
       over.sort(byKey);
+      gou.sort(byKey);
       const map = new Map();
       const mapBand = (list, lo, hi) => {
         const n = list.length;
@@ -19614,6 +20317,7 @@
       });
       mapBand(under, UNDER_LO, UNDER_HI);
       mapBand(over, OVER_LO, OVER_HI);
+      mapBand(gou, GOU_LO, GOU_HI);
       /* KM+FR : host au-dessus du guest, même bande (sous ou sur fils). */
       state.items.forEach((it) => {
         if (!isKmClipHostType(it.type)) return;
@@ -19674,7 +20378,21 @@
         fc.y = pose.y;
         state.items.push(fc);
       }
-      if (isKnxDevice(def)) ensureKnxProgram(copy);
+      if (isKnxDevice(def)) {
+        /* Dupliquer ≠ cloner les adresses : nouvelle IA + nouvelles GA par instance. */
+        delete copy.physAddr;
+        delete copy.knxKeysProg;
+        delete copy.knxChProg;
+        delete copy.knxShutterProg;
+        delete copy.knxRollerProg;
+        delete copy.knxDimProg;
+        delete copy.knxPresenceProg;
+        delete copy.knxTempProg;
+        delete copy.knxThermoProg;
+        delete copy.knxBinProg;
+        if (copy.facade && copy.facade.prog) delete copy.facade.prog;
+        ensureKnxProgram(copy);
+      }
       state.selected = copy.uid;
       state.edzPropsUid = null;
       return copy;
@@ -20186,10 +20904,11 @@
     function oibtBaseHref() {
       try {
         /* APK : file:///android_asset/swissdz-panel/ → ../oibt-trainer/
-           LAN (serve panel) : symlink swissdz-panel/oibt-trainer → même URL /oibt-trainer/ */
+           Expo Metro / site : http(s)://host/swissdz-panel/ → /oibt-trainer/ (servi à côté) */
         return new URL("../oibt-trainer/", location.href).href;
       } catch (_) {
-        return "/oibt-trainer/";
+        try { return new URL("/oibt-trainer/", location.origin).href; }
+        catch (_2) { return "/oibt-trainer/"; }
       }
     }
     function oibtAsset(path) {
@@ -24288,6 +25007,7 @@
           el.classList.add("rail");
           if (!def.image) el.classList.add("rail-body");
         }
+        if (def.kind === "goulotte") el.classList.add("goulotte");
         if (def.pvSupport) el.classList.add("pv-support");
         if (def.kind === "pe") el.classList.add("source", "pe");
         if (def.kind === "barrette") el.classList.add("barrette-dev");
@@ -24971,6 +25691,12 @@
               ev.stopPropagation();
               if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
               ev.preventDefault();
+              /* v135 : 2e doigt / pinch en cours → pas de resize (zoom plan). */
+              if (boardTouchPinch || boardGesturePinch
+                  || (boardPinchPtrs && boardPinchPtrs.size >= 2)
+                  || (board && board.classList && board.classList.contains("is-pinching"))) {
+                return;
+              }
               state.selected = item.uid;
               state.selectedWire = null;
               state.drag = null; /* priorité resize vs group-drag rail */
@@ -25574,6 +26300,14 @@
 
     function applyResizePointer(ev) {
       if (!state.resize) return false;
+      /* v135 : pinch / 2 doigts = zoom plan uniquement — jamais resize w/h. */
+      if (boardTouchPinch || boardGesturePinch
+          || (boardPinchPtrs && boardPinchPtrs.size >= 2)
+          || (board && board.classList && board.classList.contains("is-pinching"))) {
+        state.resize = null;
+        syncDragLock();
+        return true;
+      }
       if (state.resize.ref) {
         const ref = state.refSchematic;
         if (!ref || ref.locked) return true;
@@ -25658,6 +26392,7 @@
           nx = state.resize.x + (state.resize.w - nw) / 2;
         }
       }
+      /* Goulotte : resize libre (longueur + épaisseur / section). */
       const mins = resizeMinSize(item);
       /* Toujours positif : une largeur/hauteur négative miroirait L↔N via CSS. */
       nw = Math.max(mins.w, nw);
@@ -25673,8 +26408,9 @@
       /* Persiste dans le modèle item (pas seulement le DOM) — survit au re-select/render. */
       applyItemSize(item, nw, nh);
       if (defR && defR.flukeMeter) normalizeFlukeSize(item);
-      item.y = ny;
-      item.x = resolveDinX(item, nx, item.y);
+      item.y = Math.max(0, ny);
+      /* Goulottes libres (pas d’aimant DIN / anti-chevauchement). */
+      item.x = isGoulotte(item) ? Math.max(0, nx) : resolveDinX(item, nx, item.y);
       if (isPvSupportItem(item)) refitPvModules(item);
       else if (isPvModuleItem(item)) {
         delete item.pvHost;
@@ -25733,6 +26469,12 @@
         return;
       }
       if (state.wireDrag || state.resize) return;
+      /* v135 : pendant pinch, ne pas déplacer/resizer — zoom viewport only. */
+      if (boardTouchPinch || boardGesturePinch
+          || (board && board.classList && board.classList.contains("is-pinching"))) {
+        if (state.drag) { state.drag = null; syncDragLock(); }
+        return;
+      }
       if (state.drag) {
         if (state.drag.ref) {
           const ref = state.refSchematic;
@@ -26756,6 +27498,7 @@
       return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 };
     }
     function cancelBoardOpsForPinch() {
+      /* Pinch = caméra seule : annuler drag/resize (sinon w/h platine change + vibration). */
       if (state.drag) state.drag = null;
       if (state.resize) state.resize = null;
       if (state.wireDrag) state.wireDrag = null;
@@ -26765,6 +27508,11 @@
       if (typeof clearEdzLongPress === "function") clearEdzLongPress();
       if (typeof clearWireHold === "function") clearWireHold();
       syncDragLock();
+      try {
+        board.querySelectorAll(".rhandle").forEach(function (h) {
+          h.style.pointerEvents = "none";
+        });
+      } catch (_) {}
       if (boardMidPan) {
         const pid = boardMidPan.pointerId;
         boardMidPan = null;
@@ -26791,14 +27539,23 @@
       if (!(dist > 8)) return false;
       cancelBoardOpsForPinch();
       ensurePinchSpacerRoom(boardZoom());
+      const z0 = boardZoom();
+      const pad = BOARD_PAN_PAD;
+      const rect = board.getBoundingClientRect();
+      const ox0 = mid.x - rect.left;
+      const oy0 = mid.y - rect.top;
       boardTouchPinch = {
         dist0: dist,
-        z0: boardZoom(),
+        z0: z0,
         midX: mid.x,
         midY: mid.y,
         idA: a.identifier,
         idB: b.identifier,
-        via: "touch"
+        via: "touch",
+        ox0: ox0,
+        oy0: oy0,
+        ax: (board.scrollLeft + ox0 - pad) / z0,
+        ay: (board.scrollTop + oy0 - pad) / z0
       };
       boardGesturePinch = true;
       board.classList.add("is-pinching");
@@ -26911,6 +27668,18 @@
       boardGesturePinch = false;
       board.classList.remove("is-pinching");
       try { lockShellDuringPinch(false); } catch (_) {}
+      /* Appliquer le dernier frame pinch en attente, puis settle spacer. */
+      if (boardZoomRaf) {
+        try { cancelAnimationFrame(boardZoomRaf); } catch (_) {}
+        boardZoomRaf = 0;
+      }
+      if (boardZoomPend) {
+        const p = boardZoomPend;
+        boardZoomPend = null;
+        state.boardZoom = p.z1;
+        board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
+        board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
+      }
       /* Settle spacer (hors pinch) + grille ; render différé si demandé pendant pinch. */
       applyBoardZoomStyles();
       try { syncBoardCoords(); } catch (_) {}
@@ -26969,14 +27738,23 @@
       if (!boardTouchPinch) {
         cancelBoardOpsForPinch();
         ensurePinchSpacerRoom(boardZoom());
+        const z0 = boardZoom();
+        const pad = BOARD_PAN_PAD;
+        const rect = board.getBoundingClientRect();
+        const ox0 = midX - rect.left;
+        const oy0 = midY - rect.top;
         boardTouchPinch = {
           dist0: dist,
-          z0: boardZoom(),
+          z0: z0,
           midX: midX,
           midY: midY,
           idA: a.id,
           idB: b.id,
-          via: "pointer"
+          via: "pointer",
+          ox0: ox0,
+          oy0: oy0,
+          ax: (board.scrollLeft + ox0 - pad) / z0,
+          ay: (board.scrollTop + oy0 - pad) / z0
         };
         boardGesturePinch = true;
         board.classList.add("is-pinching");
@@ -27430,9 +28208,12 @@
         ctrlTrainerBoot = null;
         if (status) {
           status.hidden = false;
-          status.textContent = "Le contrôle n’a pas pu démarrer.";
+          const why = err && err.message ? String(err.message) : "";
+          status.textContent = why === "timeout"
+            ? "Le contrôle n’a pas pu démarrer (délai dépassé)."
+            : "Le contrôle n’a pas pu démarrer. Vérifiez /oibt-trainer/ (Metro ou assets APK).";
         }
-        console.error(err);
+        console.error("[controle-elec]", oibtBaseHref(), err);
         throw err;
       });
       return ctrlTrainerBoot;
