@@ -2,8 +2,8 @@
   var KEY = "wirelab-site-lang";
   var DICT = window.__WIRELAB_SITE_DICT__ = {
     fr: {
-      title: "WireLab Pro by SwissDZ",
-      desc: "WireLab Pro by SwissDZ : schémas d’installation réels (PV, LOGO!, moteur, terre). Câble, simule, forme-toi et présente avant le chantier.",
+      title: "WireLab Pro",
+      desc: "WireLab Pro : schémas d’installation réels (PV, LOGO!, moteur, terre). Câble, simule, forme-toi et présente avant le chantier. by SwissDZ.",
       heroTitle: "Le câblage électrique, comme sur le terrain.",
       heroLead: "Schémas réels : PV, automatisme, moteur, terre. Pose, câble, Play — forme-toi et présente une installation avant le chantier.",
       testOnline: "Tester WireLab en ligne",
@@ -83,8 +83,8 @@
       langAria: "Langue"
     },
     en: {
-      title: "WireLab Pro by SwissDZ",
-      desc: "WireLab Pro by SwissDZ: real installation schematics (PV, LOGO!, motor, earthing). Wire, simulate, train and present before the job site.",
+      title: "WireLab Pro",
+      desc: "WireLab Pro: real installation schematics (PV, LOGO!, motor, earthing). Wire, simulate, train and present before the job site. by SwissDZ.",
       heroTitle: "Electrical wiring, as on the job.",
       heroLead: "Real schematics: PV, automation, motor, earthing. Place, wire, Play — train and present an installation before the job site.",
       testOnline: "Try WireLab online",
@@ -164,8 +164,8 @@
       langAria: "Language"
     },
     es: {
-      title: "WireLab Pro by SwissDZ",
-      desc: "WireLab Pro by SwissDZ: esquemas reales (FV, LOGO!, motor, tierra). Cablea, simula, fórmate y presenta antes de la obra.",
+      title: "WireLab Pro",
+      desc: "WireLab Pro: esquemas reales (FV, LOGO!, motor, tierra). Cablea, simula, fórmate y presenta antes de la obra. by SwissDZ.",
       heroTitle: "El cableado eléctrico, como en la obra.",
       heroLead: "Esquemas reales: FV, automatismo, motor, tierra. Coloca, cablea, Play — fórmate y presenta una instalación antes de la obra.",
       testOnline: "Probar WireLab en línea",
@@ -245,8 +245,8 @@
       langAria: "Idioma"
     },
     ar: {
-      title: "WireLab Pro by SwissDZ",
-      desc: "WireLab Pro by SwissDZ: مخططات تركيب حقيقية (PV، LOGO!، محرك، تأريض). مدّد، حاكي، تكوّن وقدّم قبل الميدان.",
+      title: "WireLab Pro",
+      desc: "WireLab Pro: مخططات تركيب حقيقية (PV، LOGO!، محرك، تأريض). مدّد، حاكي، تكوّن وقدّم قبل الميدان. by SwissDZ.",
       heroTitle: "التمديد الكهربائي، كما في الورشة.",
       heroLead: "مخططات حقيقية: PV، أتمتة، محرك، تأريض. ضع، مدّد، Play — تكوّن وقدّم تركيبًا قبل الميدان.",
       testOnline: "جرّب WireLab عبر الإنترنت",
