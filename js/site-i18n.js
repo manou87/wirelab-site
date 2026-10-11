@@ -1,6 +1,6 @@
 (function () {
   var KEY = "wirelab-site-lang";
-  var DICT = {
+  var DICT = window.__WIRELAB_SITE_DICT__ = {
     fr: {
       title: "WireLab Pro by SwissDZ",
       desc: "WireLab Pro by SwissDZ : schémas d’installation réels (PV, LOGO!, moteur, terre). Câble, simule, forme-toi et présente avant le chantier.",
@@ -365,6 +365,9 @@
     try {
       localStorage.setItem(KEY, lang);
       localStorage.setItem("panelwire-lang", panelLang(lang));
+    } catch (e) {}
+    try {
+      document.dispatchEvent(new CustomEvent("wirelab-site-lang", { detail: { lang: lang } }));
     } catch (e) {}
   }
 
