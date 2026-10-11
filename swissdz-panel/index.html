@@ -3374,6 +3374,19 @@
     .dev.barrette-dev {
       background:transparent; box-shadow:none; overflow:visible;
     }
+    /* Goulotte PVC : couvercle opaque au-dessus des fils (z ≥ 1000 → CSS 56–58). */
+    .dev.goulotte {
+      background:transparent; box-shadow:0 2px 5px rgba(15,23,42,.28);
+      overflow:hidden; border-radius:4px;
+    }
+    .dev.goulotte img {
+      width:100%; height:100%; object-fit:fill; display:block; pointer-events:none;
+    }
+    .thumb.goulotte-t {
+      background:linear-gradient(180deg,#e5e7eb 0%,#9ca3af 45%,#6b7280 100%);
+      color:#111827; font:700 9px ui-sans-serif,system-ui,sans-serif;
+      letter-spacing:.02em; display:flex; align-items:center; justify-content:center;
+    }
     .barrette-face {
       position:absolute; inset:8% 4%;
       border-radius:4px;
@@ -7022,6 +7035,13 @@
       rail_din_35: {name:"Rail DIN 35 mm (TH35)",prefix:"X",cat:"Structure",w:473,h:103,kind:"rail",image:"assets/rail-din-35-swissdz.png",badge:"TH35",terminals:[]},
       rail_din_long: {name:"Rail DIN long perforé",prefix:"X",cat:"Structure",w:715,h:189,kind:"rail",image:"assets/rail-din-long-swissdz.png",badge:"Long",terminals:[]},
       rail_din_embouts: {name:"Rail DIN + embouts",prefix:"X",cat:"Structure",w:547,h:110,kind:"rail",image:"assets/rail-din-embouts-swissdz.png",badge:"Embouts",terminals:[]},
+      /* Goulottes PVC — kind goulotte + overWires : calque au-dessus des fils (masque le câblage). */
+      goulotte_h_240: {name:"Goulotte horizontale 240",nameEn:"Horizontal trunking 240",prefix:"X",cat:"Goulotte",w:240,h:34,kind:"goulotte",overWires:true,image:"assets/goulotte-h-240.svg",badge:"H240",terminals:[]},
+      goulotte_h_360: {name:"Goulotte horizontale 360",nameEn:"Horizontal trunking 360",prefix:"X",cat:"Goulotte",w:360,h:34,kind:"goulotte",overWires:true,image:"assets/goulotte-h-360.svg",badge:"H360",terminals:[]},
+      goulotte_h_480: {name:"Goulotte horizontale 480",nameEn:"Horizontal trunking 480",prefix:"X",cat:"Goulotte",w:480,h:34,kind:"goulotte",overWires:true,image:"assets/goulotte-h-480.svg",badge:"H480",terminals:[]},
+      goulotte_v_280: {name:"Goulotte verticale 280",nameEn:"Vertical trunking 280",prefix:"X",cat:"Goulotte",w:34,h:280,kind:"goulotte",overWires:true,image:"assets/goulotte-v-280.svg",badge:"V280",terminals:[]},
+      goulotte_v_420: {name:"Goulotte verticale 420",nameEn:"Vertical trunking 420",prefix:"X",cat:"Goulotte",w:34,h:420,kind:"goulotte",overWires:true,image:"assets/goulotte-v-420.svg",badge:"V420",terminals:[]},
+      goulotte_angle: {name:"Angle de goulotte",nameEn:"Trunking corner",prefix:"X",cat:"Goulotte",w:48,h:48,kind:"goulotte",overWires:true,image:"assets/goulotte-angle.svg",badge:"∠",terminals:[]},
       /* L/N = uniquement via compteur Sonelgaz — pas de pastilles source L/N dans la lib. PE Terre seul. */
       pe: {name:"Terre PE",prefix:"PE",cat:"Borniers",w:56,h:56,kind:"pe",terminals:[{id:"PE",nx:0.5,ny:0.5,direction:"left"}],badge:"PE"},
       /* Tête de réseau : compteur → L+N uniquement (jamais PE). PE = prise de terre / bornier PE. Empilable avec AGCP. */
@@ -7130,6 +7150,13 @@
       ]},
       borniers: {name:"Borniers N / PE SwissDz",prefix:"X",cat:"Borniers",w:140,h:90,image:"assets/borniers.png",iec:"X",terminals:[{id:"N",nx:0.3194,ny:0.3191,direction:"top"},{id:"PE",nx:0.3194,ny:0.7211,direction:"bottom"}]},
       peigne: {name:"Peigne d'alimentation SwissDz",prefix:"X",cat:"Borniers",w:200,h:80,image:"assets/peigne-swissdz.png",badge:"Peigne",iec:"X",bus:true,terminals:[{id:"IN",nx:0.0572,ny:0.5039,direction:"left"},{id:"1",nx:0.2484,ny:0.351,direction:"top"},{id:"2",nx:0.4497,ny:0.351,direction:"top"},{id:"3",nx:0.6509,ny:0.351,direction:"top"},{id:"4",nx:0.8522,ny:0.351,direction:"top"}]},
+      /* Peignes fourche — pas 36 px / module (assets/_gen_peigne_fork.py). bus = toutes dents en parallèle. */
+      peigne_1p_x6: {name:"Peigne fourche 1P ×6",nameEn:"1P fork comb ×6",prefix:"X",cat:"Borniers",w:216,h:42,image:"assets/peigne-fork-1p-x6.png",badge:"1P×6",iec:"X",bus:true,terminals:[{id:"IN",nx:0.04,ny:0.42,direction:"left"},{id:"1",nx:0.0833,ny:0.92,direction:"bottom"},{id:"2",nx:0.25,ny:0.92,direction:"bottom"},{id:"3",nx:0.4167,ny:0.92,direction:"bottom"},{id:"4",nx:0.5833,ny:0.92,direction:"bottom"},{id:"5",nx:0.75,ny:0.92,direction:"bottom"},{id:"6",nx:0.9167,ny:0.92,direction:"bottom"}]},
+      peigne_1p_x12: {name:"Peigne fourche 1P ×12",nameEn:"1P fork comb ×12",prefix:"X",cat:"Borniers",w:432,h:42,image:"assets/peigne-fork-1p-x12.png",badge:"1P×12",iec:"X",bus:true,terminals:[{id:"IN",nx:0.03,ny:0.42,direction:"left"},{id:"1",nx:0.0417,ny:0.92,direction:"bottom"},{id:"2",nx:0.125,ny:0.92,direction:"bottom"},{id:"3",nx:0.2083,ny:0.92,direction:"bottom"},{id:"4",nx:0.2917,ny:0.92,direction:"bottom"},{id:"5",nx:0.375,ny:0.92,direction:"bottom"},{id:"6",nx:0.4583,ny:0.92,direction:"bottom"},{id:"7",nx:0.5417,ny:0.92,direction:"bottom"},{id:"8",nx:0.625,ny:0.92,direction:"bottom"},{id:"9",nx:0.7083,ny:0.92,direction:"bottom"},{id:"10",nx:0.7917,ny:0.92,direction:"bottom"},{id:"11",nx:0.875,ny:0.92,direction:"bottom"},{id:"12",nx:0.9583,ny:0.92,direction:"bottom"}]},
+      peigne_3p_x1: {name:"Peigne fourche 3P ×1",nameEn:"3P fork comb ×1",prefix:"X",cat:"Borniers",w:108,h:42,image:"assets/peigne-fork-3p-x1.png",badge:"3P×1",iec:"X",bus:true,terminals:[{id:"IN",nx:0.06,ny:0.42,direction:"left"},{id:"1",nx:0.1667,ny:0.92,direction:"bottom"},{id:"3",nx:0.5,ny:0.92,direction:"bottom"},{id:"5",nx:0.8333,ny:0.92,direction:"bottom"}]},
+      peigne_3p_x2: {name:"Peigne fourche 3P ×2",nameEn:"3P fork comb ×2",prefix:"X",cat:"Borniers",w:216,h:42,image:"assets/peigne-fork-3p-x2.png",badge:"3P×2",iec:"X",bus:true,terminals:[{id:"IN",nx:0.04,ny:0.42,direction:"left"},{id:"1",nx:0.0833,ny:0.92,direction:"bottom"},{id:"3",nx:0.25,ny:0.92,direction:"bottom"},{id:"5",nx:0.4167,ny:0.92,direction:"bottom"},{id:"7",nx:0.5833,ny:0.92,direction:"bottom"},{id:"9",nx:0.75,ny:0.92,direction:"bottom"},{id:"11",nx:0.9167,ny:0.92,direction:"bottom"}]},
+      peigne_3p_x3: {name:"Peigne fourche 3P ×3",nameEn:"3P fork comb ×3",prefix:"X",cat:"Borniers",w:324,h:42,image:"assets/peigne-fork-3p-x3.png",badge:"3P×3",iec:"X",bus:true,terminals:[{id:"IN",nx:0.035,ny:0.42,direction:"left"},{id:"1",nx:0.0556,ny:0.92,direction:"bottom"},{id:"3",nx:0.1667,ny:0.92,direction:"bottom"},{id:"5",nx:0.2778,ny:0.92,direction:"bottom"},{id:"7",nx:0.3889,ny:0.92,direction:"bottom"},{id:"9",nx:0.5,ny:0.92,direction:"bottom"},{id:"11",nx:0.6111,ny:0.92,direction:"bottom"},{id:"13",nx:0.7222,ny:0.92,direction:"bottom"},{id:"15",nx:0.8333,ny:0.92,direction:"bottom"},{id:"17",nx:0.9444,ny:0.92,direction:"bottom"}]},
+      peigne_3p_x4: {name:"Peigne fourche 3P ×4",nameEn:"3P fork comb ×4",prefix:"X",cat:"Borniers",w:432,h:42,image:"assets/peigne-fork-3p-x4.png",badge:"3P×4",iec:"X",bus:true,terminals:[{id:"IN",nx:0.03,ny:0.42,direction:"left"},{id:"1",nx:0.0417,ny:0.92,direction:"bottom"},{id:"3",nx:0.125,ny:0.92,direction:"bottom"},{id:"5",nx:0.2083,ny:0.92,direction:"bottom"},{id:"7",nx:0.2917,ny:0.92,direction:"bottom"},{id:"9",nx:0.375,ny:0.92,direction:"bottom"},{id:"11",nx:0.4583,ny:0.92,direction:"bottom"},{id:"13",nx:0.5417,ny:0.92,direction:"bottom"},{id:"15",nx:0.625,ny:0.92,direction:"bottom"},{id:"17",nx:0.7083,ny:0.92,direction:"bottom"},{id:"19",nx:0.7917,ny:0.92,direction:"bottom"},{id:"21",nx:0.875,ny:0.92,direction:"bottom"},{id:"23",nx:0.9583,ny:0.92,direction:"bottom"}]},
       /* Gris 3-Pole 40A 400V~ rotatif I-ON — retiré de la lib UI. */
       sectionneur_fusible: {name:"Sectionneur-fusible 3P SwissDz",prefix:"QS",cat:"Sectionneurs",hideFromLib:true,w:124,h:172,din:true,image:"assets/sectionneur-fusible-swissdz.png",badge:"SF",iec:"QS",terminals:[{id:"1",nx:0.1552,ny:0.11,direction:"top"},{id:"2",nx:0.186,ny:0.9,direction:"bottom"},{id:"3",nx:0.4745,ny:0.11,direction:"top"},{id:"4",nx:0.4745,ny:0.9,direction:"bottom"},{id:"5",nx:0.8454,ny:0.11,direction:"top"},{id:"6",nx:0.8351,ny:0.9,direction:"bottom"}],pair:["1","2"],pairs:[["1","2"],["3","4"],["5","6"]]},
       selecteur: {name:"Sélecteur Man/0/Auto SwissDz",prefix:"S",cat:"Boutonnerie",w:96,h:96,image:"assets/selecteur-dial-base.png",thumb:"assets/selecteur-swissdz.png",badge:"M-0-A",iec:"S",selector:true,knobImage:"assets/selecteur-knob.png",knobAngles:{man:-55,"0":180,auto:55},terminals:[{id:"1",nx:0.2974,ny:0.8869,direction:"bottom"},{id:"2",nx:0.501,ny:0.8869,direction:"bottom"},{id:"3",nx:0.7046,ny:0.8869,direction:"bottom"}]},
@@ -8373,6 +8400,7 @@
     const TIER_FREE_CATS_ALL = new Set([
       "Alimentation",
       "Structure",
+      "Goulotte",
       "Borniers",
       "Disjoncteurs modulaires",
       "Différentiel",
@@ -9602,11 +9630,15 @@
     function rectsOverlap(a, b) {
       return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
     }
-    /** Composants solides (KNX inclus) — pas rails / platines / barrettes / supports PV. */
+    /** Composants solides (KNX inclus) — pas rails / platines / goulottes / barrettes / supports PV. */
     function isCollidableItem(item) {
       const def = LIB[item && item.type];
-      return !!(def && def.kind !== "rail" && def.kind !== "platine" && def.kind !== "barrette"
-        && !def.pvSupport && !isPlatine(item));
+      return !!(def && def.kind !== "rail" && def.kind !== "platine" && def.kind !== "goulotte"
+        && def.kind !== "barrette" && !def.pvSupport && !isPlatine(item));
+    }
+    function isGoulotte(item) {
+      const def = LIB[item && item.type];
+      return !!(def && def.kind === "goulotte");
     }
     /* Supports PV : case = face module 150×233, écart 10 px. Les panneaux épousent la case. */
     const PV_CELL_W = 150;
@@ -15728,22 +15760,111 @@
         ladder: { rungs: rungs }
       };
     }
+    /**
+     * Tableau maison NF C 15-100 (esprit) — platine + 3 rails DIN, AGCP, 2 DDR,
+     * disjoncteurs, peignes, borniers N/PE, terre, goulottes masquant les fils.
+     */
     function exampleMaisonProject() {
+      const gou = (uid, type, tag, x, y, w, h) => ({
+        uid, type, tag, x, y, w, h, z: 1000, closed: true, pressed: false
+      });
       return {
-        name: "tableau-maison",
+        name: "tableau-maison-nfc15100",
         items: [
-          { uid: "r1", type: "rail_din_35", tag: "X1", x: 40, y: 300, closed: true, pressed: false },
-          exIt("c1", "compteur_sonelgaz", "P1", 64, 36),
-          exIt("c2", "edz_schneider_acti9_ic60n_2p_c16", "QF1", 88, 248),
-          exIt("c3", "edz_piloto_led_blanco", "HL1", 300, 250)
+          /* Platine de montage (fond de tableau) */
+          {
+            uid: "pl1", type: "edz_tablero_residencial_12p", tag: "X0",
+            x: 48, y: 110, w: 700, h: 920, plateColor: "gris",
+            closed: true, pressed: false
+          },
+          /* Compteur amont */
+          exIt("p1", "compteur_sonelgaz", "P1", 72, 16),
+          /* 3 rails DIN sur la platine */
+          { uid: "r1", type: "rail_din_35", tag: "X1", x: 100, y: 300, closed: true, pressed: false },
+          { uid: "r2", type: "rail_din_35", tag: "X2", x: 100, y: 530, closed: true, pressed: false },
+          { uid: "r3", type: "rail_din_35", tag: "X3", x: 100, y: 760, closed: true, pressed: false },
+          /* Rangée 1 — AGCP + 2 DDR 30 mA + SPD */
+          exIt("qa1", "agcp_principal", "QA1", 120, 265),
+          exIt("qi1", "edz_abb_f202_a", "QI1", 220, 265),
+          exIt("qi2", "edz_abb_f202_a", "QI2", 310, 265),
+          exIt("spd1", "spd", "FV1", 400, 265),
+          /* Rangée 2 — circuits sous QI1 (éclairage / prises) + peigne */
+          {
+            uid: "pg1", type: "peigne_1p_x6", tag: "X4",
+            x: 120, y: 488, closed: true, pressed: false
+          },
+          exIt("qf1", "edz_schneider_acti9_ic60n_1p_c16", "QF1", 120, 495),
+          exIt("qf2", "edz_schneider_acti9_ic60n_1p_c16", "QF2", 156, 495),
+          exIt("qf3", "edz_schneider_acti9_ic60n_2p_c16", "QF3", 192, 495),
+          exIt("qf4", "edz_schneider_acti9_ic60n_1p_c16", "QF4", 280, 495),
+          /* Rangée 3 — circuits sous QI2 (cuisine / lave-linge / chauffe-eau) */
+          {
+            uid: "pg2", type: "peigne_1p_x6", tag: "X5",
+            x: 120, y: 718, closed: true, pressed: false
+          },
+          exIt("qf5", "edz_schneider_acti9_ic60n_2p_c16", "QF5", 120, 725),
+          exIt("qf6", "edz_schneider_acti9_ic60n_2p_c16", "QF6", 200, 725),
+          exIt("qf7", "edz_schneider_acti9_ic60n_1p_c16", "QF7", 280, 725),
+          /* Borniers N/PE + prise de terre */
+          exIt("xb1", "borniers", "X6", 120, 940),
+          exIt("pe1", "pe", "PE1", 300, 955),
+          /* Goulottes — couvrent les nappes de fils entre rails / côtés */
+          gou("gh1", "goulotte_h_480", "X7", 100, 448, 480, 34),
+          gou("gh2", "goulotte_h_480", "X8", 100, 678, 480, 34),
+          gou("gh3", "goulotte_h_360", "X9", 100, 900, 360, 34),
+          gou("gv1", "goulotte_v_420", "X10", 68, 300, 34, 420),
+          gou("gv2", "goulotte_v_420", "X11", 590, 300, 34, 420),
+          gou("ga1", "goulotte_angle", "X12", 68, 448, 48, 48),
+          gou("ga2", "goulotte_angle", "X13", 576, 448, 48, 48),
+          /* Charges pédagogiques (sim Play) */
+          exIt("hl1", "lampe", "HL1", 780, 500),
+          exIt("hl2", "edz_piloto_led_blanco", "HL2", 780, 640),
+          exIt("hl3", "voyant", "HL3", 780, 780)
         ],
         wires: [
-          exW("w1", 1, "c1", "L", "c2", "1", EX_L, 2.5),
-          exW("w2", 2, "c1", "N", "c2", "3", EX_N, 2.5),
-          exW("w3", 3, "c2", "2", "c3", "X1", EX_L, 1.5),
-          exW("w4", 4, "c2", "4", "c3", "X2", EX_N, 1.5)
+          /* Arrivée compteur → AGCP */
+          exW("w1", 1, "p1", "L", "qa1", "L", EX_L, 6),
+          exW("w2", 2, "p1", "N", "qa1", "N", EX_N, 6),
+          /* AGCP → DDR1 / DDR2 */
+          exW("w3", 3, "qa1", "L'", "qi1", "1", EX_L, 6),
+          exW("w4", 4, "qa1", "N'", "qi1", "3", EX_N, 6),
+          exW("w5", 5, "qa1", "L'", "qi2", "1", EX_L, 6),
+          exW("w6", 6, "qa1", "N'", "qi2", "3", EX_N, 6),
+          /* SPD amont */
+          exW("w7", 7, "qa1", "L'", "spd1", "1", EX_L, 2.5),
+          exW("w8", 8, "qa1", "N'", "spd1", "2", EX_N, 2.5),
+          exW("w9", 9, "spd1", "PE", "pe1", "PE", EX_PE, 6),
+          /* DDR1 → peigne rangée 2 + N bornier */
+          exW("w10", 10, "qi1", "2", "pg1", "IN", EX_L, 2.5),
+          exW("w11", 11, "qi1", "4", "xb1", "N", EX_N, 2.5),
+          exW("w12", 12, "pg1", "1", "qf1", "1", EX_L, 2.5),
+          exW("w13", 13, "pg1", "2", "qf2", "1", EX_L, 2.5),
+          exW("w14", 14, "pg1", "3", "qf3", "1", EX_L, 2.5),
+          exW("w15", 15, "pg1", "4", "qf4", "1", EX_L, 2.5),
+          exW("w16", 16, "xb1", "N", "qf3", "3", EX_N, 2.5),
+          /* DDR2 → peigne rangée 3 */
+          exW("w17", 17, "qi2", "2", "pg2", "IN", EX_L, 2.5),
+          exW("w18", 18, "qi2", "4", "xb1", "N", EX_N, 2.5),
+          exW("w19", 19, "pg2", "1", "qf5", "1", EX_L, 2.5),
+          exW("w20", 20, "pg2", "2", "qf6", "1", EX_L, 2.5),
+          exW("w21", 21, "pg2", "3", "qf7", "1", EX_L, 2.5),
+          exW("w22", 22, "xb1", "N", "qf5", "3", EX_N, 2.5),
+          exW("w23", 23, "xb1", "N", "qf6", "3", EX_N, 2.5),
+          /* Départs → charges */
+          exW("w24", 24, "qf1", "2", "hl1", "L", EX_L, 1.5),
+          exW("w25", 25, "xb1", "N", "hl1", "N", EX_N, 1.5),
+          exW("w26", 26, "qf2", "2", "hl2", "X1", EX_L, 1.5),
+          exW("w27", 27, "xb1", "N", "hl2", "X2", EX_N, 1.5),
+          exW("w28", 28, "qf7", "2", "hl3", "X1", EX_L, 1.5),
+          exW("w29", 29, "xb1", "N", "hl3", "X2", EX_N, 1.5),
+          /* Terre */
+          exW("w30", 30, "pe1", "PE", "xb1", "PE", EX_PE, 6)
         ],
-        counts: { X: 1, P: 1, QF: 1, H: 1 }, seq: 10, wireNo: 5
+        counts: {
+          X: 14, P: 1, QA: 1, QI: 2, FV: 1, QF: 9, PE: 1, H: 2, HL: 2
+        },
+        seq: 60,
+        wireNo: 31
       };
     }
     /** Installation PV mono : string 6×400 W, coffret DC+SPD, QS, Huawei 3 kW, compteur ↔, IDR ABB, iC60N, PE. */
@@ -18402,6 +18523,7 @@
     const CAT_ORDER = [
       "Alimentation",
       "Structure",
+      "Goulotte",
       "Borniers",
       "Disjoncteurs modulaires",
       "Différentiel",
@@ -18584,6 +18706,8 @@
         b.innerHTML = `<span class="thumb barrette-t">${holes}</span><span>${disp}</span>`;
       } else if (def.kind === "rail") {
         b.innerHTML = `<span class="thumb rail-t">DIN</span><span>${disp}</span>`;
+      } else if (def.kind === "goulotte") {
+        b.innerHTML = `<span class="thumb goulotte-t">${(def.badge || "GOU").slice(0, 4)}</span><span>${disp}</span>`;
       } else if (def.kind === "pe") {
         b.innerHTML = `<span class="thumb" style="background:repeating-linear-gradient(-45deg,#c4d600 0 4px,#008c45 4px 8px);padding:2px">${peSymbolSvg()}</span><span>${disp}</span>`;
       } else if (def.pumpWell) {
@@ -19306,6 +19430,8 @@
       }
       if (def.pvCable) item.lengthM = Number(def.lengthM) > 0 ? Number(def.lengthM) : 10;
       if (motorHasSixLeadPlate(def)) applyMotorBarPreset(item, "delta");
+      /* Goulottes / overWires : devant les fils dès la pose (z ≥ 1000). */
+      if (def.overWires || def.kind === "goulotte") item.z = 1000;
       return item;
     }
     function add(type, atClient) {
@@ -19664,7 +19790,7 @@
     }
     function proxCanBeTarget(item, def) {
       if (!item || !def) return false;
-      if (def.kind === "rail" || def.kind === "barrette") return false;
+      if (def.kind === "rail" || def.kind === "barrette" || def.kind === "goulotte") return false;
       return true;
     }
     function updateProxHits() {
@@ -24844,6 +24970,7 @@
           el.classList.add("rail");
           if (!def.image) el.classList.add("rail-body");
         }
+        if (def.kind === "goulotte") el.classList.add("goulotte");
         if (def.pvSupport) el.classList.add("pv-support");
         if (def.kind === "pe") el.classList.add("source", "pe");
         if (def.kind === "barrette") el.classList.add("barrette-dev");
