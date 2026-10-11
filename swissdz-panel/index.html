@@ -15765,6 +15765,9 @@
      * disjoncteurs, peignes, borniers N/PE, terre, goulottes masquant les fils.
      */
     function exampleMaisonProject() {
+      /* Tableau résidentiel type NF C 15-100 sur platine :
+         compteur → AGCP → 2 DDR 30 mA type A → disjoncteurs / peignes → N/PE + terre.
+         Goulottes au-dessus des nappes de fils. */
       const gou = (uid, type, tag, x, y, w, h) => ({
         uid, type, tag, x, y, w, h, z: 1000, closed: true, pressed: false
       });
@@ -15774,97 +15777,112 @@
           /* Platine de montage (fond de tableau) */
           {
             uid: "pl1", type: "edz_tablero_residencial_12p", tag: "X0",
-            x: 48, y: 110, w: 700, h: 920, plateColor: "gris",
+            x: 40, y: 100, w: 760, h: 980, plateColor: "gris",
             closed: true, pressed: false
           },
           /* Compteur amont */
-          exIt("p1", "compteur_sonelgaz", "P1", 72, 16),
+          exIt("p1", "compteur_sonelgaz", "P1", 80, 8),
           /* 3 rails DIN sur la platine */
-          { uid: "r1", type: "rail_din_35", tag: "X1", x: 100, y: 300, closed: true, pressed: false },
-          { uid: "r2", type: "rail_din_35", tag: "X2", x: 100, y: 530, closed: true, pressed: false },
-          { uid: "r3", type: "rail_din_35", tag: "X3", x: 100, y: 760, closed: true, pressed: false },
+          { uid: "r1", type: "rail_din_35", tag: "X1", x: 100, y: 290, closed: true, pressed: false },
+          { uid: "r2", type: "rail_din_35", tag: "X2", x: 100, y: 520, closed: true, pressed: false },
+          { uid: "r3", type: "rail_din_35", tag: "X3", x: 100, y: 750, closed: true, pressed: false },
           /* Rangée 1 — AGCP + 2 DDR 30 mA + SPD */
-          exIt("qa1", "agcp_principal", "QA1", 120, 265),
-          exIt("qi1", "edz_abb_f202_a", "QI1", 220, 265),
-          exIt("qi2", "edz_abb_f202_a", "QI2", 310, 265),
-          exIt("spd1", "spd", "FV1", 400, 265),
-          /* Rangée 2 — circuits sous QI1 (éclairage / prises) + peigne */
+          exIt("qa1", "agcp_principal", "QA1", 120, 255),
+          exIt("qi1", "edz_abb_f202_a", "QI1", 220, 255),
+          exIt("qi2", "edz_abb_f202_a", "QI2", 310, 255),
+          exIt("spd1", "spd", "FV1", 400, 255),
+          /* Rangée 2 — sous QI1 : éclairage ×2, prises ×2, VMC */
           {
             uid: "pg1", type: "peigne_1p_x6", tag: "X4",
-            x: 120, y: 488, closed: true, pressed: false
+            x: 120, y: 478, closed: true, pressed: false
           },
-          exIt("qf1", "edz_schneider_acti9_ic60n_1p_c16", "QF1", 120, 495),
-          exIt("qf2", "edz_schneider_acti9_ic60n_1p_c16", "QF2", 156, 495),
-          exIt("qf3", "edz_schneider_acti9_ic60n_2p_c16", "QF3", 192, 495),
-          exIt("qf4", "edz_schneider_acti9_ic60n_1p_c16", "QF4", 280, 495),
-          /* Rangée 3 — circuits sous QI2 (cuisine / lave-linge / chauffe-eau) */
+          exIt("qf1", "edz_schneider_acti9_ic60n_1p_c16", "QF1", 120, 485),
+          exIt("qf2", "edz_schneider_acti9_ic60n_1p_c16", "QF2", 156, 485),
+          exIt("qf3", "edz_schneider_acti9_ic60n_2p_c16", "QF3", 192, 485),
+          exIt("qf4", "edz_schneider_acti9_ic60n_2p_c16", "QF4", 280, 485),
+          exIt("qf5", "edz_schneider_acti9_ic60n_1p_c16", "QF5", 368, 485),
+          /* Rangée 3 — sous QI2 : cuisine 20A, LL, CE, plaque 32A, divers */
           {
             uid: "pg2", type: "peigne_1p_x6", tag: "X5",
-            x: 120, y: 718, closed: true, pressed: false
+            x: 120, y: 708, closed: true, pressed: false
           },
-          exIt("qf5", "edz_schneider_acti9_ic60n_2p_c16", "QF5", 120, 725),
-          exIt("qf6", "edz_schneider_acti9_ic60n_2p_c16", "QF6", 200, 725),
-          exIt("qf7", "edz_schneider_acti9_ic60n_1p_c16", "QF7", 280, 725),
+          exIt("qf6", "edz_schneider_acti9_ic60n_2p_c16", "QF6", 120, 715),
+          exIt("qf7", "edz_schneider_acti9_ic60n_2p_c16", "QF7", 200, 715),
+          exIt("qf8", "edz_schneider_acti9_ic60n_2p_c16", "QF8", 280, 715),
+          exIt("qf9", "edz_itm_2p_c32", "QF9", 360, 715),
+          exIt("qf10", "edz_schneider_acti9_ic60n_1p_c16", "QF10", 430, 715),
           /* Borniers N/PE + prise de terre */
-          exIt("xb1", "borniers", "X6", 120, 940),
-          exIt("pe1", "pe", "PE1", 300, 955),
-          /* Goulottes — couvrent les nappes de fils entre rails / côtés */
-          gou("gh1", "goulotte_h_480", "X7", 100, 448, 480, 34),
-          gou("gh2", "goulotte_h_480", "X8", 100, 678, 480, 34),
-          gou("gh3", "goulotte_h_360", "X9", 100, 900, 360, 34),
-          gou("gv1", "goulotte_v_420", "X10", 68, 300, 34, 420),
-          gou("gv2", "goulotte_v_420", "X11", 590, 300, 34, 420),
-          gou("ga1", "goulotte_angle", "X12", 68, 448, 48, 48),
-          gou("ga2", "goulotte_angle", "X13", 576, 448, 48, 48),
-          /* Charges pédagogiques (sim Play) */
-          exIt("hl1", "lampe", "HL1", 780, 500),
-          exIt("hl2", "edz_piloto_led_blanco", "HL2", 780, 640),
-          exIt("hl3", "voyant", "HL3", 780, 780)
+          exIt("xb1", "borniers", "X6", 120, 950),
+          exIt("pe1", "pe", "PE1", 300, 965),
+          /* Goulottes — masquent les fils entre rails / côtés */
+          gou("gh1", "goulotte_h_480", "X7", 100, 438, 480, 34),
+          gou("gh2", "goulotte_h_480", "X8", 100, 668, 480, 34),
+          gou("gh3", "goulotte_h_480", "X9", 100, 910, 480, 34),
+          gou("gv1", "goulotte_v_420", "X10", 64, 290, 34, 420),
+          gou("gv2", "goulotte_v_420", "X11", 620, 290, 34, 420),
+          gou("ga1", "goulotte_angle", "X12", 64, 438, 48, 48),
+          gou("ga2", "goulotte_angle", "X13", 606, 438, 48, 48),
+          /* Charges pédagogiques (Play) — éclairage / voyants / prise simulée */
+          exIt("hl1", "lampe", "HL1", 820, 420),
+          exIt("hl2", "lampe", "HL2", 820, 560),
+          exIt("hl3", "edz_piloto_led_blanco", "HL3", 820, 700),
+          exIt("hl4", "voyant", "HL4", 820, 820),
+          exIt("hl5", "edz_piloto_led_blanco", "HL5", 940, 700)
         ],
         wires: [
           /* Arrivée compteur → AGCP */
           exW("w1", 1, "p1", "L", "qa1", "L", EX_L, 6),
           exW("w2", 2, "p1", "N", "qa1", "N", EX_N, 6),
-          /* AGCP → DDR1 / DDR2 */
+          /* AGCP → DDR1 / DDR2 (répartition) */
           exW("w3", 3, "qa1", "L'", "qi1", "1", EX_L, 6),
           exW("w4", 4, "qa1", "N'", "qi1", "3", EX_N, 6),
           exW("w5", 5, "qa1", "L'", "qi2", "1", EX_L, 6),
           exW("w6", 6, "qa1", "N'", "qi2", "3", EX_N, 6),
-          /* SPD amont */
+          /* SPD amont + terre */
           exW("w7", 7, "qa1", "L'", "spd1", "1", EX_L, 2.5),
           exW("w8", 8, "qa1", "N'", "spd1", "2", EX_N, 2.5),
           exW("w9", 9, "spd1", "PE", "pe1", "PE", EX_PE, 6),
           /* DDR1 → peigne rangée 2 + N bornier */
           exW("w10", 10, "qi1", "2", "pg1", "IN", EX_L, 2.5),
           exW("w11", 11, "qi1", "4", "xb1", "N", EX_N, 2.5),
-          exW("w12", 12, "pg1", "1", "qf1", "1", EX_L, 2.5),
-          exW("w13", 13, "pg1", "2", "qf2", "1", EX_L, 2.5),
+          exW("w12", 12, "pg1", "1", "qf1", "1", EX_L, 1.5),
+          exW("w13", 13, "pg1", "2", "qf2", "1", EX_L, 1.5),
           exW("w14", 14, "pg1", "3", "qf3", "1", EX_L, 2.5),
           exW("w15", 15, "pg1", "4", "qf4", "1", EX_L, 2.5),
-          exW("w16", 16, "xb1", "N", "qf3", "3", EX_N, 2.5),
+          exW("w16", 16, "pg1", "5", "qf5", "1", EX_L, 1.5),
+          exW("w17", 17, "xb1", "N", "qf3", "3", EX_N, 2.5),
+          exW("w18", 18, "xb1", "N", "qf4", "3", EX_N, 2.5),
           /* DDR2 → peigne rangée 3 */
-          exW("w17", 17, "qi2", "2", "pg2", "IN", EX_L, 2.5),
-          exW("w18", 18, "qi2", "4", "xb1", "N", EX_N, 2.5),
-          exW("w19", 19, "pg2", "1", "qf5", "1", EX_L, 2.5),
-          exW("w20", 20, "pg2", "2", "qf6", "1", EX_L, 2.5),
-          exW("w21", 21, "pg2", "3", "qf7", "1", EX_L, 2.5),
-          exW("w22", 22, "xb1", "N", "qf5", "3", EX_N, 2.5),
-          exW("w23", 23, "xb1", "N", "qf6", "3", EX_N, 2.5),
+          exW("w19", 19, "qi2", "2", "pg2", "IN", EX_L, 2.5),
+          exW("w20", 20, "qi2", "4", "xb1", "N", EX_N, 2.5),
+          exW("w21", 21, "pg2", "1", "qf6", "1", EX_L, 2.5),
+          exW("w22", 22, "pg2", "2", "qf7", "1", EX_L, 2.5),
+          exW("w23", 23, "pg2", "3", "qf8", "1", EX_L, 2.5),
+          exW("w24", 24, "pg2", "4", "qf9", "1", EX_L, 6),
+          exW("w25", 25, "pg2", "5", "qf10", "1", EX_L, 1.5),
+          exW("w26", 26, "xb1", "N", "qf6", "3", EX_N, 2.5),
+          exW("w27", 27, "xb1", "N", "qf7", "3", EX_N, 2.5),
+          exW("w28", 28, "xb1", "N", "qf8", "3", EX_N, 2.5),
+          exW("w29", 29, "xb1", "N", "qf9", "3", EX_N, 6),
           /* Départs → charges */
-          exW("w24", 24, "qf1", "2", "hl1", "L", EX_L, 1.5),
-          exW("w25", 25, "xb1", "N", "hl1", "N", EX_N, 1.5),
-          exW("w26", 26, "qf2", "2", "hl2", "X1", EX_L, 1.5),
-          exW("w27", 27, "xb1", "N", "hl2", "X2", EX_N, 1.5),
-          exW("w28", 28, "qf7", "2", "hl3", "X1", EX_L, 1.5),
-          exW("w29", 29, "xb1", "N", "hl3", "X2", EX_N, 1.5),
+          exW("w30", 30, "qf1", "2", "hl1", "L", EX_L, 1.5),
+          exW("w31", 31, "xb1", "N", "hl1", "N", EX_N, 1.5),
+          exW("w32", 32, "qf2", "2", "hl2", "L", EX_L, 1.5),
+          exW("w33", 33, "xb1", "N", "hl2", "N", EX_N, 1.5),
+          exW("w34", 34, "qf3", "2", "hl3", "X1", EX_L, 2.5),
+          exW("w35", 35, "xb1", "N", "hl3", "X2", EX_N, 2.5),
+          exW("w36", 36, "qf6", "2", "hl4", "X1", EX_L, 2.5),
+          exW("w37", 37, "xb1", "N", "hl4", "X2", EX_N, 2.5),
+          exW("w38", 38, "qf10", "2", "hl5", "X1", EX_L, 1.5),
+          exW("w39", 39, "xb1", "N", "hl5", "X2", EX_N, 1.5),
           /* Terre */
-          exW("w30", 30, "pe1", "PE", "xb1", "PE", EX_PE, 6)
+          exW("w40", 40, "pe1", "PE", "xb1", "PE", EX_PE, 6)
         ],
         counts: {
-          X: 14, P: 1, QA: 1, QI: 2, FV: 1, QF: 9, PE: 1, H: 2, HL: 2
+          X: 14, P: 1, QA: 1, QI: 2, FV: 1, QF: 10, PE: 1, HL: 5
         },
-        seq: 60,
-        wireNo: 31
+        seq: 70,
+        wireNo: 41
       };
     }
     /** Installation PV mono : string 6×400 W, coffret DC+SPD, QS, Huawei 3 kW, compteur ↔, IDR ABB, iC60N, PE. */
