@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v135-zoom-viewport" />
+  <meta name="swissdz-rev" content="native-shell-8777-v136-lib-phone-lower" />
+  <!-- v136: téléphone — feuille composants ~10 % plus basse (82vh, top plus bas sous le chrome) -->
   <!-- v135: pinch = zoom viewport seulement (pas resize géométrique platine/composants) ; anti-jitter ; volets KNX ext visibles Free -->
   <!-- v134: Installations exemplaires — la liste de la modale centrale défile (molette + doigt), le plan derrière ne panne plus -->
   <!-- v133: ETS — chaque participant KNX (volet, slot façade, poussoir, actionneur, coupleur) a ses GA et noms d’objets -->
@@ -632,9 +633,9 @@
       bottom:calc(var(--pw-foot-h, 56px) + 4px) !important;
       width:min(96vw, 440px) !important;
       max-width:96vw !important;
-      /* Feuille dense : presque jusqu’au chrome haut, plus de vignettes visibles. */
-      height:min(88vh, 780px) !important;
-      max-height:min(88vh, 780px) !important;
+      /* v136 : feuille ~10 % plus basse (top plus bas sous le chrome haut). */
+      height:min(78vh, 700px) !important;
+      max-height:min(78vh, 700px) !important;
       z-index:320 !important;
       grid-area:unset !important;
       transform:translate(-50%, 110%) !important;
@@ -1716,8 +1717,9 @@
       bottom:4px !important;
       width:min(440px, 96vw) !important;
       max-width:96vw !important;
-      height:min(92vh, 820px) !important;
-      max-height:min(92vh, 820px) !important;
+      /* v136 : ~10 % plus basse — top du tiroir plus bas sous le chrome. */
+      height:min(82vh, 740px) !important;
+      max-height:min(82vh, 740px) !important;
       transform:translate(-50%, 110%) !important;
       transition:transform .22s ease !important;
       border-right:none !important;
