@@ -6077,8 +6077,8 @@
         <div class="tier-card gold" data-tier="gold" id="tierCardGold">
           <div class="tier-name" data-i18n="tierProName">Pro</div>
           <div class="tier-price">
-            <span data-i18n="tierProMonth">1,69 € / mois</span><br>
-            <span data-i18n="tierProYear">14,99 € / an</span>
+            <span data-i18n="tierProMonth">0,99 € / mois</span><br>
+            <span data-i18n="tierProYear">9,99 € / an</span>
           </div>
           <ul>
             <li data-i18n="tierProPerk1">Fluke 1664 + contrôle électrique</li>
@@ -6289,7 +6289,7 @@
       try { if (typeof syncColorSwatches === "function") syncColorSwatches(); } catch (_) {}
     }
 
-    /* ========== Tiers Free / Silver / Gold (stub Play Billing) ========== */
+    /* ========== Tiers Free / Pro (stub Play Billing) ========== */
     const TIER_STORAGE_KEY = "wirelab-tier";
     const TIER_LEGACY_VIP_KEY = "swissdz-panel-vip";
     const TIER_ORDER = { free: 0, silver: 1, gold: 1, pro: 1 };
@@ -6299,7 +6299,7 @@
       gold_month: "wirelab_gold_month",
       gold_year: "wirelab_gold_year"
     };
-    /* Free : liste détaillée (v77) — le reste = Argent ; Fluke/ETS/exemples = Gold. */
+    /* Free : liste détaillée ; Pro = Fluke / contrôle / ETS / KNX marques / exemples. */
     const TIER_FREE_TYPES = new Set();
     const VIP_FREE_TYPES = TIER_FREE_TYPES;
     const DIVERS_FREE_IDS = TIER_FREE_TYPES;

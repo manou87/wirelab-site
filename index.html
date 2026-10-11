@@ -357,6 +357,10 @@
       gap: 1rem;
       align-items: stretch;
     }
+    .plans.plans-two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: 44rem;
+    }
     .plan {
       border-radius: 1.15rem;
       border: 1px solid var(--soft);
@@ -561,8 +565,8 @@
         <p data-i18n="svc2p">Disjoncteurs, contacteurs, moteurs, commande, KNX SwissDz, PLC LOGO!, PV…</p>
       </article>
       <article>
-        <h3 data-i18n="svc3t">Mesure Gold</h3>
-        <p data-i18n="svc3p">Fluke 1664 FC sur le plan, accessoires de mise à la terre, ETS formation.</p>
+        <h3 data-i18n="svc3t">Mesure Pro</h3>
+        <p data-i18n="svc3p">Fluke 1664 FC sur le plan, contrôle électrique, ETS formation.</p>
       </article>
     </div>
   </section>
@@ -570,35 +574,25 @@
   <section id="offres" aria-labelledby="offres-title">
     <div class="section-head">
       <h2 id="offres-title" data-i18n="plansTitle">Offres</h2>
-      <p data-i18n="plansLead">Prix en euros. Achats via les stores (bientôt) — tu peux déjà tester les niveaux dans l’app.</p>
+      <p data-i18n="plansLead">Deux niveaux : Free et Pro. Achats via les stores (bientôt) — tu peux déjà tester dans l’app.</p>
     </div>
-    <div class="plans">
+    <div class="plans plans-two">
       <article class="plan">
         <h3>Free</h3>
         <p class="price">0 € <small data-i18n="freeStart">pour démarrer</small></p>
         <ul>
-          <li data-i18n="free1">Alim, structure, borniers, disjoncteurs, différentiels, moulés, sectionneurs</li>
-          <li data-i18n="free2">Boutonnerie &amp; commande sélectionnées, KM+FR, moteurs, LOGO!</li>
-          <li data-i18n="free3">KNX SwissDz de base, éclairage, prises, capteurs clés, compteurs numériques</li>
-          <li data-i18n="free4">Sans Fluke, ETS, PV ni schémas prédéfinis</li>
-        </ul>
-      </article>
-      <article class="plan argent">
-        <h3 data-i18n="silverName">Argent</h3>
-        <p class="price"><span data-i18n="silverPrice">0,99 € / mois</span> <small data-i18n="silverYear">ou 8,99 € / an</small></p>
-        <ul>
-          <li data-i18n="silver1">Toute la bibliothèque sauf l’appareil de mesure</li>
-          <li data-i18n="silver2">Photovoltaïque inclus</li>
-          <li data-i18n="silver3">Fluke + ETS + installations prédéfinies → Gold</li>
+          <li data-i18n="free1">Schéma, bibliothèque, KNX SwissDZ, solaire, mise à la terre</li>
+          <li data-i18n="free2">Exemple photovoltaïque inclus</li>
+          <li data-i18n="free3">Sans Fluke, contrôle électrique, ETS ni autres installations</li>
         </ul>
       </article>
       <article class="plan gold">
-        <h3 data-i18n="goldName">Gold</h3>
-        <p class="price"><span data-i18n="goldPrice">1,69 € / mois</span> <small data-i18n="goldYear">ou 14,99 € / an</small></p>
+        <h3 data-i18n="proName">Pro</h3>
+        <p class="price"><span data-i18n="proPrice">0,99 € / mois</span> <small data-i18n="proYear">ou 9,99 € / an</small></p>
         <ul>
-          <li data-i18n="gold1">Tout Argent</li>
-          <li data-i18n="gold2">Fluke 1664 + accessoires mise à la terre</li>
-          <li data-i18n="gold3">ETS formation + installations prédéfinies</li>
+          <li data-i18n="pro1">Fluke 1664 + contrôle électrique</li>
+          <li data-i18n="pro2">KNX marques (hors SwissDZ) + ETS</li>
+          <li data-i18n="pro3">Installations prédéfinies (sauf solaire)</li>
         </ul>
       </article>
     </div>
