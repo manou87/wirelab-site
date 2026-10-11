@@ -2779,7 +2779,10 @@
     .roller-cmd[data-dir="stop"] { background:#334155; }
     /* v122-facade-maison : gabarit sur la grille (pas une 2e photo de volet). */
     .dev.house-facade { overflow:visible; }
+    /* Cadrage sélection = boîte .dev = dessin façade (pas de marge morte SVG). */
+    .dev.house-facade.sel { outline-offset:0; }
     .facade-shell { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0; }
+    .facade-shell > svg { display:block; width:100%; height:100%; }
     .facade-slot { position:absolute; box-sizing:border-box; z-index:3; pointer-events:none; overflow:visible; }
     .facade-slot.empty {
       pointer-events:auto; cursor:pointer;
@@ -7421,7 +7424,7 @@
       ]},
       /* v122 : gabarit façade. Bornes = termsOf() selon emplacements équipés (pas un 2e moteur de fils).
          Photo volet = fenetre_volet.png (même ouverture rollerOpening). */
-      facade_maison: {name:"Façade maison",nameEn:"House facade",nameAr:"واجهة المنزل",prefix:"FH",cat:"Domotique KNX",w:960,h:780,badge:"Façade",iec:"FH",houseFacade:true,terminals:[]},
+      facade_maison: {name:"Façade maison",nameEn:"House facade",nameAr:"واجهة المنزل",prefix:"FH",cat:"Domotique KNX",w:960,h:704,badge:"Façade",iec:"FH",houseFacade:true,terminals:[]},
       knx_variateur: {name:"Variateur KNX SwissDz 1 canal",prefix:"UD",cat:"Domotique KNX",w:86,h:150,din:true,image:"assets/knx-variateur-swissdz.png",badge:"Dim",iec:"UD",knxDimmer:true,busLed:{nx:0.50,ny:0.14},knxDimBar:{nx:0.50,ny:0.30,nw:0.62},terminals:[
         {id:"L",nx:0.20,ny:0.52,direction:"top"},{id:"~",nx:0.50,ny:0.52,direction:"top"},{id:"N",nx:0.80,ny:0.52,direction:"top"},
         {id:"BUS",nx:0.50,ny:0.907,direction:"bottom"}
@@ -9662,7 +9665,7 @@
       if (def && def.pvSupport) {
         return { w: Math.max(70, Math.round(def.w * 0.4)), h: Math.max(90, Math.round(def.h * 0.4)) };
       }
-      if (def && def.houseFacade) return { w: 480, h: 390 };
+      if (def && def.houseFacade) return { w: 480, h: 345 };
       /* Goulotte : longueur ET section (épaisseur) libres. */
       if (def && def.kind === "goulotte") {
         return { w: 20, h: 20 };
@@ -11571,16 +11574,20 @@
       bays = bays | 0;
       if (bays < 4) bays = 4;
       if (bays > FACADE_MAX_BAYS) bays = FACADE_MAX_BAYS;
+      /* Géométrie serrée : le dessin remplit W×H → cadrage sélection collé à la façade. */
       const side = 180, winW = 120, winH = 190, gap = 40;
       const W = side * 2 + bays * winW + (bays - 1) * gap;
-      const H = 780;
-      const winY = 318;
-      const groundY = 584;
+      const ridge = 72;
+      const eave = 168;
+      const winY = 246;
+      const groundY = 512;
       const gH = 170;
+      /* Bas = porte (h 200) pour coller le cadrage au sol de la façade. */
+      const H = groundY - 8 + 200;
       const slots = [];
-      slots.push({ id: "meteo", kind: "meteo", x: (W - 140) / 2, y: 78, w: 140, h: 58 });
-      slots.push({ id: "pv1", kind: "pv", x: 170, y: 158, w: Math.max(80, W - 340), h: 28 });
-      slots.push({ id: "pv2", kind: "pv", x: 110, y: 194, w: Math.max(120, W - 220), h: 28 });
+      slots.push({ id: "meteo", kind: "meteo", x: (W - 140) / 2, y: 8, w: 140, h: 58 });
+      slots.push({ id: "pv1", kind: "pv", x: 170, y: 88, w: Math.max(80, W - 340), h: 28 });
+      slots.push({ id: "pv2", kind: "pv", x: 110, y: 124, w: Math.max(120, W - 220), h: 28 });
       for (let i = 0; i < bays; i++) {
         const x = side + i * (winW + gap);
         slots.push({ id: "v" + (i + 1), kind: "volet", x: x, y: winY, w: winW, h: winH });
@@ -11591,13 +11598,13 @@
         }
       }
       const gW = Math.round((W * 0.36) / 10) * 10;
-      slots.push({ id: "g1", kind: "garage", x: 20, y: groundY, w: gW, h: gH });
-      slots.push({ id: "g2", kind: "garage", x: W - 20 - gW, y: groundY, w: gW, h: gH });
+      slots.push({ id: "g1", kind: "garage", x: 0, y: groundY, w: gW, h: gH });
+      slots.push({ id: "g2", kind: "garage", x: W - gW, y: groundY, w: gW, h: gH });
       slots.push({ id: "porte", kind: "door", x: (W - 100) / 2, y: groundY - 8, w: 100, h: 200 });
-      slots.push({ id: "eg1", kind: "light", x: 20 + gW / 2 - 18, y: groundY - 68, w: 36, h: 36, ax: 20 + gW / 2 });
-      slots.push({ id: "eg2", kind: "light", x: W - 20 - gW / 2 - 18, y: groundY - 68, w: 36, h: 36, ax: W - 20 - gW / 2 });
+      slots.push({ id: "eg1", kind: "light", x: gW / 2 - 18, y: groundY - 68, w: 36, h: 36, ax: gW / 2 });
+      slots.push({ id: "eg2", kind: "light", x: W - gW / 2 - 18, y: groundY - 68, w: 36, h: 36, ax: W - gW / 2 });
       slots.push({ id: "ed", kind: "light", x: W / 2 - 18, y: groundY - 68, w: 36, h: 36, ax: W / 2 });
-      return { w: W, h: H, bays: bays, slots: slots, gW: gW, eave: 240, ridge: 146 };
+      return { w: W, h: H, bays: bays, slots: slots, gW: gW, eave: eave, ridge: ridge };
     }
     function ensureFacade(item) {
       if (!item.facade || typeof item.facade !== "object") {
@@ -11618,8 +11625,15 @@
     function syncFacadeBox(item) {
       const f = ensureFacade(item);
       const g = facadeGeom(f.bays);
-      if (!(Number(item.w) > 0)) item.w = g.w;
-      if (!(Number(item.h) > 0)) item.h = g.h;
+      /* Toujours caler w/h sur la géométrie (sauf resize en cours) — cadrage = façade. */
+      const resizing = !!(state.resize && state.resize.uid === item.uid);
+      if (!resizing) {
+        item.w = g.w;
+        item.h = g.h;
+      } else {
+        if (!(Number(item.w) > 0)) item.w = g.w;
+        if (!(Number(item.h) > 0)) item.h = g.h;
+      }
       return g;
     }
     function facadeRollerProg(slotId) {
@@ -12004,6 +12018,7 @@
       svg.setAttribute("viewBox", "0 0 " + g.w + " " + g.h);
       svg.setAttribute("width", "100%");
       svg.setAttribute("height", "100%");
+      svg.setAttribute("preserveAspectRatio", "none");
       function svgRect(x, y, w, h, fill) {
         const r = document.createElementNS(NS, "rect");
         r.setAttribute("x", String(x));
@@ -12015,11 +12030,12 @@
         r.setAttribute("stroke-width", "2");
         return r;
       }
-      svg.appendChild(svgRect(16, g.eave, g.w - 32, g.h - g.eave - 12, "#e7eaee"));
-      svg.appendChild(svgRect(16, 568, g.gW + 8, g.h - 580, "#d5dbe3"));
-      svg.appendChild(svgRect(g.w - 16 - g.gW - 8, 568, g.gW + 8, g.h - 580, "#d5dbe3"));
+      /* Corps / ailes / toit bord à bord du viewBox (= cadrage sélection). */
+      svg.appendChild(svgRect(0, g.eave, g.w, g.h - g.eave, "#e7eaee"));
+      svg.appendChild(svgRect(0, g.eave + 328, g.gW + 8, g.h - (g.eave + 328), "#d5dbe3"));
+      svg.appendChild(svgRect(g.w - g.gW - 8, g.eave + 328, g.gW + 8, g.h - (g.eave + 328), "#d5dbe3"));
       const roof = document.createElementNS(NS, "polygon");
-      roof.setAttribute("points", "16," + g.eave + " 80," + g.ridge + " " + (g.w - 80) + "," + g.ridge + " " + (g.w - 16) + "," + g.eave);
+      roof.setAttribute("points", "0," + g.eave + " 64," + g.ridge + " " + (g.w - 64) + "," + g.ridge + " " + g.w + "," + g.eave);
       roof.setAttribute("fill", "#8b939c");
       roof.setAttribute("stroke", "#475569");
       roof.setAttribute("stroke-width", "2");
@@ -26145,6 +26161,12 @@
           }, item));
         });
       });
+
+      const svgClips = document.createElementNS(NS, "svg");
+      svgClips.setAttribute("class", "wire-clips");
+      svgClips.setAttribute("aria-hidden", "true");
+      world.appendChild(svgClips);
+      appendTerminalClips(svgClips, NS);
 
       /* 4) Effet court-circuit : bannière + arc / étincelles */
       if (state.short) {
