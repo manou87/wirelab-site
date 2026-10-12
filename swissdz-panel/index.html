@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v143-fluke-one-face" />
+  <meta name="swissdz-rev" content="native-shell-8777-v144-restore-phone-zoom" />
+  <!-- v144: téléphone — zoom/pad comme version-site-1 (plus de plafond iOS qui bloquait le pinch) -->
   <!-- v143: Fluke — une seule face (live) ; underlay masqué si prêt ; pendant zoom photo seule (anti double-échelle) -->
   <!-- v142: iPhone zoom-out façade KNX — pas de render() après pinch ; zoom min relevé ; imgs/SVG masqués au pinch -->
   <!-- v141: iPhone — zoom/Lecture OOM : SVG sans attrs 2600×1800, pad/zoom plafonnés, SW off, calques masqués au pinch -->
@@ -6224,12 +6225,12 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v143-fluke-one-face"></script>
+  <script src="i18n/panelwire-i18n.js?v=v144-restore-phone-zoom"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
   <!-- v140 : 1st-party — plus de cdn.jsdelivr (jamais d’hôte tiers pour le panel) -->
-  <script src="js/supabase.min.js?v=v143-fluke-one-face"></script>
-  <script src="js/wirelab-auth.js?v=v143-fluke-one-face"></script>
+  <script src="js/supabase.min.js?v=v144-restore-phone-zoom"></script>
+  <script src="js/wirelab-auth.js?v=v144-restore-phone-zoom"></script>
   <script src="js/wirelab-auth-vitrine.js?v=vitrine10"></script>
   <script>
     /* Assets pré-cadrés (photos studio trop larges → bandes). */
@@ -10703,17 +10704,16 @@
     try {
       if (PW_IOS) document.documentElement.classList.add("pw-ios");
     } catch (_) {}
-    /* v142 iOS : zoom-out extrême (0.08) sur façade KNX = OOM ; plancher ~fit. */
-    const BOARD_ZOOM_MIN = PW_IOS ? 0.42 : 0.2;
-    const BOARD_ZOOM_ABS_MIN = PW_IOS ? 0.38 : 0.08;
-    /* v141 iOS : zoom max 2.4 (×5 + SVG géants = OOM Safari). */
-    const BOARD_ZOOM_MAX = PW_IOS ? 2.2 : 5;
+    /* v144 : mêmes limites zoom/pad que version-site-1 / PC — le plafond iOS
+       (0.38–2.2) bloquait le pinch après chargement d’exemplaire (~fit). */
+    const BOARD_ZOOM_MIN = 0.2;
+    const BOARD_ZOOM_ABS_MIN = 0.08;
+    const BOARD_ZOOM_MAX = 5;
     const BOARD_ZOOM_STEP = 1.15;
     const BOARD_WORLD_W = 2600;
     const BOARD_WORLD_H = 1800;
-    /* v106 = WireLabPro-1.0.1 : grande marge fixe → pan fluide 4 directions (pas letterbox dynamique).
-       v141 iOS : pad 720 (2400 → grille/spacer énormes → crash au zoom). */
-    const BOARD_PAN_PAD = PW_IOS ? 720 : 2400;
+    /* v106 = WireLabPro-1.0.1 : grande marge fixe → pan fluide 4 directions. */
+    const BOARD_PAN_PAD = 2400;
     const BOARD_PAN_ROOM = 0;
     const BOARD_COORDS_STEP = 100;
     const BOARD_FIT_ZOOM_MIN = 0.45;
@@ -10824,9 +10824,7 @@
       const vh = Math.max(0, board.clientHeight || 0);
       const coverX = vw > 0 ? Math.max(0, (vw / z - BOARD_WORLD_W) / 2) : 0;
       const coverY = vh > 0 ? Math.max(0, (vh / z - BOARD_WORLD_H) / 2) : 0;
-      let bleed = Math.max(pad / z, coverX, coverY, gridStep) + gridStep;
-      /* v141 iOS : grille trop large (pad/z) = milliers de lines SVG → crash WebKit. */
-      if (PW_IOS) bleed = Math.min(bleed, 500);
+      const bleed = Math.max(pad / z, coverX, coverY, gridStep) + gridStep;
       const nBleed = Math.ceil(bleed / gridStep) * gridStep;
       const bx0 = -nBleed;
       const by0 = -nBleed;
@@ -10933,10 +10931,8 @@
       const pad = BOARD_PAN_PAD;
       const vw = Math.max(0, board.clientWidth || 0);
       const vh = Math.max(0, board.clientHeight || 0);
-      /* Marge zoom-in une fois (×2.5), jamais BOARD_ZOOM_MAX (échec v26).
-         v141 iOS : ×1.35 seulement — agrandir le spacer pendant pinch = OOM. */
-      const headMul = PW_IOS ? 1.35 : 2.5;
-      const zHead = Math.min(BOARD_ZOOM_MAX, Math.max(zNow * headMul, zNow + (PW_IOS ? 0.2 : 0.5)));
+      /* Marge zoom-in une fois (×2.5), jamais BOARD_ZOOM_MAX (échec v26). */
+      const zHead = Math.min(BOARD_ZOOM_MAX, Math.max(zNow * 2.5, zNow + 0.5));
       const needW = Math.max(Math.round(BOARD_WORLD_W * zHead + pad * 2), vw);
       const needH = Math.max(Math.round(BOARD_WORLD_H * zHead + pad * 2), vh);
       const curW = parseFloat(spacer.style.width) || spacer.offsetWidth || 0;
