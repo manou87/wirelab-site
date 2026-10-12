@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v138-lib-phone-lower" />
+  <meta name="swissdz-rev" content="native-shell-8777-v150-features-no-lock" />
+  <!-- v150: features demandées (goulottes/embouts/façade/dnd/lang/liste) + zoom backup ; SANS cadenas Lecture -->
   <!-- v138: téléphone — feuille composants visiblement plus basse (top explicite, plus de height vh clipée par work) -->
   <!-- v137: ETS à la demande (pas au clic KNX) ; GA/IA uniques par instance ; exemple façade câblée ; Contrôle Expo via /oibt-trainer/ -->
   <!-- v136: téléphone — feuille composants ~10 % plus basse (82vh) — ineffective web: 82vh≈92vh après clip overflow -->
@@ -3119,7 +3120,75 @@
       -webkit-user-select:none; user-select:none;
       -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent;
     }
-    /* Fluke : UN SEUL calque = iframe oibt-trainer live (pas de photo inventée sur le plan).
+    /* v143 : face live prête → une seule couche (plus de photo sous l’iframe = double Fluke). */
+    .dev.fluke-meter.is-live-ready > img.fluke-underlay {
+      display:none !important; visibility:hidden !important; opacity:0 !important;
+      pointer-events:none !important;
+    }
+    /* Pendant zoom plan : iframe WebKit décroche du scale parent → photo seule, taille = cadre. */
+    #board.is-pinching .dev.fluke-meter.is-live-ready > img.fluke-underlay,
+    #board.is-board-zooming .dev.fluke-meter.is-live-ready > img.fluke-underlay {
+      display:block !important; visibility:visible !important; opacity:1 !important;
+      width:100% !important; height:100% !important;
+    }
+    #board.is-pinching .dev.fluke-meter.is-live-ready .fluke-viewport,
+    #board.is-pinching .dev.fluke-meter.is-live-ready iframe.fluke-live,
+    #board.is-board-zooming .dev.fluke-meter.is-live-ready .fluke-viewport,
+    #board.is-board-zooming .dev.fluke-meter.is-live-ready iframe.fluke-live {
+      visibility:hidden !important; opacity:0 !important; pointer-events:none !important;
+    }
+    /* Viewport / iframe : pointer-events none (mesure sans tap lecteur). UI = .is-fluke-ui */
+    .dev.fluke-meter .fluke-viewport {
+      position:absolute; inset:0; z-index:1;
+      overflow:hidden;
+      border-radius:10% / 14%;
+      background:transparent !important; background-color:transparent !important;
+      border:0 !important;
+      box-shadow:none !important; pointer-events:none;
+      -webkit-mask-image:none; mask-image:none;
+    }
+    /* Canvas Flutter à taille fixe (400×214) + scale CSS : agrandir n’explose plus le WebGL. */
+    .dev.fluke-meter iframe.fluke-live {
+      position:absolute; left:0; top:0; z-index:1;
+      width:400px; height:214px;
+      border:0 !important; margin:0; padding:0;
+      background:transparent !important; background-color:transparent !important;
+      color-scheme:only light;
+      touch-action:none;
+      pointer-events:none;
+      transform-origin:0 0;
+      /* v143 : pas de will-change — couche GPU séparée = échelle différente au zoom plan */
+      -webkit-backface-visibility:hidden; backface-visibility:hidden;
+      /* v90 : tant que Flutter n’est pas prêt, underlay photo reste visible */
+      opacity:0;
+    }
+    .dev.fluke-meter iframe.fluke-live[data-fluke-ready="1"] { opacity:1; }
+    /* Face interactive dès que live prêt (plus de bouton UI). */
+    .dev.fluke-meter.is-fluke-ui .fluke-viewport,
+    .dev.fluke-meter.is-fluke-ui iframe.fluke-live,
+    .dev.fluke-meter.is-live-ready .fluke-viewport,
+    .dev.fluke-meter.is-live-ready iframe.fluke-live { pointer-events:auto; }
+    #board.mode-wire .dev.fluke-meter.is-fluke-ui iframe.fluke-live,
+    #board.mode-wire .dev.fluke-meter.is-fluke-ui .fluke-viewport,
+    #board.mode-wire .dev.fluke-meter.is-live-ready iframe.fluke-live,
+    #board.mode-wire .dev.fluke-meter.is-live-ready .fluke-viewport { pointer-events:none; }
+    #board.is-dragging .dev.fluke-meter iframe.fluke-live { pointer-events:none; }
+    .dev.fluke-meter .fluke-drag-handle {
+      position:absolute; left:16%; right:16%; top:0; height:16px; z-index:6;
+      cursor:grab; touch-action:none; pointer-events:auto;
+      background:linear-gradient(180deg, rgba(15,23,42,.32), rgba(15,23,42,.02));
+      border-radius:0 0 7px 7px;
+      border-bottom:1px solid rgba(148,163,184,.28);
+    }
+    .dev.fluke-meter .fluke-drag-handle:active { cursor:grabbing; }
+    .dev.fluke-meter .fluke-drag-handle::after {
+      content:""; position:absolute; left:50%; top:50%;
+      width:30px; height:3px; margin:-1.5px 0 0 -15px;
+      border-radius:2px; background:rgba(148,163,184,.6);
+    }
+    /* v143 : plus de bouton UI — face live seule, zoom = cadre appareil. */
+
+/* Fluke : UN SEUL calque = iframe oibt-trainer live (pas de photo inventée sur le plan).
        Boîtier ≈ rectangle arrondi (ratio réel ~1.87). */
     .dev.fluke-meter {
       z-index:22; overflow:visible !important;
@@ -6165,11 +6234,11 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v138-lib-phone-lower"></script>
+  <script src="i18n/panelwire-i18n.js?v=v150-features-no-lock"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/wirelab-auth.js?v=v37-google-only"></script>
+  <script src="js/supabase.min.js?v=v150-features-no-lock"></script>
+  <script src="js/wirelab-auth.js?v=v150-features-no-lock"></script>
   <script src="js/wirelab-auth-vitrine.js?v=vitrine10"></script>
   <script>
     /* Assets pré-cadrés (photos studio trop larges → bandes). */
@@ -10824,8 +10893,6 @@
     /* Déclaré tôt : utilisé pendant pinch (défini avant les handlers). */
     var boardTouchPinch = null;
     var boardPinchPtrs = new Map();
-    var boardZoomRaf = 0;
-    var boardZoomPend = null;
     /*
      * v108 : zoom 1.0.1 + spacer FIGÉ pendant pinch.
      * Cause user : plan vide fluide ; dès qu’un .dev (photo) est posé → tremblement.
@@ -10847,6 +10914,16 @@
       const curH = parseFloat(spacer.style.height) || spacer.offsetHeight || 0;
       if (needW > curW) spacer.style.width = needW + "px";
       if (needH > curH) spacer.style.height = needH + "px";
+    }
+    function fitAllFlukeLiveFrames() {
+      try {
+        state.items.forEach((it) => {
+          const def = LIB[it.type];
+          if (!def || !def.flukeMeter) return;
+          const frame = flukeLiveFrames.get(it.uid);
+          if (frame) fitFlukeLiveFrame(frame, it);
+        });
+      } catch (_) {}
     }
     function applyBoardZoomStyles(opts) {
       const pinching = !!(opts && opts.livePinch) || board.classList.contains("is-pinching");
@@ -10876,6 +10953,7 @@
         board.scrollTop = pad;
       }
       if (!pinching) {
+        try { fitAllFlukeLiveFrames(); } catch (_) {}
         const zin = document.getElementById("btnZoomIn");
         const zout = document.getElementById("btnZoomOut");
         if (zin) zin.disabled = z >= BOARD_ZOOM_MAX - 1e-6;
@@ -10906,51 +10984,31 @@
     }
     /* Zoom ancré sous curseur/doigts — viewport only (jamais item.w/h). */
     function setBoardZoomAt(next, clientX, clientY, opts) {
+      try { bumpExampleFitToken(); } catch (_) {}
       const z0 = boardZoom();
       const z1 = clampBoardZoom(next);
       const rect = board.getBoundingClientRect();
       const pad = BOARD_PAN_PAD;
-      const pinching = !!(opts && opts.livePinch) || board.classList.contains("is-pinching");
-      let ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
-      let oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
-      /* Ancre monde figée au début du pinch (évite oscillation si doigts bougent). */
-      let ax, ay;
-      if (pinching && boardTouchPinch && Number.isFinite(boardTouchPinch.ax)) {
-        ax = boardTouchPinch.ax;
-        ay = boardTouchPinch.ay;
-        if (Number.isFinite(boardTouchPinch.ox0)) ox = boardTouchPinch.ox0;
-        if (Number.isFinite(boardTouchPinch.oy0)) oy = boardTouchPinch.oy0;
-      } else {
-        ax = (board.scrollLeft + ox - pad) / z0;
-        ay = (board.scrollTop + oy - pad) / z0;
-      }
-      if (Math.abs(z1 - z0) < 1e-9 && !pinching) {
+      const ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
+      const oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
+      const ax = (board.scrollLeft + ox - pad) / z0;
+      const ay = (board.scrollTop + oy - pad) / z0;
+      if (Math.abs(z1 - z0) < 1e-9) {
         applyBoardZoomStyles(opts);
         return;
       }
-      if (pinching) {
-        if (boardTouchPinch && !Number.isFinite(boardTouchPinch.ax)) {
-          boardTouchPinch.ax = ax;
-          boardTouchPinch.ay = ay;
-          boardTouchPinch.ox0 = ox;
-          boardTouchPinch.oy0 = oy;
-        }
-        boardZoomPend = { z1: z1, ox: ox, oy: oy, ax: ax, ay: ay, pad: pad };
-        if (!boardZoomRaf) {
-          boardZoomRaf = requestAnimationFrame(function () {
-            boardZoomRaf = 0;
-            const p = boardZoomPend;
-            boardZoomPend = null;
-            if (!p) return;
-            state.boardZoom = p.z1;
-            applyBoardZoomStyles({ livePinch: true });
-            board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
-            board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
-          });
-        }
-        return;
-      }
       state.boardZoom = z1;
+      const pinching = !!(opts && opts.livePinch) || board.classList.contains("is-pinching");
+      if (!pinching) {
+        try {
+          board.classList.add("is-board-zooming");
+          if (window.__pwFlukeZoomHideT) clearTimeout(window.__pwFlukeZoomHideT);
+          window.__pwFlukeZoomHideT = setTimeout(function () {
+            try { board.classList.remove("is-board-zooming"); } catch (_) {}
+            try { fitAllFlukeLiveFrames(); } catch (_) {}
+          }, 160);
+        } catch (_) {}
+      }
       applyBoardZoomStyles(opts);
       board.scrollLeft = ax * z1 - ox + pad;
       board.scrollTop = ay * z1 - oy + pad;
@@ -20719,7 +20777,14 @@
         fab.innerHTML = simIconHtml("fab-ico") + '<span class="fab-label">' + short + "</span>";
       }
     }
+    function bumpExampleFitToken() {
+      exampleFitToken++;
+      return exampleFitToken;
+    }
     function toggleSim() {
+      try { bumpExampleFitToken(); } catch (_) {}
+      let keepSl = 0, keepSt = 0, keepZ = 1;
+      try { keepSl = board.scrollLeft; keepSt = board.scrollTop; keepZ = boardZoom(); } catch (_) {}
       try {
         if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       } catch (_) {}
@@ -20750,6 +20815,12 @@
         });
       }
       render();
+      try {
+        state.boardZoom = keepZ;
+        applyBoardZoomStyles();
+        board.scrollLeft = keepSl;
+        board.scrollTop = keepSt;
+      } catch (_) {}
       if (state.etsOpen) renderEtsPanel();
       /* v12 : shell en flux (pas fixed) — ne jamais réécrire height/transform sur body. */
     }
@@ -27730,23 +27801,14 @@
       if (!(dist > 8)) return false;
       cancelBoardOpsForPinch();
       ensurePinchSpacerRoom(boardZoom());
-      const z0 = boardZoom();
-      const pad = BOARD_PAN_PAD;
-      const rect = board.getBoundingClientRect();
-      const ox0 = mid.x - rect.left;
-      const oy0 = mid.y - rect.top;
       boardTouchPinch = {
         dist0: dist,
-        z0: z0,
+        z0: boardZoom(),
         midX: mid.x,
         midY: mid.y,
         idA: a.identifier,
         idB: b.identifier,
-        via: "touch",
-        ox0: ox0,
-        oy0: oy0,
-        ax: (board.scrollLeft + ox0 - pad) / z0,
-        ay: (board.scrollTop + oy0 - pad) / z0
+        via: "touch"
       };
       boardGesturePinch = true;
       board.classList.add("is-pinching");
@@ -27859,18 +27921,6 @@
       boardGesturePinch = false;
       board.classList.remove("is-pinching");
       try { lockShellDuringPinch(false); } catch (_) {}
-      /* Appliquer le dernier frame pinch en attente, puis settle spacer. */
-      if (boardZoomRaf) {
-        try { cancelAnimationFrame(boardZoomRaf); } catch (_) {}
-        boardZoomRaf = 0;
-      }
-      if (boardZoomPend) {
-        const p = boardZoomPend;
-        boardZoomPend = null;
-        state.boardZoom = p.z1;
-        board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
-        board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
-      }
       /* Settle spacer (hors pinch) + grille ; render différé si demandé pendant pinch. */
       applyBoardZoomStyles();
       try { syncBoardCoords(); } catch (_) {}
@@ -27929,23 +27979,14 @@
       if (!boardTouchPinch) {
         cancelBoardOpsForPinch();
         ensurePinchSpacerRoom(boardZoom());
-        const z0 = boardZoom();
-        const pad = BOARD_PAN_PAD;
-        const rect = board.getBoundingClientRect();
-        const ox0 = midX - rect.left;
-        const oy0 = midY - rect.top;
         boardTouchPinch = {
           dist0: dist,
-          z0: z0,
+          z0: boardZoom(),
           midX: midX,
           midY: midY,
           idA: a.id,
           idB: b.id,
-          via: "pointer",
-          ox0: ox0,
-          oy0: oy0,
-          ax: (board.scrollLeft + ox0 - pad) / z0,
-          ay: (board.scrollTop + oy0 - pad) / z0
+          via: "pointer"
         };
         boardGesturePinch = true;
         board.classList.add("is-pinching");
