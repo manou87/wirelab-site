@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v147-hide-lecture-badge" />
+  <meta name="swissdz-rev" content="native-shell-8777-v148-restore-zoom-plan" />
+  <!-- v148: zoom/plan = version-site-1 (pinch immédiat, pas de rAF/ancre figée, Lecture=render normal) ; Fluke/embouts/cadenas-off inchangés -->
   <!-- v147: badge 🔒 Lecture vraiment masqué (CSS body.sim-lecture le réaffichait) -->
   <!-- v146: test — cadenas Lecture désactivé (Play ne verrouille plus le layout) -->
   <!-- v145: iPhone — Lecture après zoom : render à scale(1) puis restaurer pan/zoom (évite OOM) -->
@@ -2992,25 +2993,6 @@
       pointer-events:none !important;
       transition:none !important;
       animation:none !important;
-    }
-    /* v141/v142 : pinch iPhone — masquer calques + photos (re-raster GPU → crash zoom-out façade). */
-    html.pw-ios #board.is-pinching svg.wire-clips,
-    html.pw-ios #board.is-pinching svg.fluke-leads,
-    html.pw-ios #board.is-pinching svg.prox-beams,
-    html.pw-ios #board.is-pinching svg.align-guides,
-    html.pw-ios #board.is-pinching svg.board-coords,
-    html.pw-ios #board.is-pinching svg.wires {
-      visibility:hidden !important;
-    }
-    html.pw-ios #board.is-pinching #boardWorld .dev img,
-    html.pw-ios #board.is-pinching #boardWorld .knx-shutter,
-    html.pw-ios #board.is-pinching #boardWorld .roller-opening,
-    html.pw-ios #board.is-pinching #boardWorld .board-ref-layer {
-      visibility:hidden !important;
-    }
-    html.pw-ios .knx-shutter .slats,
-    html.pw-ios .roller-opening .cloth {
-      will-change:auto !important;
     }
     /* v135 : poignées resize invisibles/inertes pendant pinch — évite resize géométrique vs zoom. */
     #board.is-pinching .rhandle {
@@ -6223,12 +6205,12 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v147-hide-lecture-badge"></script>
+  <script src="i18n/panelwire-i18n.js?v=v148-restore-zoom-plan"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
   <!-- v140 : 1st-party — plus de cdn.jsdelivr (jamais d’hôte tiers pour le panel) -->
-  <script src="js/supabase.min.js?v=v147-hide-lecture-badge"></script>
-  <script src="js/wirelab-auth.js?v=v147-hide-lecture-badge"></script>
+  <script src="js/supabase.min.js?v=v148-restore-zoom-plan"></script>
+  <script src="js/wirelab-auth.js?v=v148-restore-zoom-plan"></script>
   <script src="js/wirelab-auth-vitrine.js?v=vitrine10"></script>
   <script>
     /* Assets pré-cadrés (photos studio trop larges → bandes). */
@@ -10914,14 +10896,12 @@
     /* Déclaré tôt : utilisé pendant pinch (défini avant les handlers). */
     var boardTouchPinch = null;
     var boardPinchPtrs = new Map();
-    var boardZoomRaf = 0;
-    var boardZoomPend = null;
     /*
-     * v108 : zoom 1.0.1 + spacer FIGÉ pendant pinch.
+     * v108 / version-site-1 : zoom 1.0.1 + spacer FIGÉ pendant pinch.
      * Cause user : plan vide fluide ; dès qu’un .dev (photo) est posé → tremblement.
      * Resize spacer frame-à-frame + scale des PNG = thrash WebKit. Pendant pinch =
      * uniquement scale(#boardWorld) + scroll. Settle spacer à la fin.
-     * v135 : coalesce rAF pendant pinch (anti-vibration) ; resize géométrique interdit.
+     * v148 : pinch appliqué immédiatement (comme backup) — plus de coalesce rAF.
      */
     function ensurePinchSpacerRoom(zNow) {
       const spacer = document.getElementById("boardZoomSpacer");
@@ -11003,56 +10983,27 @@
       const z1 = clampBoardZoom(next);
       const rect = board.getBoundingClientRect();
       const pad = BOARD_PAN_PAD;
-      const pinching = !!(opts && opts.livePinch) || board.classList.contains("is-pinching");
-      let ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
-      let oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
-      /* Ancre monde figée au début du pinch (évite oscillation si doigts bougent). */
-      let ax, ay;
-      if (pinching && boardTouchPinch && Number.isFinite(boardTouchPinch.ax)) {
-        ax = boardTouchPinch.ax;
-        ay = boardTouchPinch.ay;
-        if (Number.isFinite(boardTouchPinch.ox0)) ox = boardTouchPinch.ox0;
-        if (Number.isFinite(boardTouchPinch.oy0)) oy = boardTouchPinch.oy0;
-      } else {
-        ax = (board.scrollLeft + ox - pad) / z0;
-        ay = (board.scrollTop + oy - pad) / z0;
-      }
-      if (Math.abs(z1 - z0) < 1e-9 && !pinching) {
+      const ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
+      const oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
+      const ax = (board.scrollLeft + ox - pad) / z0;
+      const ay = (board.scrollTop + oy - pad) / z0;
+      if (Math.abs(z1 - z0) < 1e-9) {
         applyBoardZoomStyles(opts);
-        return;
-      }
-      if (pinching) {
-        if (boardTouchPinch && !Number.isFinite(boardTouchPinch.ax)) {
-          boardTouchPinch.ax = ax;
-          boardTouchPinch.ay = ay;
-          boardTouchPinch.ox0 = ox;
-          boardTouchPinch.oy0 = oy;
-        }
-        boardZoomPend = { z1: z1, ox: ox, oy: oy, ax: ax, ay: ay, pad: pad };
-        if (!boardZoomRaf) {
-          boardZoomRaf = requestAnimationFrame(function () {
-            boardZoomRaf = 0;
-            const p = boardZoomPend;
-            boardZoomPend = null;
-            if (!p) return;
-            state.boardZoom = p.z1;
-            applyBoardZoomStyles({ livePinch: true });
-            board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
-            board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
-          });
-        }
         return;
       }
       state.boardZoom = z1;
       /* v143 : molette / boutons zoom — masquer iframe Fluke le temps du scale (anti double face). */
-      try {
-        board.classList.add("is-board-zooming");
-        if (window.__pwFlukeZoomHideT) clearTimeout(window.__pwFlukeZoomHideT);
-        window.__pwFlukeZoomHideT = setTimeout(function () {
-          try { board.classList.remove("is-board-zooming"); } catch (_) {}
-          try { fitAllFlukeLiveFrames(); } catch (_) {}
-        }, 160);
-      } catch (_) {}
+      const pinching = !!(opts && opts.livePinch) || board.classList.contains("is-pinching");
+      if (!pinching) {
+        try {
+          board.classList.add("is-board-zooming");
+          if (window.__pwFlukeZoomHideT) clearTimeout(window.__pwFlukeZoomHideT);
+          window.__pwFlukeZoomHideT = setTimeout(function () {
+            try { board.classList.remove("is-board-zooming"); } catch (_) {}
+            try { fitAllFlukeLiveFrames(); } catch (_) {}
+          }, 160);
+        } catch (_) {}
+      }
       applyBoardZoomStyles(opts);
       board.scrollLeft = ax * z1 - ox + pad;
       board.scrollTop = ay * z1 - oy + pad;
@@ -20894,33 +20845,14 @@
           if (def && hasCoil(def) && !def.latch && !isOnDelayTimer(def, i.type)) i.closed = false;
         });
       }
-      /*
-       * v145 iPhone : zoom puis Lecture → render() avec boardWorld déjà en scale(z)
-       * saturait WebKit (écran blanc). Rebuild à scale(1), puis restaurer la vue.
-       * PC inchangé. Cadenas Lecture = toujours layout only (pas la caméra).
-       */
-      const safeLectureRender = !!PW_IOS;
+      /* v148 : render comme version-site-1 (plus de rebuild scale(1) iOS). */
+      render();
       try {
-        if (safeLectureRender) {
-          board.classList.add("is-board-zooming");
-          const world = document.getElementById("boardWorld");
-          if (world) world.style.transform = "translate3d(0,0,0) scale(1)";
-        }
-        render();
-      } catch (_) {
-        try { render(); } catch (_2) {}
-      } finally {
-        try {
-          state.boardZoom = keepZ;
-          applyBoardZoomStyles();
-          board.scrollLeft = keepSl;
-          board.scrollTop = keepSt;
-        } catch (_) {}
-        if (safeLectureRender) {
-          try { board.classList.remove("is-board-zooming"); } catch (_) {}
-          try { fitAllFlukeLiveFrames(); } catch (_) {}
-        }
-      }
+        state.boardZoom = keepZ;
+        applyBoardZoomStyles();
+        board.scrollLeft = keepSl;
+        board.scrollTop = keepSt;
+      } catch (_) {}
       if (state.etsOpen) renderEtsPanel();
       /* v12 : shell en flux (pas fixed) — ne jamais réécrire height/transform sur body. */
     }
@@ -27915,23 +27847,14 @@
       if (!(dist > 8)) return false;
       cancelBoardOpsForPinch();
       ensurePinchSpacerRoom(boardZoom());
-      const z0 = boardZoom();
-      const pad = BOARD_PAN_PAD;
-      const rect = board.getBoundingClientRect();
-      const ox0 = mid.x - rect.left;
-      const oy0 = mid.y - rect.top;
       boardTouchPinch = {
         dist0: dist,
-        z0: z0,
+        z0: boardZoom(),
         midX: mid.x,
         midY: mid.y,
         idA: a.identifier,
         idB: b.identifier,
-        via: "touch",
-        ox0: ox0,
-        oy0: oy0,
-        ax: (board.scrollLeft + ox0 - pad) / z0,
-        ay: (board.scrollTop + oy0 - pad) / z0
+        via: "touch"
       };
       boardGesturePinch = true;
       board.classList.add("is-pinching");
@@ -28044,32 +27967,14 @@
       boardGesturePinch = false;
       board.classList.remove("is-pinching");
       try { lockShellDuringPinch(false); } catch (_) {}
-      /* Appliquer le dernier frame pinch en attente, puis settle spacer. */
-      if (boardZoomRaf) {
-        try { cancelAnimationFrame(boardZoomRaf); } catch (_) {}
-        boardZoomRaf = 0;
-      }
-      if (boardZoomPend) {
-        const p = boardZoomPend;
-        boardZoomPend = null;
-        state.boardZoom = p.z1;
-        board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
-        board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
-      }
-      /* Settle spacer (hors pinch) + grille ; render différé si demandé pendant pinch.
-         v142 iOS : NE PAS rebuild le DOM après pinch (façade KNX + fils → OOM Safari).
-         Le zoom n’a touché que scale/scroll — les .dev/SVG déjà en place suffisent. */
+      /* Settle spacer (hors pinch) + grille ; render différé si demandé pendant pinch. */
       applyBoardZoomStyles();
       try { syncBoardCoords(); } catch (_) {}
       if (window.__pwNeedRenderAfterZoom) {
         window.__pwNeedRenderAfterZoom = false;
-        if (PW_IOS) {
-          try { applyBoardZoomStyles(); } catch (_) {}
-        } else {
-          requestAnimationFrame(function () {
-            try { render(); } catch (_) {}
-          });
-        }
+        requestAnimationFrame(function () {
+          try { render(); } catch (_) {}
+        });
       }
     }
     applyStableShellH();
@@ -28120,23 +28025,14 @@
       if (!boardTouchPinch) {
         cancelBoardOpsForPinch();
         ensurePinchSpacerRoom(boardZoom());
-        const z0 = boardZoom();
-        const pad = BOARD_PAN_PAD;
-        const rect = board.getBoundingClientRect();
-        const ox0 = midX - rect.left;
-        const oy0 = midY - rect.top;
         boardTouchPinch = {
           dist0: dist,
-          z0: z0,
+          z0: boardZoom(),
           midX: midX,
           midY: midY,
           idA: a.id,
           idB: b.id,
-          via: "pointer",
-          ox0: ox0,
-          oy0: oy0,
-          ax: (board.scrollLeft + ox0 - pad) / z0,
-          ay: (board.scrollTop + oy0 - pad) / z0
+          via: "pointer"
         };
         boardGesturePinch = true;
         board.classList.add("is-pinching");
