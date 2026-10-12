@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v140-safari-crash" />
+  <meta name="swissdz-rev" content="native-shell-8777-v141-iphone-oom" />
+  <!-- v141: iPhone — zoom/Lecture OOM : SVG sans attrs 2600×1800, pad/zoom plafonnés, SW off, calques masqués au pinch -->
   <!-- v140: iOS Safari — SW sans fetch intercept ; calques SVG sans min 2000×1400 (OOM WebKit) ; supabase 1st-party ; embouts harden -->
   <!-- v139: Play/Lecture — badge hors flux (pas de shift footer) ; annule autofit exemplaire en retard ; conserve pan/zoom -->
   <!-- v138: téléphone — feuille composants visiblement plus basse (top explicite, plus de height vh clipée par work) -->
@@ -2990,6 +2991,17 @@
       pointer-events:none !important;
       transition:none !important;
       animation:none !important;
+    }
+    /* v141 : pendant pinch iPhone — masquer calques SVG lourds (évite re-raster GPU → crash). */
+    html.pw-ios #board.is-pinching svg.wire-clips,
+    html.pw-ios #board.is-pinching svg.fluke-leads,
+    html.pw-ios #board.is-pinching svg.prox-beams,
+    html.pw-ios #board.is-pinching svg.align-guides,
+    html.pw-ios #board.is-pinching svg.board-coords {
+      visibility:hidden !important;
+    }
+    html.pw-ios #board.is-pinching svg.wires {
+      opacity:0.25 !important;
     }
     /* v135 : poignées resize invisibles/inertes pendant pinch — évite resize géométrique vs zoom. */
     #board.is-pinching .rhandle {
@@ -6185,12 +6197,12 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v140-safari-crash"></script>
+  <script src="i18n/panelwire-i18n.js?v=v141-iphone-oom"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
   <!-- v140 : 1st-party — plus de cdn.jsdelivr (jamais d’hôte tiers pour le panel) -->
-  <script src="js/supabase.min.js?v=v140-safari-crash"></script>
-  <script src="js/wirelab-auth.js?v=v140-safari-crash"></script>
+  <script src="js/supabase.min.js?v=v141-iphone-oom"></script>
+  <script src="js/wirelab-auth.js?v=v141-iphone-oom"></script>
   <script src="js/wirelab-auth-vitrine.js?v=vitrine10"></script>
   <script>
     /* Assets pré-cadrés (photos studio trop larges → bandes). */
@@ -10652,14 +10664,28 @@
       showWireTags: true
     };
 
+    /* v141 : iPhone/iPad WebKit — mémoire GPU limitée ; détecter tôt pour plafonner zoom/pad. */
+    const PW_IOS = (function () {
+      try {
+        const ua = navigator.userAgent || "";
+        if (/iPhone|iPad|iPod/i.test(ua)) return true;
+        if (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1) return true;
+      } catch (_) {}
+      return false;
+    })();
+    try {
+      if (PW_IOS) document.documentElement.classList.add("pw-ios");
+    } catch (_) {}
     const BOARD_ZOOM_MIN = 0.2;
     const BOARD_ZOOM_ABS_MIN = 0.08;
-    const BOARD_ZOOM_MAX = 5;
+    /* v141 iOS : zoom max 2.4 (×5 + SVG géants = OOM Safari). */
+    const BOARD_ZOOM_MAX = PW_IOS ? 2.4 : 5;
     const BOARD_ZOOM_STEP = 1.15;
     const BOARD_WORLD_W = 2600;
     const BOARD_WORLD_H = 1800;
-    /* v106 = WireLabPro-1.0.1 : grande marge fixe → pan fluide 4 directions (pas letterbox dynamique). */
-    const BOARD_PAN_PAD = 2400;
+    /* v106 = WireLabPro-1.0.1 : grande marge fixe → pan fluide 4 directions (pas letterbox dynamique).
+       v141 iOS : pad 720 (2400 → grille/spacer énormes → crash au zoom). */
+    const BOARD_PAN_PAD = PW_IOS ? 720 : 2400;
     const BOARD_PAN_ROOM = 0;
     const BOARD_COORDS_STEP = 100;
     const BOARD_FIT_ZOOM_MIN = 0.45;
@@ -10671,14 +10697,15 @@
       exampleFitToken++;
       return exampleFitToken;
     }
-    /** Calque SVG plan : viewBox monde, sans forcer un backing-store 2000×1400 (crash iOS). */
+    /** Calque SVG plan : viewBox monde uniquement — attrs width/height 2600×1800 = backing-store OOM iOS. */
     function sizeBoardSvg(svg) {
       if (!svg) return;
       try {
-        svg.setAttribute("width", String(BOARD_WORLD_W));
-        svg.setAttribute("height", String(BOARD_WORLD_H));
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "100%");
         svg.setAttribute("viewBox", "0 0 " + BOARD_WORLD_W + " " + BOARD_WORLD_H);
         svg.setAttribute("preserveAspectRatio", "none");
+        svg.removeAttribute("xmlns:xlink");
       } catch (_) {}
     }
 
@@ -10769,7 +10796,9 @@
       const vh = Math.max(0, board.clientHeight || 0);
       const coverX = vw > 0 ? Math.max(0, (vw / z - BOARD_WORLD_W) / 2) : 0;
       const coverY = vh > 0 ? Math.max(0, (vh / z - BOARD_WORLD_H) / 2) : 0;
-      const bleed = Math.max(pad / z, coverX, coverY, gridStep) + gridStep;
+      let bleed = Math.max(pad / z, coverX, coverY, gridStep) + gridStep;
+      /* v141 iOS : grille trop large (pad/z) = milliers de lines SVG → crash WebKit. */
+      if (PW_IOS) bleed = Math.min(bleed, 500);
       const nBleed = Math.ceil(bleed / gridStep) * gridStep;
       const bx0 = -nBleed;
       const by0 = -nBleed;
@@ -10876,8 +10905,10 @@
       const pad = BOARD_PAN_PAD;
       const vw = Math.max(0, board.clientWidth || 0);
       const vh = Math.max(0, board.clientHeight || 0);
-      /* Marge zoom-in une fois (×2.5), jamais BOARD_ZOOM_MAX (échec v26). */
-      const zHead = Math.min(BOARD_ZOOM_MAX, Math.max(zNow * 2.5, zNow + 0.5));
+      /* Marge zoom-in une fois (×2.5), jamais BOARD_ZOOM_MAX (échec v26).
+         v141 iOS : ×1.35 seulement — agrandir le spacer pendant pinch = OOM. */
+      const headMul = PW_IOS ? 1.35 : 2.5;
+      const zHead = Math.min(BOARD_ZOOM_MAX, Math.max(zNow * headMul, zNow + (PW_IOS ? 0.2 : 0.5)));
       const needW = Math.max(Math.round(BOARD_WORLD_W * zHead + pad * 2), vw);
       const needH = Math.max(Math.round(BOARD_WORLD_H * zHead + pad * 2), vh);
       const curW = parseFloat(spacer.style.width) || spacer.offsetWidth || 0;
@@ -29512,30 +29543,25 @@
       openProjectFile(f);
     });
 
-    /* v140 : purge anciens SW (fetch pass-through = crash-loop iOS), puis registre sans intercept. */
+    /* v141 : sur iPhone — désinstaller TOUS les SW (même sans fetch, WebKit peut crash-loop).
+       Desktop : purge anciens, puis registre minimal sans intercept. */
     if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-      var SW_VER = "safari-crash-v140";
-      var swReg = function () {
-        navigator.serviceWorker.register("sw-pwire.js?v=" + SW_VER).catch(function () {});
+      var SW_VER = "safari-crash-v141";
+      var swNuke = function () {
+        if (!navigator.serviceWorker.getRegistrations) return Promise.resolve();
+        return navigator.serviceWorker.getRegistrations().then(function (regs) {
+          return Promise.all((regs || []).map(function (reg) {
+            try { return reg.unregister(); } catch (_) { return Promise.resolve(); }
+          }));
+        });
       };
-      if (navigator.serviceWorker.getRegistrations) {
-        navigator.serviceWorker.getRegistrations().then(function (regs) {
-          var ops = (regs || []).map(function (reg) {
-            try {
-              var url = (reg.active && reg.active.scriptURL)
-                || (reg.waiting && reg.waiting.scriptURL)
-                || (reg.installing && reg.installing.scriptURL)
-                || "";
-              if (url.indexOf("sw-pwire.js") >= 0 && url.indexOf(SW_VER) < 0) {
-                return reg.unregister();
-              }
-            } catch (_) {}
-            return Promise.resolve();
-          });
-          return Promise.all(ops);
-        }).then(swReg).catch(swReg);
+      if (PW_IOS) {
+        swNuke().catch(function () {});
       } else {
-        swReg();
+        var swReg = function () {
+          navigator.serviceWorker.register("sw-pwire.js?v=" + SW_VER).catch(function () {});
+        };
+        swNuke().then(swReg).catch(swReg);
       }
     }
     if ("launchQueue" in window && window.launchQueue && typeof window.launchQueue.setConsumer === "function") {
