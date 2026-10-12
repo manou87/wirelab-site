@@ -8,20 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v147-hide-lecture-badge" />
-  <!-- v147: badge 🔒 Lecture vraiment masqué (CSS body.sim-lecture le réaffichait) -->
-  <!-- v146: test — cadenas Lecture désactivé (Play ne verrouille plus le layout) -->
-  <!-- v145: iPhone — Lecture après zoom : render à scale(1) puis restaurer pan/zoom (évite OOM) -->
-  <!-- v144: téléphone — zoom/pad comme version-site-1 (plus de plafond iOS qui bloquait le pinch) -->
-  <!-- v143: Fluke — une seule face (live) ; underlay masqué si prêt ; pendant zoom photo seule (anti double-échelle) -->
-  <!-- v142: iPhone zoom-out façade KNX — pas de render() après pinch ; zoom min relevé ; imgs/SVG masqués au pinch -->
-  <!-- v141: iPhone — zoom/Lecture OOM : SVG sans attrs 2600×1800, pad/zoom plafonnés, SW off, calques masqués au pinch -->
-  <!-- v140: iOS Safari — SW sans fetch intercept ; calques SVG sans min 2000×1400 (OOM WebKit) ; supabase 1st-party ; embouts harden -->
-  <!-- v139: Play/Lecture — badge hors flux (pas de shift footer) ; annule autofit exemplaire en retard ; conserve pan/zoom -->
-  <!-- v138: téléphone — feuille composants visiblement plus basse (top explicite, plus de height vh clipée par work) -->
-  <!-- v137: ETS à la demande (pas au clic KNX) ; GA/IA uniques par instance ; exemple façade câblée ; Contrôle Expo via /oibt-trainer/ -->
-  <!-- v136: téléphone — feuille composants ~10 % plus basse (82vh) — ineffective web: 82vh≈92vh après clip overflow -->
-  <!-- v135: pinch = zoom viewport seulement (pas resize géométrique platine/composants) ; anti-jitter ; volets KNX ext visibles Free -->
+  <meta name="swissdz-rev" content="native-shell-8777-v149-rollback-site1" />
+  <!-- v149: ROLLBACK complet swissdz-panel = tag version-site-1 (avant cadenas Lecture / crash iPhone) -->
   <!-- v134: Installations exemplaires — la liste de la modale centrale défile (molette + doigt), le plan derrière ne panne plus -->
   <!-- v133: ETS — chaque participant KNX (volet, slot façade, poussoir, actionneur, coupleur) a ses GA et noms d’objets -->
   <!-- v132: cordon PE continu ; mesures Fluke du plan = bornes réellement touchées (hors / sous tension) -->
@@ -725,18 +713,16 @@
       position:fixed !important;
       left:50% !important;
       right:auto !important;
-      /* v138 : top explicite — bande plan visible sous le chrome (vh seul était masqué). */
-      top:max(12vh, calc(var(--pw-head-h, 48px) + 10px)) !important;
-      top:max(12dvh, calc(var(--pw-head-h, 48px) + 10px)) !important;
-      bottom:calc(var(--pw-foot-h, 56px) + 4px) !important;
-      width:min(96vw, 440px) !important;
-      max-width:96vw !important;
-      height:auto !important;
-      max-height:none !important;
+      top:auto !important;
+      bottom:calc(var(--pw-foot-h, 56px) + 8px) !important;
+      width:min(312px, 78vw) !important;
+      max-width:78vw !important;
+      height:min(52vh, 440px) !important;
+      max-height:min(52vh, 440px) !important;
       z-index:320 !important;
       grid-area:unset !important;
       transform:translate(-50%, 110%) !important;
-      border-radius:14px 14px 10px 10px !important;
+      border-radius:14px !important;
       border-top:1px solid var(--line) !important;
       box-shadow:0 -8px 28px rgba(15,23,42,.26) !important;
       overflow:hidden !important;
@@ -985,7 +971,6 @@
        Mobile (≤900px) : .bar reprend flex:1 pour épingler le play à droite. */
     .foot-pin-play {
       display:flex; align-items:center; flex:0 0 auto; z-index:5;
-      position:relative; /* ancre badge Lecture hors flux */
     }
     .bar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex:0 1 auto; min-width:0; }
     /* Desktop : wrapper projet en ligne flex */
@@ -1500,14 +1485,6 @@
       font-size:11px; line-height:1; pointer-events:none;
       filter:drop-shadow(0 1px 1px rgba(15,23,42,.35));
     }
-    /* Mode Lecture (Play) : badge off en v146/v147 (test sans cadenas). */
-    .lecture-badge,
-    body.sim-lecture .lecture-badge,
-    #lectureBadge {
-      display:none !important;
-      visibility:hidden !important;
-    }
-    html[data-theme="dark"] .lecture-badge { background:#16a34a; }
     .play-fab { display:none !important; }
     @media (max-width: 1100px) {
       .app-shell { grid-template-columns:240px minmax(0,1fr); }
@@ -1811,7 +1788,7 @@
       background:rgba(15,23,42,.45); touch-action:manipulation;
     }
     html.pw-lib-bottom body.lib-open .lib-backdrop { display:block; }
-    /* v88-lib-phone : feuille haute, grille 2 cols, vignettes + nom (pas de + Ajouter). */
+    /* v63 : feuille catalogue quasi plein écran (cartes photo + select catégorie). */
     html.pw-lib-bottom .lib-side {
       position:absolute !important;
       grid-area:work !important;
@@ -1819,18 +1796,17 @@
       z-index:60 !important;
       left:50% !important;
       right:auto !important;
-      /* v138 : top % du work (pas height vh) — 82vh/92vh dépassaient work + overflow:hidden → même rendu. */
-      top:14% !important;
+      top:auto !important;
       bottom:4px !important;
       width:min(440px, 96vw) !important;
       max-width:96vw !important;
-      height:auto !important;
-      max-height:none !important;
+      height:min(82vh, 720px) !important;
+      max-height:min(82vh, 720px) !important;
       transform:translate(-50%, 110%) !important;
       transition:transform .22s ease !important;
       border-right:none !important;
       border-top:1px solid rgba(148,163,184,.35) !important;
-      border-radius:14px 14px 10px 10px !important;
+      border-radius:18px 18px 12px 12px !important;
       box-shadow:0 -12px 40px rgba(15,23,42,.4) !important;
       overflow:hidden !important;
       pointer-events:none !important;
@@ -1843,65 +1819,68 @@
       pointer-events:auto !important;
       visibility:visible !important;
     }
-    /* En-tête compact : seul le × reste ; titre + hint masqués pour gagner de la hauteur. */
     html.pw-lib-bottom .lib-phone-head {
-      display:flex !important; align-items:center; justify-content:flex-end; gap:0;
-      padding:0 0 2px; margin:0; min-height:0;
+      display:flex !important; align-items:flex-start; gap:10px;
+      padding:4px 2px 8px; margin:0;
     }
     html.pw-lib-bottom .lib-phone-close {
-      flex:0 0 auto; width:30px; height:30px; border-radius:8px;
+      flex:0 0 auto; width:36px; height:36px; border-radius:10px;
       border:1px solid rgba(148,163,184,.35); background:rgba(30,41,59,.9);
-      color:#f8fafc; font-size:18px; line-height:1; font-weight:600;
+      color:#f8fafc; font-size:22px; line-height:1; font-weight:600;
       display:inline-flex; align-items:center; justify-content:center;
       touch-action:manipulation; -webkit-tap-highlight-color:transparent;
     }
-    html.pw-lib-bottom .lib-phone-titles { display:none !important; }
-    html.pw-lib-bottom .lib-phone-titles strong,
-    html.pw-lib-bottom .lib-phone-titles span { display:none !important; }
+    html.pw-lib-bottom .lib-phone-titles {
+      flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:2px;
+    }
+    html.pw-lib-bottom .lib-phone-titles strong {
+      margin:0 !important; font-size:18px !important; font-weight:800 !important;
+      color:#f8fafc !important; letter-spacing:0 !important; text-transform:none !important;
+    }
+    html.pw-lib-bottom .lib-phone-titles span {
+      font-size:12px; font-weight:600; color:#94a3b8; line-height:1.25;
+    }
     html.pw-lib-bottom .lib-desk-title,
     html.pw-lib-bottom .lib-tabs { display:none !important; }
     html.pw-lib-bottom .lib-cat-select-row {
-      display:block !important; margin:0 0 4px;
+      display:block !important; margin:0 0 8px;
     }
     html.pw-lib-bottom .lib-cat-select-row select {
-      width:100%; height:34px; border-radius:8px;
+      width:100%; height:40px; border-radius:10px;
       border:1px solid rgba(148,163,184,.35);
       background:#1e293b; color:#f1f5f9;
-      padding:0 10px; font-size:13px; font-weight:700;
+      padding:0 12px; font-size:14px; font-weight:700;
       outline:none; appearance:none;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-      background-repeat:no-repeat; background-position:right 10px center;
-      padding-right:28px;
+      background-repeat:no-repeat; background-position:right 12px center;
+      padding-right:32px;
     }
     html.pw-lib-bottom .lib-side-head {
-      flex:0 0 auto !important; padding:6px 8px 4px !important;
+      flex:0 0 auto !important; padding:10px 12px 6px !important;
       border-bottom:1px solid rgba(148,163,184,.2) !important;
       background:#0f172a !important;
     }
     html.pw-lib-bottom .lib-search-row input {
-      height:34px !important; font-size:13px !important; font-weight:650 !important;
-      border-radius:8px !important; padding-left:32px !important;
+      height:40px !important; font-size:14px !important; font-weight:650 !important;
+      border-radius:10px !important; padding-left:34px !important;
       background:#1e293b !important; color:#f1f5f9 !important;
       border-color:rgba(148,163,184,.35) !important;
     }
-    html.pw-lib-bottom .lib-search-row .lib-search-ico { color:#94a3b8 !important; left:10px !important; width:15px !important; height:15px !important; }
+    html.pw-lib-bottom .lib-search-row .lib-search-ico { color:#94a3b8 !important; left:10px !important; width:16px !important; height:16px !important; }
     html.pw-lib-bottom .lib-side > .lib-items,
     html.pw-lib-bottom .lib-phone-grid {
       display:grid !important; flex:1 1 auto !important; min-height:0 !important;
-      /* 2 cols : lisible sur téléphone ; auto-rows évite l’écrasement (all-cats). */
-      grid-template-columns:1fr 1fr !important;
-      grid-auto-rows:auto !important; gap:8px !important;
-      padding:8px 10px 14px !important; overflow-y:auto !important;
-      -webkit-overflow-scrolling:touch; align-content:start; align-items:start;
+      grid-template-columns:1fr 1fr !important; gap:10px !important;
+      padding:10px 12px 16px !important; overflow-y:auto !important;
+      -webkit-overflow-scrolling:touch; align-content:start;
       background:#0b1220 !important;
     }
     html.pw-lib-bottom .lib-tabs .lib-acc-panel.lib-items { display:none !important; }
     html.pw-lib-bottom .item {
       background:#1e293b !important; border:1px solid rgba(148,163,184,.22) !important;
-      border-radius:10px !important; padding:8px 6px 6px !important;
-      gap:4px !important; min-height:118px !important; height:auto !important;
-      justify-content:flex-start !important; align-self:start !important;
-      overflow:visible !important; box-shadow:none;
+      border-radius:14px !important; padding:10px 8px 8px !important;
+      gap:6px !important; min-height:148px; justify-content:flex-start !important;
+      box-shadow:0 4px 14px rgba(0,0,0,.22);
     }
     html.pw-lib-bottom .item:hover,
     html.pw-lib-bottom .item:active {
@@ -1909,23 +1888,21 @@
     }
     html.pw-lib-bottom .item img,
     html.pw-lib-bottom .item .thumb {
-      width:78% !important; max-height:72px !important; min-height:40px !important;
-      margin:2px auto 0 !important; flex:0 0 auto !important;
-      background:#fff !important; border-radius:8px !important; padding:4px;
-      box-sizing:border-box; object-fit:contain !important;
+      width:78% !important; max-height:88px !important; margin:2px auto 0 !important;
+      background:#fff !important; border-radius:10px !important; padding:6px;
+      box-sizing:border-box;
     }
     html.pw-lib-bottom .item > span:not(.thumb):not(.lib-add) {
-      display:-webkit-box !important; -webkit-box-orient:vertical !important;
-      font-size:11px !important; font-weight:700 !important; color:#e2e8f0 !important;
-      -webkit-line-clamp:2; line-clamp:2; min-height:2.2em; line-height:1.15;
-      overflow:hidden; text-overflow:ellipsis; flex:0 0 auto !important;
-      max-width:100%;
+      font-size:12px !important; font-weight:700 !important; color:#e2e8f0 !important;
+      -webkit-line-clamp:2; min-height:2.4em;
     }
-    /* Téléphone : vignettes seules — pas de bouton « + Ajouter ». */
     html.pw-lib-bottom .item .lib-add {
-      display:none !important;
+      display:inline-flex !important; align-items:center; justify-content:center; gap:4px;
+      margin-top:auto; width:100%; height:32px; border-radius:9px;
+      background:#2563eb; color:#fff; font-size:12px; font-weight:800;
+      letter-spacing:.01em; pointer-events:none;
     }
-    html.pw-lib-bottom .item .lib-add::before { content:none; }
+    html.pw-lib-bottom .item .lib-add::before { content:"+"; font-size:15px; font-weight:900; line-height:1; }
     html.pw-lib-bottom .lib-examples {
       background:#0b1220 !important; color:#e2e8f0 !important;
       flex:1 1 auto; min-height:0; overflow:auto; padding:10px 12px;
@@ -2799,10 +2776,7 @@
     .roller-cmd[data-dir="stop"] { background:#334155; }
     /* v122-facade-maison : gabarit sur la grille (pas une 2e photo de volet). */
     .dev.house-facade { overflow:visible; }
-    /* Cadrage sélection = boîte .dev = dessin façade (pas de marge morte SVG). */
-    .dev.house-facade.sel { outline-offset:0; }
     .facade-shell { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0; }
-    .facade-shell > svg { display:block; width:100%; height:100%; }
     .facade-slot { position:absolute; box-sizing:border-box; z-index:3; pointer-events:none; overflow:visible; }
     .facade-slot.empty {
       pointer-events:auto; cursor:pointer;
@@ -2907,31 +2881,10 @@
       display:flex; flex-direction:column; gap:4px; align-items:center; justify-content:center;
       width:100%; min-width:0; max-width:none; text-align:center;
       margin:0; border:1px solid #eef2f7; border-radius:10px; padding:8px 6px;
-      background:#fafbfc; cursor:grab;
+      background:#fafbfc; cursor:pointer;
       touch-action:manipulation; -webkit-tap-highlight-color:transparent;
     }
-    .item:active { cursor:grabbing; }
     .item:hover { border-color:#bfdbfe; background:#f8fbff; }
-    .lib-ghost {
-      position:fixed; z-index:5800; pointer-events:none;
-      transform:translate(-50%,-55%);
-      width:72px; max-width:22vw; padding:6px; border-radius:10px;
-      border:1.5px solid #2563eb; background:#fff;
-      box-shadow:0 10px 28px rgba(15,23,42,.28);
-      display:flex; flex-direction:column; align-items:center; gap:4px;
-      font-size:10px; font-weight:800; color:#0f172a; text-align:center;
-    }
-    .lib-ghost img, .lib-ghost .thumb {
-      width:100%; max-height:48px; object-fit:contain; display:block;
-    }
-    body.lib-palette-drag #board {
-      outline:2px dashed rgba(37,99,235,.55);
-      outline-offset:-2px;
-    }
-    body.lib-palette-drag #board.lib-drop-hot {
-      outline-color:#2563eb;
-      background-color:rgba(37,99,235,.04);
-    }
     .item > span:not(.thumb) {
       font-size:11px; font-weight:650; color:#475569; line-height:1.2;
       max-width:100%; overflow:hidden;
@@ -2992,30 +2945,6 @@
       pointer-events:none !important;
       transition:none !important;
       animation:none !important;
-    }
-    /* v141/v142 : pinch iPhone — masquer calques + photos (re-raster GPU → crash zoom-out façade). */
-    html.pw-ios #board.is-pinching svg.wire-clips,
-    html.pw-ios #board.is-pinching svg.fluke-leads,
-    html.pw-ios #board.is-pinching svg.prox-beams,
-    html.pw-ios #board.is-pinching svg.align-guides,
-    html.pw-ios #board.is-pinching svg.board-coords,
-    html.pw-ios #board.is-pinching svg.wires {
-      visibility:hidden !important;
-    }
-    html.pw-ios #board.is-pinching #boardWorld .dev img,
-    html.pw-ios #board.is-pinching #boardWorld .knx-shutter,
-    html.pw-ios #board.is-pinching #boardWorld .roller-opening,
-    html.pw-ios #board.is-pinching #boardWorld .board-ref-layer {
-      visibility:hidden !important;
-    }
-    html.pw-ios .knx-shutter .slats,
-    html.pw-ios .roller-opening .cloth {
-      will-change:auto !important;
-    }
-    /* v135 : poignées resize invisibles/inertes pendant pinch — évite resize géométrique vs zoom. */
-    #board.is-pinching .rhandle {
-      display:none !important;
-      pointer-events:none !important;
     }
     /* Spacer = marge pan (fond uni). Grille UNIQUEMENT dans #boardWorld. */
     #boardZoomSpacer {
@@ -3122,10 +3051,9 @@
       color:var(--muted); font-size:15px; pointer-events:none; text-align:center; padding:24px;
       z-index:3;
     }
-    /* Stacking v84/v137: rail(8) → faces sous fils(20–50) → fils(55) → faces devant fils(56–58)
-       → fluke-leads(59) → pastilles(70) → goulottes(80–85, couvrent fils + modules).
-       Devant = cover fils ; Derrière = fils visibles. */
-
+    /* Stacking v84: rail(8) → faces sous fils(20–50) → fils(55) → faces devant fils(56–58)
+       → fluke-leads(59) → pastilles(70). Devant = cover fils ; Derrière = fils visibles.
+       v42 inchangé: waypoints figés + path.hit off pendant drag module. */
     /* Image pure : pas de bande/bordure ; sélection = outline léger. */
     .dev {
       position:absolute; border:none; background:transparent; border-radius:0;
@@ -3185,30 +3113,13 @@
     .dev.fluke-meter > img.fluke-underlay {
       display:block !important;
       position:absolute; inset:0; width:100%; height:100%;
-      object-fit:contain; object-position:center; z-index:0; pointer-events:none;
+      object-fit:contain; z-index:0; pointer-events:none;
       background:#0b1220;
     }
     .dev.fluke-meter .fluke-underlay-hidden {
       display:none !important; visibility:hidden !important;
       pointer-events:none !important; opacity:0 !important;
       width:0 !important; height:0 !important;
-    }
-    /* v143 : face live prête → une seule couche (plus de photo sous l’iframe = double Fluke). */
-    .dev.fluke-meter.is-live-ready > img.fluke-underlay {
-      display:none !important; visibility:hidden !important; opacity:0 !important;
-      pointer-events:none !important;
-    }
-    /* Pendant zoom plan : iframe WebKit décroche du scale parent → photo seule, taille = cadre. */
-    #board.is-pinching .dev.fluke-meter.is-live-ready > img.fluke-underlay,
-    #board.is-board-zooming .dev.fluke-meter.is-live-ready > img.fluke-underlay {
-      display:block !important; visibility:visible !important; opacity:1 !important;
-      width:100% !important; height:100% !important;
-    }
-    #board.is-pinching .dev.fluke-meter.is-live-ready .fluke-viewport,
-    #board.is-pinching .dev.fluke-meter.is-live-ready iframe.fluke-live,
-    #board.is-board-zooming .dev.fluke-meter.is-live-ready .fluke-viewport,
-    #board.is-board-zooming .dev.fluke-meter.is-live-ready iframe.fluke-live {
-      visibility:hidden !important; opacity:0 !important; pointer-events:none !important;
     }
     /* Viewport / iframe : pointer-events none (mesure sans tap lecteur). UI = .is-fluke-ui */
     .dev.fluke-meter .fluke-viewport {
@@ -3230,21 +3141,17 @@
       touch-action:none;
       pointer-events:none;
       transform-origin:0 0;
-      /* v143 : pas de will-change — couche GPU séparée = échelle différente au zoom plan */
+      will-change:transform;
       -webkit-backface-visibility:hidden; backface-visibility:hidden;
       /* v90 : tant que Flutter n’est pas prêt, underlay photo reste visible */
       opacity:0;
     }
     .dev.fluke-meter iframe.fluke-live[data-fluke-ready="1"] { opacity:1; }
-    /* Face interactive dès que live prêt (plus de bouton UI). */
+    /* Face interactive seulement si UI activée (bouton cadre) — sinon pointes + Play directs. */
     .dev.fluke-meter.is-fluke-ui .fluke-viewport,
-    .dev.fluke-meter.is-fluke-ui iframe.fluke-live,
-    .dev.fluke-meter.is-live-ready .fluke-viewport,
-    .dev.fluke-meter.is-live-ready iframe.fluke-live { pointer-events:auto; }
+    .dev.fluke-meter.is-fluke-ui iframe.fluke-live { pointer-events:auto; }
     #board.mode-wire .dev.fluke-meter.is-fluke-ui iframe.fluke-live,
-    #board.mode-wire .dev.fluke-meter.is-fluke-ui .fluke-viewport,
-    #board.mode-wire .dev.fluke-meter.is-live-ready iframe.fluke-live,
-    #board.mode-wire .dev.fluke-meter.is-live-ready .fluke-viewport { pointer-events:none; }
+    #board.mode-wire .dev.fluke-meter.is-fluke-ui .fluke-viewport { pointer-events:none; }
     #board.is-dragging .dev.fluke-meter iframe.fluke-live { pointer-events:none; }
     .dev.fluke-meter .fluke-drag-handle {
       position:absolute; left:16%; right:16%; top:0; height:16px; z-index:6;
@@ -3259,10 +3166,14 @@
       width:30px; height:3px; margin:-1.5px 0 0 -15px;
       border-radius:2px; background:rgba(148,163,184,.6);
     }
-    /* v143 : plus de bouton UI — face live seule, zoom = cadre appareil. */
     .dev.fluke-meter .fluke-ui-btn {
-      display:none !important;
-      pointer-events:none !important;
+      position:absolute; right:4px; bottom:4px; z-index:7;
+      min-width:28px; height:22px; padding:0 6px;
+      border-radius:6px; border:1px solid rgba(148,163,184,.55);
+      background:rgba(15,23,42,.72); color:#e2e8f0;
+      font:700 10px/20px system-ui,sans-serif; letter-spacing:.02em;
+      cursor:pointer; touch-action:manipulation; pointer-events:auto;
+      -webkit-user-select:none; user-select:none;
     }
     .dev.fluke-meter .fluke-ui-btn.on {
       background:#166534; border-color:#22c55e; color:#fff;
@@ -3309,8 +3220,7 @@
     /* Cordons Fluke : calque dédié, jamais clipés par l’iframe / masque trainer */
     svg.fluke-leads {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible !important;
-      /* v140 : pas de min-width/height forcés — calques géants = OOM WebKit iOS */
-      pointer-events:none; z-index:59;
+      pointer-events:none; min-width:1600px; min-height:1000px; z-index:59;
     }
     svg.fluke-leads path.fluke-lead,
     svg.wires path.fluke-lead {
@@ -3426,12 +3336,6 @@
     }
     .dev.source.phase { background:#fecaca; }
     .dev.source.neutre { background:#bfdbfe; }
-    svg.wire-clips {
-      position:absolute; inset:0; width:100%; height:100%; overflow:visible;
-      /* v140 : embouts — taille = boardWorld (pas min 2000×1400 → crash GPU iPhone) */
-      pointer-events:none; z-index:66;
-    }
-
     /* Pastilles : L1 marron · L2 noir · L3 gris · N bleu · PE jaune-vert · BUS KNX.
        Taille de base ; le JS scale width/height/margin/font avec le resize composant.
        --term-snap-aim-* partagés avec JS termVisualSnapRadius (v40-terminal-snap). */
@@ -3525,24 +3429,6 @@
     }
     .dev.barrette-dev {
       background:transparent; box-shadow:none; overflow:visible;
-    }
-    /* Goulotte PVC : couvre fils + modules (z CSS 80–85).
-       overflow:visible — sinon les .rhandle sont clippés (drag au lieu de resize). */
-    .dev.goulotte {
-      background:transparent; box-shadow:none;
-      overflow:visible; border-radius:0;
-      z-index:80;
-    }
-    .dev.sel.goulotte { z-index:85; }
-    .dev.goulotte img {
-      width:100%; height:100%; object-fit:fill; display:block; pointer-events:none;
-      border-radius:4px; box-shadow:0 2px 5px rgba(15,23,42,.28);
-    }
-    .dev.goulotte .rhandle { z-index:120; }
-    .thumb.goulotte-t {
-      background:linear-gradient(180deg,#e5e7eb 0%,#9ca3af 45%,#6b7280 100%);
-      color:#111827; font:700 9px ui-sans-serif,system-ui,sans-serif;
-      letter-spacing:.02em; display:flex; align-items:center; justify-content:center;
     }
     .barrette-face {
       position:absolute; inset:8% 4%;
@@ -4388,7 +4274,7 @@
     /* Guides d’alignement DIN : traits fins, pistache = rail / distance, violet = bords */
     svg.align-guides {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible;
-      pointer-events:none; z-index:45;
+      pointer-events:none; min-width:1600px; min-height:1000px; z-index:45;
     }
     svg.align-guides line {
       vector-effect:non-scaling-stroke;
@@ -4400,15 +4286,14 @@
     }
     svg.wires {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible;
-      /* v140 : size via viewBox JS / 100% parent — min 2000×1400 tuait Safari iOS */
-      pointer-events:none; z-index:55;
+      pointer-events:none; min-width:2000px; min-height:1400px; z-index:55;
       -webkit-user-select:none; user-select:none;
       -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent;
     }
     /* Faisceau capteur prox / photo : secteur depuis le nez, sous les modules */
     svg.prox-beams {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible;
-      pointer-events:none; z-index:14;
+      pointer-events:none; min-width:2000px; min-height:1400px; z-index:14;
     }
     svg.prox-beams .prox-cone {
       stroke-linejoin:round; stroke-linecap:round;
@@ -4788,23 +4673,23 @@
       text-overflow: clip !important;
       padding: 2px 4px !important;
     }
-    /* v91 : ne pas écraser les cartes (min-height:0 + overflow:hidden → barres blanches en all-cats). */
     html.pw-lib-bottom .item {
-      overflow: visible !important;
-      align-self: start !important;
-      min-height: 118px !important;
-      height: auto !important;
+      overflow: hidden !important;
+      align-self: stretch !important;
+      min-height: 168px !important;
       position: relative !important;
       z-index: 1 !important;
     }
     html.pw-lib-bottom .item img,
     html.pw-lib-bottom .item .thumb {
       max-height: 72px !important;
-      min-height: 40px !important;
       flex: 0 0 auto !important;
     }
     html.pw-lib-bottom .item .lib-add {
-      display: none !important;
+      flex: 0 0 auto !important;
+      margin-top: auto !important;
+      position: relative !important;
+      z-index: 2 !important;
     }
     .lib-tech-close {
       display: block; width: 100%; margin-top: 8px;
@@ -5662,7 +5547,7 @@
           <button type="button" id="btnLibClose" class="lib-phone-close" data-i18n-aria="libCloseAria" aria-label="Fermer">×</button>
           <div class="lib-phone-titles">
             <strong data-i18n="libPhoneTitle">Composants</strong>
-            <span data-i18n="libPhoneHint">Toucher = fiche · glisser sur le plan</span>
+            <span data-i18n="libPhoneHint">Toucher pour ajouter · glisser possible</span>
           </div>
         </div>
         <div class="lib-search-row">
@@ -5920,7 +5805,6 @@
         <button id="btnPlay" class="btn-ico" type="button" data-i18n-title="btnPlayTitle" data-i18n-aria="btnPlayAria" title="Vérifier le courant" aria-label="Vérifier le courant">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6L19.2 12 8 5.2z"/></svg>
         </button>
-        <span id="lectureBadge" class="lecture-badge" hidden aria-live="polite" data-i18n="lectureBadge">🔒 Lecture</span>
       </div>
     </div>
   </footer>
@@ -6223,12 +6107,11 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v147-hide-lecture-badge"></script>
+  <script src="i18n/panelwire-i18n.js?v=v149-rollback-site1"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
-  <!-- v140 : 1st-party — plus de cdn.jsdelivr (jamais d’hôte tiers pour le panel) -->
-  <script src="js/supabase.min.js?v=v147-hide-lecture-badge"></script>
-  <script src="js/wirelab-auth.js?v=v147-hide-lecture-badge"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/wirelab-auth.js?v=v149-rollback-site1"></script>
   <script src="js/wirelab-auth-vitrine.js?v=vitrine10"></script>
   <script>
     /* Assets pré-cadrés (photos studio trop larges → bandes). */
@@ -6255,11 +6138,6 @@
     const COLOR_N = "#0088ce";
     const COLOR_PE = "#c4d600";
     const COLOR_PE_STRIPE = "#008c45";
-    /* Cosses / embouts sur les vis-bornes — requis par appendTerminalClips (sinon render() plante → ↑↓ z-order morts). */
-    const EMBOUT_GREEN = "#16a34a";
-    const EMBOUT_GREEN_EDGE = "#14532d";
-    const EMBOUT_LEN = 14;
-    const EMBOUT_TH = 8;
     const COLOR_KNX = "#009640"; /* gaine / câble bus KNX (vert) */
 
 
@@ -7211,13 +7089,6 @@
       rail_din_35: {name:"Rail DIN 35 mm (TH35)",prefix:"X",cat:"Structure",w:473,h:103,kind:"rail",image:"assets/rail-din-35-swissdz.png",badge:"TH35",terminals:[]},
       rail_din_long: {name:"Rail DIN long perforé",prefix:"X",cat:"Structure",w:715,h:189,kind:"rail",image:"assets/rail-din-long-swissdz.png",badge:"Long",terminals:[]},
       rail_din_embouts: {name:"Rail DIN + embouts",prefix:"X",cat:"Structure",w:547,h:110,kind:"rail",image:"assets/rail-din-embouts-swissdz.png",badge:"Embouts",terminals:[]},
-      /* Goulottes PVC — kind goulotte + overWires : calque au-dessus des fils (masque le câblage). */
-      goulotte_h_240: {name:"Goulotte horizontale 240",nameEn:"Horizontal trunking 240",prefix:"X",cat:"Goulotte",w:240,h:34,kind:"goulotte",overWires:true,image:"assets/goulotte-h-240.svg?v=edz1",badge:"H240",terminals:[]},
-      goulotte_h_360: {name:"Goulotte horizontale 360",nameEn:"Horizontal trunking 360",prefix:"X",cat:"Goulotte",w:360,h:34,kind:"goulotte",overWires:true,image:"assets/goulotte-h-360.svg?v=edz1",badge:"H360",terminals:[]},
-      goulotte_h_480: {name:"Goulotte horizontale 480",nameEn:"Horizontal trunking 480",prefix:"X",cat:"Goulotte",w:480,h:34,kind:"goulotte",overWires:true,image:"assets/goulotte-h-480.svg?v=edz1",badge:"H480",terminals:[]},
-      goulotte_v_280: {name:"Goulotte verticale 280",nameEn:"Vertical trunking 280",prefix:"X",cat:"Goulotte",w:34,h:280,kind:"goulotte",overWires:true,image:"assets/goulotte-v-280.svg?v=edz1",badge:"V280",terminals:[]},
-      goulotte_v_420: {name:"Goulotte verticale 420",nameEn:"Vertical trunking 420",prefix:"X",cat:"Goulotte",w:34,h:420,kind:"goulotte",overWires:true,image:"assets/goulotte-v-420.svg?v=edz1",badge:"V420",terminals:[]},
-      goulotte_angle: {name:"Angle de goulotte",nameEn:"Trunking corner",prefix:"X",cat:"Goulotte",w:48,h:48,kind:"goulotte",overWires:true,image:"assets/goulotte-angle.svg?v=edz1",badge:"∠",terminals:[]},
       /* L/N = uniquement via compteur Sonelgaz — pas de pastilles source L/N dans la lib. PE Terre seul. */
       pe: {name:"Terre PE",prefix:"PE",cat:"Borniers",w:56,h:56,kind:"pe",terminals:[{id:"PE",nx:0.5,ny:0.5,direction:"left"}],badge:"PE"},
       /* Tête de réseau : compteur → L+N uniquement (jamais PE). PE = prise de terre / bornier PE. Empilable avec AGCP. */
@@ -7326,13 +7197,6 @@
       ]},
       borniers: {name:"Borniers N / PE SwissDz",prefix:"X",cat:"Borniers",w:140,h:90,image:"assets/borniers.png",iec:"X",terminals:[{id:"N",nx:0.3194,ny:0.3191,direction:"top"},{id:"PE",nx:0.3194,ny:0.7211,direction:"bottom"}]},
       peigne: {name:"Peigne d'alimentation SwissDz",prefix:"X",cat:"Borniers",w:200,h:80,image:"assets/peigne-swissdz.png",badge:"Peigne",iec:"X",bus:true,terminals:[{id:"IN",nx:0.0572,ny:0.5039,direction:"left"},{id:"1",nx:0.2484,ny:0.351,direction:"top"},{id:"2",nx:0.4497,ny:0.351,direction:"top"},{id:"3",nx:0.6509,ny:0.351,direction:"top"},{id:"4",nx:0.8522,ny:0.351,direction:"top"}]},
-      /* Peignes fourche — pas 36 px / module (assets/_gen_peigne_fork.py). bus = toutes dents en parallèle. */
-      peigne_1p_x6: {name:"Peigne fourche 1P ×6",nameEn:"1P fork comb ×6",prefix:"X",cat:"Borniers",w:216,h:42,image:"assets/peigne-fork-1p-x6.png",badge:"1P×6",iec:"X",bus:true,terminals:[{id:"IN",nx:0.04,ny:0.42,direction:"left"},{id:"1",nx:0.0833,ny:0.92,direction:"bottom"},{id:"2",nx:0.25,ny:0.92,direction:"bottom"},{id:"3",nx:0.4167,ny:0.92,direction:"bottom"},{id:"4",nx:0.5833,ny:0.92,direction:"bottom"},{id:"5",nx:0.75,ny:0.92,direction:"bottom"},{id:"6",nx:0.9167,ny:0.92,direction:"bottom"}]},
-      peigne_1p_x12: {name:"Peigne fourche 1P ×12",nameEn:"1P fork comb ×12",prefix:"X",cat:"Borniers",w:432,h:42,image:"assets/peigne-fork-1p-x12.png",badge:"1P×12",iec:"X",bus:true,terminals:[{id:"IN",nx:0.03,ny:0.42,direction:"left"},{id:"1",nx:0.0417,ny:0.92,direction:"bottom"},{id:"2",nx:0.125,ny:0.92,direction:"bottom"},{id:"3",nx:0.2083,ny:0.92,direction:"bottom"},{id:"4",nx:0.2917,ny:0.92,direction:"bottom"},{id:"5",nx:0.375,ny:0.92,direction:"bottom"},{id:"6",nx:0.4583,ny:0.92,direction:"bottom"},{id:"7",nx:0.5417,ny:0.92,direction:"bottom"},{id:"8",nx:0.625,ny:0.92,direction:"bottom"},{id:"9",nx:0.7083,ny:0.92,direction:"bottom"},{id:"10",nx:0.7917,ny:0.92,direction:"bottom"},{id:"11",nx:0.875,ny:0.92,direction:"bottom"},{id:"12",nx:0.9583,ny:0.92,direction:"bottom"}]},
-      peigne_3p_x1: {name:"Peigne fourche 3P ×1",nameEn:"3P fork comb ×1",prefix:"X",cat:"Borniers",w:108,h:42,image:"assets/peigne-fork-3p-x1.png",badge:"3P×1",iec:"X",bus:true,terminals:[{id:"IN",nx:0.06,ny:0.42,direction:"left"},{id:"1",nx:0.1667,ny:0.92,direction:"bottom"},{id:"3",nx:0.5,ny:0.92,direction:"bottom"},{id:"5",nx:0.8333,ny:0.92,direction:"bottom"}]},
-      peigne_3p_x2: {name:"Peigne fourche 3P ×2",nameEn:"3P fork comb ×2",prefix:"X",cat:"Borniers",w:216,h:42,image:"assets/peigne-fork-3p-x2.png",badge:"3P×2",iec:"X",bus:true,terminals:[{id:"IN",nx:0.04,ny:0.42,direction:"left"},{id:"1",nx:0.0833,ny:0.92,direction:"bottom"},{id:"3",nx:0.25,ny:0.92,direction:"bottom"},{id:"5",nx:0.4167,ny:0.92,direction:"bottom"},{id:"7",nx:0.5833,ny:0.92,direction:"bottom"},{id:"9",nx:0.75,ny:0.92,direction:"bottom"},{id:"11",nx:0.9167,ny:0.92,direction:"bottom"}]},
-      peigne_3p_x3: {name:"Peigne fourche 3P ×3",nameEn:"3P fork comb ×3",prefix:"X",cat:"Borniers",w:324,h:42,image:"assets/peigne-fork-3p-x3.png",badge:"3P×3",iec:"X",bus:true,terminals:[{id:"IN",nx:0.035,ny:0.42,direction:"left"},{id:"1",nx:0.0556,ny:0.92,direction:"bottom"},{id:"3",nx:0.1667,ny:0.92,direction:"bottom"},{id:"5",nx:0.2778,ny:0.92,direction:"bottom"},{id:"7",nx:0.3889,ny:0.92,direction:"bottom"},{id:"9",nx:0.5,ny:0.92,direction:"bottom"},{id:"11",nx:0.6111,ny:0.92,direction:"bottom"},{id:"13",nx:0.7222,ny:0.92,direction:"bottom"},{id:"15",nx:0.8333,ny:0.92,direction:"bottom"},{id:"17",nx:0.9444,ny:0.92,direction:"bottom"}]},
-      peigne_3p_x4: {name:"Peigne fourche 3P ×4",nameEn:"3P fork comb ×4",prefix:"X",cat:"Borniers",w:432,h:42,image:"assets/peigne-fork-3p-x4.png",badge:"3P×4",iec:"X",bus:true,terminals:[{id:"IN",nx:0.03,ny:0.42,direction:"left"},{id:"1",nx:0.0417,ny:0.92,direction:"bottom"},{id:"3",nx:0.125,ny:0.92,direction:"bottom"},{id:"5",nx:0.2083,ny:0.92,direction:"bottom"},{id:"7",nx:0.2917,ny:0.92,direction:"bottom"},{id:"9",nx:0.375,ny:0.92,direction:"bottom"},{id:"11",nx:0.4583,ny:0.92,direction:"bottom"},{id:"13",nx:0.5417,ny:0.92,direction:"bottom"},{id:"15",nx:0.625,ny:0.92,direction:"bottom"},{id:"17",nx:0.7083,ny:0.92,direction:"bottom"},{id:"19",nx:0.7917,ny:0.92,direction:"bottom"},{id:"21",nx:0.875,ny:0.92,direction:"bottom"},{id:"23",nx:0.9583,ny:0.92,direction:"bottom"}]},
       /* Gris 3-Pole 40A 400V~ rotatif I-ON — retiré de la lib UI. */
       sectionneur_fusible: {name:"Sectionneur-fusible 3P SwissDz",prefix:"QS",cat:"Sectionneurs",hideFromLib:true,w:124,h:172,din:true,image:"assets/sectionneur-fusible-swissdz.png",badge:"SF",iec:"QS",terminals:[{id:"1",nx:0.1552,ny:0.11,direction:"top"},{id:"2",nx:0.186,ny:0.9,direction:"bottom"},{id:"3",nx:0.4745,ny:0.11,direction:"top"},{id:"4",nx:0.4745,ny:0.9,direction:"bottom"},{id:"5",nx:0.8454,ny:0.11,direction:"top"},{id:"6",nx:0.8351,ny:0.9,direction:"bottom"}],pair:["1","2"],pairs:[["1","2"],["3","4"],["5","6"]]},
       selecteur: {name:"Sélecteur Man/0/Auto SwissDz",prefix:"S",cat:"Boutonnerie",w:96,h:96,image:"assets/selecteur-dial-base.png",thumb:"assets/selecteur-swissdz.png",badge:"M-0-A",iec:"S",selector:true,knobImage:"assets/selecteur-knob.png",knobAngles:{man:-55,"0":180,auto:55},terminals:[{id:"1",nx:0.2974,ny:0.8869,direction:"bottom"},{id:"2",nx:0.501,ny:0.8869,direction:"bottom"},{id:"3",nx:0.7046,ny:0.8869,direction:"bottom"}]},
@@ -7482,7 +7346,7 @@
          Pas de bornes Monter/Descendre. knxRoller = mêmes GA qu’un canal knxShutter, sans L→U/D.
          roller.pos 0 = fermé à la pose, 1 = ouvert.
          v123 : touches Monter/Arrêt/Descendre inertes tant que L, N, PE et BUS ne sont pas raccordés. */
-      fenetre_volet: {name:"Volet KNX extérieur (fenêtre)",nameEn:"KNX exterior shutter (window)",nameAr:"شباك خارجي KNX",prefix:"VR",cat:"Domotique KNX",w:210,h:332,image:"assets/electrodz/fenetre_volet.png?v=v121-fenetre-knx",badge:"Volet ext",iec:"VR",rollerBlind:true,knxRoller:true,busLed:{nx:0.08,ny:0.045},rollerOpening:{nx:0.168,ny:0.218,nw:0.652,nh:0.640},terminals:[
+      fenetre_volet: {name:"Fenêtre + volet roulant",nameEn:"Window + roller shutter",prefix:"VR",cat:"Domotique KNX",w:210,h:332,image:"assets/electrodz/fenetre_volet.png?v=v121-fenetre-knx",badge:"Volet",iec:"VR",rollerBlind:true,knxRoller:true,busLed:{nx:0.08,ny:0.045},rollerOpening:{nx:0.168,ny:0.218,nw:0.652,nh:0.640},terminals:[
         {id:"L",nx:0.28,ny:0.04,direction:"top"},
         {id:"N",nx:0.46,ny:0.04,direction:"top"},
         {id:"PE",nx:0.64,ny:0.04,direction:"top"},
@@ -7490,7 +7354,7 @@
       ]},
       /* v122 : gabarit façade. Bornes = termsOf() selon emplacements équipés (pas un 2e moteur de fils).
          Photo volet = fenetre_volet.png (même ouverture rollerOpening). */
-      facade_maison: {name:"Façade maison",nameEn:"House facade",nameAr:"واجهة المنزل",prefix:"FH",cat:"Domotique KNX",w:960,h:704,badge:"Façade",iec:"FH",houseFacade:true,terminals:[]},
+      facade_maison: {name:"Façade maison",nameEn:"House facade",nameAr:"واجهة المنزل",prefix:"FH",cat:"Domotique KNX",w:960,h:780,badge:"Façade",iec:"FH",houseFacade:true,terminals:[]},
       knx_variateur: {name:"Variateur KNX SwissDz 1 canal",prefix:"UD",cat:"Domotique KNX",w:86,h:150,din:true,image:"assets/knx-variateur-swissdz.png",badge:"Dim",iec:"UD",knxDimmer:true,busLed:{nx:0.50,ny:0.14},knxDimBar:{nx:0.50,ny:0.30,nw:0.62},terminals:[
         {id:"L",nx:0.20,ny:0.52,direction:"top"},{id:"~",nx:0.50,ny:0.52,direction:"top"},{id:"N",nx:0.80,ny:0.52,direction:"top"},
         {id:"BUS",nx:0.50,ny:0.907,direction:"bottom"}
@@ -8576,7 +8440,6 @@
     const TIER_FREE_CATS_ALL = new Set([
       "Alimentation",
       "Structure",
-      "Goulotte",
       "Borniers",
       "Disjoncteurs modulaires",
       "Différentiel",
@@ -9292,8 +9155,6 @@
           drop.add(i.uid);
           return;
         }
-        /* Goulottes toujours au calque couvercle (devant fils + modules). */
-        if (def.kind === "goulotte" && !(Number(i.z) >= 1000)) i.z = 1000;
         if (def.thermal) {
           if (i.thermalIr == null && THERMAL_IR_FROM_TYPE[old] != null) {
             i.thermalIr = THERMAL_IR_FROM_TYPE[old];
@@ -9731,11 +9592,7 @@
       if (def && def.pvSupport) {
         return { w: Math.max(70, Math.round(def.w * 0.4)), h: Math.max(90, Math.round(def.h * 0.4)) };
       }
-      if (def && def.houseFacade) return { w: 480, h: 345 };
-      /* Goulotte : longueur ET section (épaisseur) libres. */
-      if (def && def.kind === "goulotte") {
-        return { w: 20, h: 20 };
-      }
+      if (def && def.houseFacade) return { w: 480, h: 390 };
       return { w: 40, h: 40 };
     }
     /** Tout composant placé peut être redimensionné (plus seulement din/rail). */
@@ -9812,15 +9669,11 @@
     function rectsOverlap(a, b) {
       return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
     }
-    /** Composants solides (KNX inclus) — pas rails / platines / goulottes / barrettes / supports PV. */
+    /** Composants solides (KNX inclus) — pas rails / platines / barrettes / supports PV. */
     function isCollidableItem(item) {
       const def = LIB[item && item.type];
-      return !!(def && def.kind !== "rail" && def.kind !== "platine" && def.kind !== "goulotte"
-        && def.kind !== "barrette" && !def.pvSupport && !isPlatine(item));
-    }
-    function isGoulotte(item) {
-      const def = LIB[item && item.type];
-      return !!(def && def.kind === "goulotte");
+      return !!(def && def.kind !== "rail" && def.kind !== "platine" && def.kind !== "barrette"
+        && !def.pvSupport && !isPlatine(item));
     }
     /* Supports PV : case = face module 150×233, écart 10 px. Les panneaux épousent la case. */
     const PV_CELL_W = 150;
@@ -10690,50 +10543,19 @@
       showWireTags: true
     };
 
-    /* v141 : iPhone/iPad WebKit — mémoire GPU limitée ; détecter tôt pour plafonner zoom/pad. */
-    const PW_IOS = (function () {
-      try {
-        const ua = navigator.userAgent || "";
-        if (/iPhone|iPad|iPod/i.test(ua)) return true;
-        if (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1) return true;
-      } catch (_) {}
-      return false;
-    })();
-    try {
-      if (PW_IOS) document.documentElement.classList.add("pw-ios");
-    } catch (_) {}
-    /* v144 : mêmes limites zoom/pad que version-site-1 / PC — le plafond iOS
-       (0.38–2.2) bloquait le pinch après chargement d’exemplaire (~fit). */
     const BOARD_ZOOM_MIN = 0.2;
     const BOARD_ZOOM_ABS_MIN = 0.08;
     const BOARD_ZOOM_MAX = 5;
     const BOARD_ZOOM_STEP = 1.15;
     const BOARD_WORLD_W = 2600;
     const BOARD_WORLD_H = 1800;
-    /* v106 = WireLabPro-1.0.1 : grande marge fixe → pan fluide 4 directions. */
+    /* v106 = WireLabPro-1.0.1 : grande marge fixe → pan fluide 4 directions (pas letterbox dynamique). */
     const BOARD_PAN_PAD = 2400;
     const BOARD_PAN_ROOM = 0;
     const BOARD_COORDS_STEP = 100;
     const BOARD_FIT_ZOOM_MIN = 0.45;
     let boardOriginReady = false;
     let boardCoordsExtentKey = "";
-    /* Token : annule centerBoardView différé (exemplaire) si Play / pan / zoom avant la fin. */
-    let exampleFitToken = 0;
-    function bumpExampleFitToken() {
-      exampleFitToken++;
-      return exampleFitToken;
-    }
-    /** Calque SVG plan : viewBox monde uniquement — attrs width/height 2600×1800 = backing-store OOM iOS. */
-    function sizeBoardSvg(svg) {
-      if (!svg) return;
-      try {
-        svg.setAttribute("width", "100%");
-        svg.setAttribute("height", "100%");
-        svg.setAttribute("viewBox", "0 0 " + BOARD_WORLD_W + " " + BOARD_WORLD_H);
-        svg.setAttribute("preserveAspectRatio", "none");
-        svg.removeAttribute("xmlns:xlink");
-      } catch (_) {}
-    }
 
     function boardZoom() {
       const z = Number(state.boardZoom);
@@ -10914,14 +10736,11 @@
     /* Déclaré tôt : utilisé pendant pinch (défini avant les handlers). */
     var boardTouchPinch = null;
     var boardPinchPtrs = new Map();
-    var boardZoomRaf = 0;
-    var boardZoomPend = null;
     /*
      * v108 : zoom 1.0.1 + spacer FIGÉ pendant pinch.
      * Cause user : plan vide fluide ; dès qu’un .dev (photo) est posé → tremblement.
      * Resize spacer frame-à-frame + scale des PNG = thrash WebKit. Pendant pinch =
      * uniquement scale(#boardWorld) + scroll. Settle spacer à la fin.
-     * v135 : coalesce rAF pendant pinch (anti-vibration) ; resize géométrique interdit.
      */
     function ensurePinchSpacerRoom(zNow) {
       const spacer = document.getElementById("boardZoomSpacer");
@@ -10966,7 +10785,6 @@
         board.scrollTop = pad;
       }
       if (!pinching) {
-        try { fitAllFlukeLiveFrames(); } catch (_) {}
         const zin = document.getElementById("btnZoomIn");
         const zout = document.getElementById("btnZoomOut");
         if (zin) zin.disabled = z >= BOARD_ZOOM_MAX - 1e-6;
@@ -10995,64 +10813,21 @@
     function setBoardZoom(next) {
       setBoardZoomAt(next, null, null);
     }
-    /* Zoom ancré sous curseur/doigts — viewport only (jamais item.w/h). */
+    /* Zoom ancré sous curseur/doigts — exact 1.0.1 (recalcule ax/ay chaque frame). */
     function setBoardZoomAt(next, clientX, clientY, opts) {
-      /* Zoom utilisateur / pinch : annule autofit exemplaire différé. */
-      try { bumpExampleFitToken(); } catch (_) {}
       const z0 = boardZoom();
       const z1 = clampBoardZoom(next);
       const rect = board.getBoundingClientRect();
       const pad = BOARD_PAN_PAD;
-      const pinching = !!(opts && opts.livePinch) || board.classList.contains("is-pinching");
-      let ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
-      let oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
-      /* Ancre monde figée au début du pinch (évite oscillation si doigts bougent). */
-      let ax, ay;
-      if (pinching && boardTouchPinch && Number.isFinite(boardTouchPinch.ax)) {
-        ax = boardTouchPinch.ax;
-        ay = boardTouchPinch.ay;
-        if (Number.isFinite(boardTouchPinch.ox0)) ox = boardTouchPinch.ox0;
-        if (Number.isFinite(boardTouchPinch.oy0)) oy = boardTouchPinch.oy0;
-      } else {
-        ax = (board.scrollLeft + ox - pad) / z0;
-        ay = (board.scrollTop + oy - pad) / z0;
-      }
-      if (Math.abs(z1 - z0) < 1e-9 && !pinching) {
+      const ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
+      const oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
+      const ax = (board.scrollLeft + ox - pad) / z0;
+      const ay = (board.scrollTop + oy - pad) / z0;
+      if (Math.abs(z1 - z0) < 1e-9) {
         applyBoardZoomStyles(opts);
         return;
       }
-      if (pinching) {
-        if (boardTouchPinch && !Number.isFinite(boardTouchPinch.ax)) {
-          boardTouchPinch.ax = ax;
-          boardTouchPinch.ay = ay;
-          boardTouchPinch.ox0 = ox;
-          boardTouchPinch.oy0 = oy;
-        }
-        boardZoomPend = { z1: z1, ox: ox, oy: oy, ax: ax, ay: ay, pad: pad };
-        if (!boardZoomRaf) {
-          boardZoomRaf = requestAnimationFrame(function () {
-            boardZoomRaf = 0;
-            const p = boardZoomPend;
-            boardZoomPend = null;
-            if (!p) return;
-            state.boardZoom = p.z1;
-            applyBoardZoomStyles({ livePinch: true });
-            board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
-            board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
-          });
-        }
-        return;
-      }
       state.boardZoom = z1;
-      /* v143 : molette / boutons zoom — masquer iframe Fluke le temps du scale (anti double face). */
-      try {
-        board.classList.add("is-board-zooming");
-        if (window.__pwFlukeZoomHideT) clearTimeout(window.__pwFlukeZoomHideT);
-        window.__pwFlukeZoomHideT = setTimeout(function () {
-          try { board.classList.remove("is-board-zooming"); } catch (_) {}
-          try { fitAllFlukeLiveFrames(); } catch (_) {}
-        }, 160);
-      } catch (_) {}
       applyBoardZoomStyles(opts);
       board.scrollLeft = ax * z1 - ox + pad;
       board.scrollTop = ay * z1 - oy + pad;
@@ -11096,87 +10871,23 @@
       }
       return pref || "1.1.0";
     }
-    /** GA déjà prises sur le plan (objets de communication existants). */
-    function collectUsedGas() {
-      const used = new Set();
-      const take = (g) => { const n = normGa(g); if (n) used.add(n); };
-      const takeObj = (o) => {
-        if (!o || typeof o !== "object") return;
-        ["ga", "gaUp", "gaDown", "gaStop", "gaOn", "gaLevel", "gaSet", "gaHeat", "gaStrike", "gaVideo"]
-          .forEach((k) => take(o[k]));
-      };
-      const takeMap = (m) => {
-        if (!m || typeof m !== "object") return;
-        Object.keys(m).forEach((k) => takeObj(m[k]));
-      };
-      state.items.forEach((it) => {
-        takeMap(it.knxKeysProg);
-        takeMap(it.knxChProg);
-        takeMap(it.knxShutterProg);
-        takeObj(it.knxRollerProg);
-        takeObj(it.knxDimProg);
-        takeObj(it.knxPresenceProg);
-        takeObj(it.knxTempProg);
-        takeObj(it.knxThermoProg);
-        takeMap(it.knxBinProg);
-        if (it.facade && it.facade.prog) takeMap(it.facade.prog);
-      });
-      return used;
-    }
-    /** Prochaine adresse de groupe libre (main/mid/sub). prefer si encore libre.
-     *  extraUsed : Set mutable pour enchaîner plusieurs allocations avant écriture sur l’item. */
-    function nextKnxGa(main, mid, prefer, extraUsed) {
-      const used = extraUsed || collectUsedGas();
-      const pref = prefer ? normGa(prefer) : "";
-      if (pref && !used.has(pref)) { used.add(pref); return pref; }
-      const m = (main | 0) || 1;
-      const d = (mid | 0);
-      for (let z = 1; z < 2000; z++) {
-        const a = m + "/" + d + "/" + z;
-        if (!used.has(a)) { used.add(a); return a; }
-      }
-      return pref || (m + "/" + d + "/1");
-    }
-    function allocKnxGaTriple(main, mid, preferUp, preferDown, preferStop) {
-      const used = collectUsedGas();
-      return {
-        gaUp: nextKnxGa(main, mid, preferUp, used),
-        gaDown: nextKnxGa(main, mid, preferDown, used),
-        gaStop: nextKnxGa(main, mid, preferStop, used)
-      };
-    }
     function defaultKnxKeysProg() {
-      /* Défaut poussoir volet : T1/T2 = canal 1, T3/T4 = canal 2 — GA uniques à l’allocation. */
-      const used = collectUsedGas();
+      /* Défaut poussoir + actionneur volet : T1/T2 = canal 1, T3/T4 = canal 2 */
       return {
-        1: { fn: "up", ga: nextKnxGa(1, 2, "1/2/1", used) },
-        2: { fn: "down", ga: nextKnxGa(1, 2, "1/2/2", used) },
-        3: { fn: "up", ga: nextKnxGa(1, 2, "1/2/4", used) },
-        4: { fn: "down", ga: nextKnxGa(1, 2, "1/2/5", used) }
+        1: { fn: "up", ga: "1/2/1" },
+        2: { fn: "down", ga: "1/2/2" },
+        3: { fn: "up", ga: "1/2/4" },
+        4: { fn: "down", ga: "1/2/5" }
       };
     }
     function defaultKnxChProg() {
-      const used = collectUsedGas();
-      return {
-        1: { ga: nextKnxGa(1, 1, "1/1/1", used) },
-        2: { ga: nextKnxGa(1, 1, "1/1/2", used) },
-        3: { ga: nextKnxGa(1, 1, "1/1/3", used) },
-        4: { ga: nextKnxGa(1, 1, "1/1/4", used) }
-      };
+      return { 1: { ga: "1/1/1" }, 2: { ga: "1/1/2" }, 3: { ga: "1/1/3" }, 4: { ga: "1/1/4" } };
     }
     function defaultKnxShutterProg() {
-      const used = collectUsedGas();
-      const c1 = {
-        gaUp: nextKnxGa(1, 2, "1/2/1", used),
-        gaDown: nextKnxGa(1, 2, "1/2/2", used),
-        gaStop: nextKnxGa(1, 2, "1/2/3", used)
+      return {
+        1: { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" },
+        2: { gaUp: "1/2/4", gaDown: "1/2/5", gaStop: "1/2/6" }
       };
-      const c2 = {
-        gaUp: nextKnxGa(1, 2, "1/2/4", used),
-        gaDown: nextKnxGa(1, 2, "1/2/5", used),
-        gaStop: nextKnxGa(1, 2, "1/2/6", used)
-      };
-      return { 1: c1, 2: c2 };
     }
     function knxBinaryIds(def) {
       const hits = (def && def.knxBinHits) || [];
@@ -11209,11 +10920,7 @@
         if (!item.knxToggle) item.knxToggle = { 1: false, 2: false, 3: false, 4: false };
         if (!item.knxKeysProg) item.knxKeysProg = defaultKnxKeysProg();
         [1, 2, 3, 4].forEach((n) => {
-          if (!item.knxKeysProg[n]) {
-            item.knxKeysProg[n] = { fn: "switch", ga: nextKnxGa(1, 0, "1/0/" + n) };
-          } else if (!normGa(item.knxKeysProg[n].ga)) {
-            item.knxKeysProg[n].ga = nextKnxGa(1, 0, "1/0/" + n);
-          }
+          if (!item.knxKeysProg[n]) item.knxKeysProg[n] = { fn: "switch", ga: "1/0/" + n };
           knxEnsureName(item.knxKeysProg[n], "name", "Touche " + n);
         });
       }
@@ -11221,11 +10928,7 @@
         if (!item.knxCh) item.knxCh = { 1: false, 2: false, 3: false, 4: false };
         if (!item.knxChProg) item.knxChProg = defaultKnxChProg();
         [1, 2, 3, 4].forEach((n) => {
-          if (!item.knxChProg[n]) {
-            item.knxChProg[n] = { ga: nextKnxGa(1, 1, "1/1/" + n) };
-          } else if (!normGa(item.knxChProg[n].ga)) {
-            item.knxChProg[n].ga = nextKnxGa(1, 1, "1/1/" + n);
-          }
+          if (!item.knxChProg[n]) item.knxChProg[n] = { ga: "1/1/" + n };
           knxEnsureName(item.knxChProg[n], "name", "Sortie " + n);
         });
       }
@@ -11233,68 +10936,38 @@
         if (!item.knxShutter) item.knxShutter = { 1: { dir: "stop", pos: 0.35 }, 2: { dir: "stop", pos: 0.35 } };
         if (!item.knxShutterProg) item.knxShutterProg = defaultKnxShutterProg();
         [1, 2].forEach((n) => {
-          let p = item.knxShutterProg[n];
-          if (!p) {
-            const base = 1 + (n - 1) * 3;
-            p = allocKnxGaTriple(1, 2, "1/2/" + base, "1/2/" + (base + 1), "1/2/" + (base + 2));
-            item.knxShutterProg[n] = p;
-          } else {
-            if (!normGa(p.gaUp)) p.gaUp = nextKnxGa(1, 2);
-            if (!normGa(p.gaDown)) p.gaDown = nextKnxGa(1, 2);
-            if (!normGa(p.gaStop)) p.gaStop = nextKnxGa(1, 2);
-          }
+          const p = item.knxShutterProg[n];
+          if (!p) return;
           knxEnsureName(p, "nameUp", "Volet " + n + " montée");
           knxEnsureName(p, "nameDown", "Volet " + n + " descente");
           knxEnsureName(p, "nameStop", "Volet " + n + " arrêt");
         });
       }
       if (def.knxRoller) {
-        /* Chaque volet extérieur (fenetre_volet) reçoit ses propres GA — pas de collision entre instances. */
-        if (!item.knxRollerProg) {
-          item.knxRollerProg = allocKnxGaTriple(1, 2, "1/2/1", "1/2/2", "1/2/3");
-        } else {
-          const p = item.knxRollerProg;
-          if (!normGa(p.gaUp)) p.gaUp = nextKnxGa(1, 2);
-          if (!normGa(p.gaDown)) p.gaDown = nextKnxGa(1, 2);
-          if (!normGa(p.gaStop)) p.gaStop = nextKnxGa(1, 2);
-        }
+        if (!item.knxRollerProg) item.knxRollerProg = { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" };
         knxEnsureName(item.knxRollerProg, "nameUp", "Montée");
         knxEnsureName(item.knxRollerProg, "nameDown", "Descente");
         knxEnsureName(item.knxRollerProg, "nameStop", "Arrêt");
       }
       if (def.knxDimmer || def.knxDali) {
         if (!item.knxDim) item.knxDim = { on: false, level: 80 };
-        if (!item.knxDimProg) {
-          const used = collectUsedGas();
-          item.knxDimProg = { gaOn: nextKnxGa(1, 3, "1/3/1", used), gaLevel: nextKnxGa(1, 3, "1/3/2", used) };
-        } else {
-          if (!normGa(item.knxDimProg.gaOn)) item.knxDimProg.gaOn = nextKnxGa(1, 3);
-          if (!normGa(item.knxDimProg.gaLevel)) item.knxDimProg.gaLevel = nextKnxGa(1, 3);
-        }
+        if (!item.knxDimProg) item.knxDimProg = { gaOn: "1/3/1", gaLevel: "1/3/2" };
         knxEnsureName(item.knxDimProg, "nameOn", "ON/OFF");
         knxEnsureName(item.knxDimProg, "nameLevel", "Niveau");
       }
       if (def.knxPresence) {
         if (item.knxPresence == null) item.knxPresence = false;
-        if (!item.knxPresenceProg) item.knxPresenceProg = { ga: nextKnxGa(1, 4, "1/4/1") };
-        else if (!normGa(item.knxPresenceProg.ga)) item.knxPresenceProg.ga = nextKnxGa(1, 4);
+        if (!item.knxPresenceProg) item.knxPresenceProg = { ga: "1/4/1" };
         knxEnsureName(item.knxPresenceProg, "name", "Présence");
       }
       if (def.knxTemp) {
         if (item.knxTemp == null) item.knxTemp = 21.5;
-        if (!item.knxTempProg) item.knxTempProg = { ga: nextKnxGa(1, 5, "1/5/1") };
-        else if (!normGa(item.knxTempProg.ga)) item.knxTempProg.ga = nextKnxGa(1, 5);
+        if (!item.knxTempProg) item.knxTempProg = { ga: "1/5/1" };
         knxEnsureName(item.knxTempProg, "name", "Température");
       }
       if (def.knxThermo) {
         if (!item.knxThermo) item.knxThermo = { set: 20, room: 21, heat: false };
-        if (!item.knxThermoProg) {
-          const used = collectUsedGas();
-          item.knxThermoProg = { gaSet: nextKnxGa(1, 6, "1/6/1", used), gaHeat: nextKnxGa(1, 6, "1/6/2", used) };
-        } else {
-          if (!normGa(item.knxThermoProg.gaSet)) item.knxThermoProg.gaSet = nextKnxGa(1, 6);
-          if (!normGa(item.knxThermoProg.gaHeat)) item.knxThermoProg.gaHeat = nextKnxGa(1, 6);
-        }
+        if (!item.knxThermoProg) item.knxThermoProg = { gaSet: "1/6/1", gaHeat: "1/6/2" };
         knxEnsureName(item.knxThermoProg, "nameSet", "Consigne");
         knxEnsureName(item.knxThermoProg, "nameHeat", "Chauffage");
       }
@@ -11303,11 +10976,8 @@
         if (!item.knxBinProg || typeof item.knxBinProg !== "object") item.knxBinProg = {};
         knxBinaryIds(def).forEach((n) => {
           if (item.knxBin[n] == null) item.knxBin[n] = false;
-          if (!item.knxBinProg[n]) item.knxBinProg[n] = { ga: nextKnxGa(1, 7, "1/7/" + n), name: "Entrée " + n };
-          else {
-            if (!normGa(item.knxBinProg[n].ga)) item.knxBinProg[n].ga = nextKnxGa(1, 7, "1/7/" + n);
-            knxEnsureName(item.knxBinProg[n], "name", "Entrée " + n);
-          }
+          if (!item.knxBinProg[n]) item.knxBinProg[n] = { ga: "1/7/" + n, name: "Entrée " + n };
+          else knxEnsureName(item.knxBinProg[n], "name", "Entrée " + n);
         });
       }
       if (def.houseFacade) {
@@ -11683,20 +11353,16 @@
       bays = bays | 0;
       if (bays < 4) bays = 4;
       if (bays > FACADE_MAX_BAYS) bays = FACADE_MAX_BAYS;
-      /* Géométrie serrée : le dessin remplit W×H → cadrage sélection collé à la façade. */
       const side = 180, winW = 120, winH = 190, gap = 40;
       const W = side * 2 + bays * winW + (bays - 1) * gap;
-      const ridge = 72;
-      const eave = 168;
-      const winY = 246;
-      const groundY = 512;
+      const H = 780;
+      const winY = 318;
+      const groundY = 584;
       const gH = 170;
-      /* Bas = porte (h 200) pour coller le cadrage au sol de la façade. */
-      const H = groundY - 8 + 200;
       const slots = [];
-      slots.push({ id: "meteo", kind: "meteo", x: (W - 140) / 2, y: 8, w: 140, h: 58 });
-      slots.push({ id: "pv1", kind: "pv", x: 170, y: 88, w: Math.max(80, W - 340), h: 28 });
-      slots.push({ id: "pv2", kind: "pv", x: 110, y: 124, w: Math.max(120, W - 220), h: 28 });
+      slots.push({ id: "meteo", kind: "meteo", x: (W - 140) / 2, y: 78, w: 140, h: 58 });
+      slots.push({ id: "pv1", kind: "pv", x: 170, y: 158, w: Math.max(80, W - 340), h: 28 });
+      slots.push({ id: "pv2", kind: "pv", x: 110, y: 194, w: Math.max(120, W - 220), h: 28 });
       for (let i = 0; i < bays; i++) {
         const x = side + i * (winW + gap);
         slots.push({ id: "v" + (i + 1), kind: "volet", x: x, y: winY, w: winW, h: winH });
@@ -11707,13 +11373,13 @@
         }
       }
       const gW = Math.round((W * 0.36) / 10) * 10;
-      slots.push({ id: "g1", kind: "garage", x: 0, y: groundY, w: gW, h: gH });
-      slots.push({ id: "g2", kind: "garage", x: W - gW, y: groundY, w: gW, h: gH });
+      slots.push({ id: "g1", kind: "garage", x: 20, y: groundY, w: gW, h: gH });
+      slots.push({ id: "g2", kind: "garage", x: W - 20 - gW, y: groundY, w: gW, h: gH });
       slots.push({ id: "porte", kind: "door", x: (W - 100) / 2, y: groundY - 8, w: 100, h: 200 });
-      slots.push({ id: "eg1", kind: "light", x: gW / 2 - 18, y: groundY - 68, w: 36, h: 36, ax: gW / 2 });
-      slots.push({ id: "eg2", kind: "light", x: W - gW / 2 - 18, y: groundY - 68, w: 36, h: 36, ax: W - gW / 2 });
+      slots.push({ id: "eg1", kind: "light", x: 20 + gW / 2 - 18, y: groundY - 68, w: 36, h: 36, ax: 20 + gW / 2 });
+      slots.push({ id: "eg2", kind: "light", x: W - 20 - gW / 2 - 18, y: groundY - 68, w: 36, h: 36, ax: W - 20 - gW / 2 });
       slots.push({ id: "ed", kind: "light", x: W / 2 - 18, y: groundY - 68, w: 36, h: 36, ax: W / 2 });
-      return { w: W, h: H, bays: bays, slots: slots, gW: gW, eave: eave, ridge: ridge };
+      return { w: W, h: H, bays: bays, slots: slots, gW: gW, eave: 240, ridge: 146 };
     }
     function ensureFacade(item) {
       if (!item.facade || typeof item.facade !== "object") {
@@ -11734,15 +11400,8 @@
     function syncFacadeBox(item) {
       const f = ensureFacade(item);
       const g = facadeGeom(f.bays);
-      /* Toujours caler w/h sur la géométrie (sauf resize en cours) — cadrage = façade. */
-      const resizing = !!(state.resize && state.resize.uid === item.uid);
-      if (!resizing) {
-        item.w = g.w;
-        item.h = g.h;
-      } else {
-        if (!(Number(item.w) > 0)) item.w = g.w;
-        if (!(Number(item.h) > 0)) item.h = g.h;
-      }
+      if (!(Number(item.w) > 0)) item.w = g.w;
+      if (!(Number(item.h) > 0)) item.h = g.h;
       return g;
     }
     function facadeRollerProg(slotId) {
@@ -11764,31 +11423,22 @@
       };
       return map[slotId] || "";
     }
-    /* Défauts GA. Allocation nextKnxGa : 2e façade / slots ajoutés n’entrent pas en collision. */
+    /* Défauts GA. La simulation lit item.facade.prog[slot] — un autre participant ne partage pas cet objet. */
     function defaultFacadeSlotProg(slotId, kind) {
       if (kind === "volet" || kind === "garage") {
-        const prefer = facadeRollerProg(slotId) || { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" };
+        const p = facadeRollerProg(slotId) || { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" };
         const lab = (kind === "garage" ? "Garage " : "Volet ") + slotId;
-        const g = allocKnxGaTriple(1, 2, prefer.gaUp, prefer.gaDown, prefer.gaStop);
         return {
           nameUp: lab + " montée", nameDown: lab + " descente", nameStop: lab + " arrêt",
-          gaUp: g.gaUp, gaDown: g.gaDown, gaStop: g.gaStop
+          gaUp: p.gaUp, gaDown: p.gaDown, gaStop: p.gaStop
         };
       }
-      if (kind === "light") {
-        return { name: "Lampe " + slotId, ga: nextKnxGa(1, 1, facadeLightGa(slotId) || "1/1/40") };
-      }
+      if (kind === "light") return { name: "Lampe " + slotId, ga: facadeLightGa(slotId) || "1/1/40" };
       if (kind === "door") {
-        const used = collectUsedGas();
-        return {
-          nameStrike: "Gâche", gaStrike: nextKnxGa(1, 1, "1/1/30", used),
-          nameVideo: "Visiophone", gaVideo: nextKnxGa(1, 1, "1/1/31", used)
-        };
+        return { nameStrike: "Gâche", gaStrike: "1/1/30", nameVideo: "Visiophone", gaVideo: "1/1/31" };
       }
-      if (kind === "meteo") return { name: "Station météo", ga: nextKnxGa(1, 5, "1/5/10") };
-      if (kind === "pv") {
-        return { name: "Solaire " + slotId, ga: nextKnxGa(1, 8, slotId === "pv2" ? "1/8/2" : "1/8/1") };
-      }
+      if (kind === "meteo") return { name: "Station météo", ga: "1/5/10" };
+      if (kind === "pv") return { name: "Solaire " + slotId, ga: slotId === "pv2" ? "1/8/2" : "1/8/1" };
       return null;
     }
     function ensureFacadeProg(item) {
@@ -12127,7 +11777,6 @@
       svg.setAttribute("viewBox", "0 0 " + g.w + " " + g.h);
       svg.setAttribute("width", "100%");
       svg.setAttribute("height", "100%");
-      svg.setAttribute("preserveAspectRatio", "none");
       function svgRect(x, y, w, h, fill) {
         const r = document.createElementNS(NS, "rect");
         r.setAttribute("x", String(x));
@@ -12139,12 +11788,11 @@
         r.setAttribute("stroke-width", "2");
         return r;
       }
-      /* Corps / ailes / toit bord à bord du viewBox (= cadrage sélection). */
-      svg.appendChild(svgRect(0, g.eave, g.w, g.h - g.eave, "#e7eaee"));
-      svg.appendChild(svgRect(0, g.eave + 328, g.gW + 8, g.h - (g.eave + 328), "#d5dbe3"));
-      svg.appendChild(svgRect(g.w - g.gW - 8, g.eave + 328, g.gW + 8, g.h - (g.eave + 328), "#d5dbe3"));
+      svg.appendChild(svgRect(16, g.eave, g.w - 32, g.h - g.eave - 12, "#e7eaee"));
+      svg.appendChild(svgRect(16, 568, g.gW + 8, g.h - 580, "#d5dbe3"));
+      svg.appendChild(svgRect(g.w - 16 - g.gW - 8, 568, g.gW + 8, g.h - 580, "#d5dbe3"));
       const roof = document.createElementNS(NS, "polygon");
-      roof.setAttribute("points", "0," + g.eave + " 64," + g.ridge + " " + (g.w - 64) + "," + g.ridge + " " + g.w + "," + g.eave);
+      roof.setAttribute("points", "16," + g.eave + " 80," + g.ridge + " " + (g.w - 80) + "," + g.ridge + " " + (g.w - 16) + "," + g.eave);
       roof.setAttribute("fill", "#8b939c");
       roof.setAttribute("stroke", "#475569");
       roof.setAttribute("stroke-width", "2");
@@ -12323,7 +11971,7 @@
         bay.textContent = "+";
         bay.title = "Ajouter une travée";
         bay.style.left = ((g.w - 42) / g.w * 100) + "%";
-        bay.style.top = ((g.eave + (g.h - g.eave) * 0.35) / g.h * 100) + "%";
+        bay.style.top = (400 / g.h * 100) + "%";
         bindRollerTap(bay, function () { facadeAddBay(item); });
         el.appendChild(bay);
       }
@@ -12615,18 +12263,21 @@
       try { ensureEtsFrameGeom(true); } catch (_) {}
       syncEtsLayout();
     }
-    /** Sélection plan : mémorise le participant ; n’ouvre PAS ETS (btn ETS bas / Menu uniquement). */
+    /** Sélection plan : ouvre le cadre ETS déjà existant sur CE participant (et ce slot façade). */
     function focusEtsOnKnx(item, slotId) {
       if (!item || state.mode === "wire") return;
       const def = LIB[item.type];
       if (!def || !isKnxDevice(def)) return;
       state.etsSelUid = item.uid;
       state.etsSelSlot = slotId || "";
-      ensureKnxProgram(item);
-      /* Clic / sélection KNX : jamais d’auto-ouverture du cadre ETS. */
-      if (!state.etsOpen) return;
       state.etsTab = "params";
       state.etsProgMode = "params";
+      ensureKnxProgram(item);
+      if (!state.etsOpen) {
+        if (!tierAtLeast("silver")) return;
+        state.etsOpen = true;
+        try { ensureEtsFrameGeom(!state.etsFrame); } catch (_) {}
+      }
       syncEtsLayout();
     }
     function collectKnxLinks() {
@@ -15998,129 +15649,22 @@
         ladder: { rungs: rungs }
       };
     }
-    /**
-     * Tableau maison NF C 15-100 (esprit) — platine + 3 rails DIN, AGCP, 2 DDR,
-     * disjoncteurs, peignes, borniers N/PE, terre, goulottes masquant les fils.
-     */
     function exampleMaisonProject() {
-      /* Tableau résidentiel type NF C 15-100 sur platine :
-         compteur → AGCP → 2 DDR 30 mA type A → disjoncteurs / peignes → N/PE + terre.
-         Goulottes au-dessus des nappes de fils. */
-      const gou = (uid, type, tag, x, y, w, h) => ({
-        uid, type, tag, x, y, w, h, z: 1000, closed: true, pressed: false
-      });
       return {
-        name: "tableau-maison-nfc15100",
+        name: "tableau-maison",
         items: [
-          /* Platine de montage (fond de tableau) */
-          {
-            uid: "pl1", type: "edz_tablero_residencial_12p", tag: "X0",
-            x: 40, y: 100, w: 760, h: 980, plateColor: "gris",
-            closed: true, pressed: false
-          },
-          /* Compteur amont */
-          exIt("p1", "compteur_sonelgaz", "P1", 80, 8),
-          /* 3 rails DIN sur la platine */
-          { uid: "r1", type: "rail_din_35", tag: "X1", x: 100, y: 290, closed: true, pressed: false },
-          { uid: "r2", type: "rail_din_35", tag: "X2", x: 100, y: 520, closed: true, pressed: false },
-          { uid: "r3", type: "rail_din_35", tag: "X3", x: 100, y: 750, closed: true, pressed: false },
-          /* Rangée 1 — AGCP + 2 DDR 30 mA + SPD */
-          exIt("qa1", "agcp_principal", "QA1", 120, 255),
-          exIt("qi1", "edz_abb_f202_a", "QI1", 220, 255),
-          exIt("qi2", "edz_abb_f202_a", "QI2", 310, 255),
-          exIt("spd1", "spd", "FV1", 400, 255),
-          /* Rangée 2 — sous QI1 : éclairage ×2, prises ×2, VMC */
-          {
-            uid: "pg1", type: "peigne_1p_x6", tag: "X4",
-            x: 120, y: 478, closed: true, pressed: false
-          },
-          exIt("qf1", "edz_schneider_acti9_ic60n_1p_c16", "QF1", 120, 485),
-          exIt("qf2", "edz_schneider_acti9_ic60n_1p_c16", "QF2", 156, 485),
-          exIt("qf3", "edz_schneider_acti9_ic60n_2p_c16", "QF3", 192, 485),
-          exIt("qf4", "edz_schneider_acti9_ic60n_2p_c16", "QF4", 280, 485),
-          exIt("qf5", "edz_schneider_acti9_ic60n_1p_c16", "QF5", 368, 485),
-          /* Rangée 3 — sous QI2 : cuisine 20A, LL, CE, plaque 32A, divers */
-          {
-            uid: "pg2", type: "peigne_1p_x6", tag: "X5",
-            x: 120, y: 708, closed: true, pressed: false
-          },
-          exIt("qf6", "edz_schneider_acti9_ic60n_2p_c16", "QF6", 120, 715),
-          exIt("qf7", "edz_schneider_acti9_ic60n_2p_c16", "QF7", 200, 715),
-          exIt("qf8", "edz_schneider_acti9_ic60n_2p_c16", "QF8", 280, 715),
-          exIt("qf9", "edz_itm_2p_c32", "QF9", 360, 715),
-          exIt("qf10", "edz_schneider_acti9_ic60n_1p_c16", "QF10", 430, 715),
-          /* Borniers N/PE + prise de terre */
-          exIt("xb1", "borniers", "X6", 120, 950),
-          exIt("pe1", "pe", "PE1", 300, 965),
-          /* Goulottes — masquent les fils entre rails / côtés */
-          gou("gh1", "goulotte_h_480", "X7", 100, 438, 480, 34),
-          gou("gh2", "goulotte_h_480", "X8", 100, 668, 480, 34),
-          gou("gh3", "goulotte_h_480", "X9", 100, 910, 480, 34),
-          gou("gv1", "goulotte_v_420", "X10", 64, 290, 34, 420),
-          gou("gv2", "goulotte_v_420", "X11", 620, 290, 34, 420),
-          gou("ga1", "goulotte_angle", "X12", 64, 438, 48, 48),
-          gou("ga2", "goulotte_angle", "X13", 606, 438, 48, 48),
-          /* Charges pédagogiques (Play) — éclairage / voyants / prise simulée */
-          exIt("hl1", "lampe", "HL1", 820, 420),
-          exIt("hl2", "lampe", "HL2", 820, 560),
-          exIt("hl3", "edz_piloto_led_blanco", "HL3", 820, 700),
-          exIt("hl4", "voyant", "HL4", 820, 820),
-          exIt("hl5", "edz_piloto_led_blanco", "HL5", 940, 700)
+          { uid: "r1", type: "rail_din_35", tag: "X1", x: 40, y: 300, closed: true, pressed: false },
+          exIt("c1", "compteur_sonelgaz", "P1", 64, 36),
+          exIt("c2", "edz_schneider_acti9_ic60n_2p_c16", "QF1", 88, 248),
+          exIt("c3", "edz_piloto_led_blanco", "HL1", 300, 250)
         ],
         wires: [
-          /* Arrivée compteur → AGCP */
-          exW("w1", 1, "p1", "L", "qa1", "L", EX_L, 6),
-          exW("w2", 2, "p1", "N", "qa1", "N", EX_N, 6),
-          /* AGCP → DDR1 / DDR2 (répartition) */
-          exW("w3", 3, "qa1", "L'", "qi1", "1", EX_L, 6),
-          exW("w4", 4, "qa1", "N'", "qi1", "3", EX_N, 6),
-          exW("w5", 5, "qa1", "L'", "qi2", "1", EX_L, 6),
-          exW("w6", 6, "qa1", "N'", "qi2", "3", EX_N, 6),
-          /* SPD amont + terre */
-          exW("w7", 7, "qa1", "L'", "spd1", "1", EX_L, 2.5),
-          exW("w8", 8, "qa1", "N'", "spd1", "2", EX_N, 2.5),
-          exW("w9", 9, "spd1", "PE", "pe1", "PE", EX_PE, 6),
-          /* DDR1 → peigne rangée 2 + N bornier */
-          exW("w10", 10, "qi1", "2", "pg1", "IN", EX_L, 2.5),
-          exW("w11", 11, "qi1", "4", "xb1", "N", EX_N, 2.5),
-          exW("w12", 12, "pg1", "1", "qf1", "1", EX_L, 1.5),
-          exW("w13", 13, "pg1", "2", "qf2", "1", EX_L, 1.5),
-          exW("w14", 14, "pg1", "3", "qf3", "1", EX_L, 2.5),
-          exW("w15", 15, "pg1", "4", "qf4", "1", EX_L, 2.5),
-          exW("w16", 16, "pg1", "5", "qf5", "1", EX_L, 1.5),
-          exW("w17", 17, "xb1", "N", "qf3", "3", EX_N, 2.5),
-          exW("w18", 18, "xb1", "N", "qf4", "3", EX_N, 2.5),
-          /* DDR2 → peigne rangée 3 */
-          exW("w19", 19, "qi2", "2", "pg2", "IN", EX_L, 2.5),
-          exW("w20", 20, "qi2", "4", "xb1", "N", EX_N, 2.5),
-          exW("w21", 21, "pg2", "1", "qf6", "1", EX_L, 2.5),
-          exW("w22", 22, "pg2", "2", "qf7", "1", EX_L, 2.5),
-          exW("w23", 23, "pg2", "3", "qf8", "1", EX_L, 2.5),
-          exW("w24", 24, "pg2", "4", "qf9", "1", EX_L, 6),
-          exW("w25", 25, "pg2", "5", "qf10", "1", EX_L, 1.5),
-          exW("w26", 26, "xb1", "N", "qf6", "3", EX_N, 2.5),
-          exW("w27", 27, "xb1", "N", "qf7", "3", EX_N, 2.5),
-          exW("w28", 28, "xb1", "N", "qf8", "3", EX_N, 2.5),
-          exW("w29", 29, "xb1", "N", "qf9", "3", EX_N, 6),
-          /* Départs → charges */
-          exW("w30", 30, "qf1", "2", "hl1", "L", EX_L, 1.5),
-          exW("w31", 31, "xb1", "N", "hl1", "N", EX_N, 1.5),
-          exW("w32", 32, "qf2", "2", "hl2", "L", EX_L, 1.5),
-          exW("w33", 33, "xb1", "N", "hl2", "N", EX_N, 1.5),
-          exW("w34", 34, "qf3", "2", "hl3", "X1", EX_L, 2.5),
-          exW("w35", 35, "xb1", "N", "hl3", "X2", EX_N, 2.5),
-          exW("w36", 36, "qf6", "2", "hl4", "X1", EX_L, 2.5),
-          exW("w37", 37, "xb1", "N", "hl4", "X2", EX_N, 2.5),
-          exW("w38", 38, "qf10", "2", "hl5", "X1", EX_L, 1.5),
-          exW("w39", 39, "xb1", "N", "hl5", "X2", EX_N, 1.5),
-          /* Terre */
-          exW("w40", 40, "pe1", "PE", "xb1", "PE", EX_PE, 6)
+          exW("w1", 1, "c1", "L", "c2", "1", EX_L, 2.5),
+          exW("w2", 2, "c1", "N", "c2", "3", EX_N, 2.5),
+          exW("w3", 3, "c2", "2", "c3", "X1", EX_L, 1.5),
+          exW("w4", 4, "c2", "4", "c3", "X2", EX_N, 1.5)
         ],
-        counts: {
-          X: 14, P: 1, QA: 1, QI: 2, FV: 1, QF: 10, PE: 1, HL: 5
-        },
-        seq: 70,
-        wireNo: 41
+        counts: { X: 1, P: 1, QF: 1, H: 1 }, seq: 10, wireNo: 5
       };
     }
     /** Installation PV mono : string 6×400 W, coffret DC+SPD, QS, Huawei 3 kW, compteur ↔, IDR ABB, iC60N, PE. */
@@ -16377,219 +15921,19 @@
       };
     }
     function exampleFacadeKnxProject() {
-      /* Tutorat KNX : GTL (alim + coupleur IP + poussoirs) + façade maison câblée
-         + 2 volets extérieurs avec IA/GA distinctes. Topology TP daisy-chain professionnelle. */
       const g = facadeGeom(4);
-      const facState = facadeFullState(4);
-      const facProg = {};
-      g.slots.forEach((s) => {
-        if (!facState.eq[s.id]) return;
-        if (s.kind === "volet" || s.kind === "garage") {
-          const p = facadeRollerProg(s.id) || { gaUp: "1/2/1", gaDown: "1/2/2", gaStop: "1/2/3" };
-          const lab = (s.kind === "garage" ? "Garage " : "Volet ") + s.id;
-          facProg[s.id] = {
-            nameUp: lab + " montée", nameDown: lab + " descente", nameStop: lab + " arrêt",
-            gaUp: p.gaUp, gaDown: p.gaDown, gaStop: p.gaStop
-          };
-        } else if (s.kind === "light") {
-          facProg[s.id] = { name: "Lampe " + s.id, ga: facadeLightGa(s.id) || "1/1/40" };
-        } else if (s.kind === "door") {
-          facProg[s.id] = { nameStrike: "Gâche", gaStrike: "1/1/30", nameVideo: "Visiophone", gaVideo: "1/1/31" };
-        } else if (s.kind === "meteo") {
-          facProg[s.id] = { name: "Station météo", ga: "1/5/10" };
-        } else if (s.kind === "pv") {
-          facProg[s.id] = { name: "Solaire " + s.id, ga: s.id === "pv2" ? "1/8/2" : "1/8/1" };
-        }
-      });
-      facState.prog = facProg;
-      /* Démo ciblée : retirer lampes intermédiaires / PV non câblés (reste tutor-ready). */
-      ["ei1", "ei2", "ei3", "e3", "e4", "pv1", "pv2"].forEach((id) => {
-        delete facState.eq[id];
-        if (facState.roller) delete facState.roller[id];
-        if (facState.light) delete facState.light[id];
-        delete facProg[id];
-      });
-      /* Poussoir éclairage façade : e1, e2, ed, gâche */
-      const pushLight = {
-        1: { fn: "switch", ga: "1/1/11", name: "Applique e1" },
-        2: { fn: "switch", ga: "1/1/13", name: "Applique e2" },
-        3: { fn: "switch", ga: "1/1/20", name: "Applique entrée" },
-        4: { fn: "switch", ga: "1/1/30", name: "Gâche porte" }
-      };
-      /* Poussoir volets : v1 montée/descente, v2 montée/descente */
-      const pushShut = {
-        1: { fn: "up", ga: "1/2/1", name: "Volet v1 ↑" },
-        2: { fn: "down", ga: "1/2/2", name: "Volet v1 ↓" },
-        3: { fn: "up", ga: "1/2/4", name: "Volet v2 ↑" },
-        4: { fn: "down", ga: "1/2/5", name: "Volet v2 ↓" }
-      };
-      const wires = [];
-      let wn = 1;
-      const addW = (aUid, aTerm, bUid, bTerm, color, section) => {
-        wires.push(exW("w" + wn, wn, aUid, aTerm, bUid, bTerm, color, section));
-        wn++;
-      };
-      /* Alim 230 V */
-      addW("p1", "L", "qf1", "1", EX_L, 2.5);
-      addW("p1", "N", "qf1", "3", EX_N, 2.5);
-      addW("qf1", "2", "g1", "L", EX_L, 1.5);
-      addW("qf1", "4", "g1", "N", EX_N, 1.5);
-      addW("g1", "PE", "pe1", "PE", EX_PE, 2.5);
-      addW("pe1", "PE", "x2", "PE", EX_PE, 2.5);
-      addW("qf1", "4", "x2", "N", EX_N, 1.5);
-      /* Bus KNX daisy-chain GTL → poussoirs → façade → volets libres */
-      addW("g1", "BUS", "ik1", "BUS", EX_BUS, 0.8);
-      addW("ik1", "BUS", "ip1", "BUS", EX_BUS, 0.8);
-      addW("ip1", "BUS", "s1", "BUS", EX_BUS, 0.8);
-      addW("s1", "BUS", "s2", "BUS", EX_BUS, 0.8);
-      addW("s2", "BUS", "fac1", "v1.BUS", EX_BUS, 0.8);
-      addW("fac1", "v1.BUS", "fac1", "v2.BUS", EX_BUS, 0.8);
-      addW("fac1", "v2.BUS", "fac1", "v3.BUS", EX_BUS, 0.8);
-      addW("fac1", "v3.BUS", "fac1", "v4.BUS", EX_BUS, 0.8);
-      addW("fac1", "v4.BUS", "fac1", "e1.BUS", EX_BUS, 0.8);
-      addW("fac1", "e1.BUS", "fac1", "e2.BUS", EX_BUS, 0.8);
-      addW("fac1", "e2.BUS", "fac1", "ed.BUS", EX_BUS, 0.8);
-      addW("fac1", "ed.BUS", "fac1", "eg1.BUS", EX_BUS, 0.8);
-      addW("fac1", "eg1.BUS", "fac1", "eg2.BUS", EX_BUS, 0.8);
-      addW("fac1", "eg2.BUS", "fac1", "g1.BUS", EX_BUS, 0.8);
-      addW("fac1", "g1.BUS", "fac1", "g2.BUS", EX_BUS, 0.8);
-      addW("fac1", "g2.BUS", "fac1", "porte.BUS", EX_BUS, 0.8);
-      addW("fac1", "porte.BUS", "fac1", "meteo.BUS", EX_BUS, 0.8);
-      addW("fac1", "meteo.BUS", "vr1", "BUS", EX_BUS, 0.8);
-      addW("vr1", "BUS", "vr2", "BUS", EX_BUS, 0.8);
-      /* Force façade : L/N/PE sur volets, lampes clés, garages, porte */
-      const powerSlots = ["v1", "v2", "v3", "v4", "e1", "e2", "ed", "eg1", "eg2", "g1", "g2", "porte"];
-      powerSlots.forEach((sid, i) => {
-        const fromL = i === 0 ? ["qf1", "2"] : ["fac1", powerSlots[i - 1] + ".L"];
-        const fromN = i === 0 ? ["x2", "N"] : ["fac1", powerSlots[i - 1] + ".N"];
-        addW(fromL[0], fromL[1], "fac1", sid + ".L", EX_L, 1.5);
-        addW(fromN[0], fromN[1], "fac1", sid + ".N", EX_N, 1.5);
-        /* PE : volets + garages uniquement (bornes PE sur ces slots). */
-        if (/^v\d+$/.test(sid) || /^g\d+$/.test(sid)) {
-          const prevPe = powerSlots.slice(0, i).reverse().find((p) => /^v\d+$/.test(p) || /^g\d+$/.test(p));
-          if (!prevPe) addW("pe1", "PE", "fac1", sid + ".PE", EX_PE, 2.5);
-          else addW("fac1", prevPe + ".PE", "fac1", sid + ".PE", EX_PE, 2.5);
-        }
-      });
-      /* Volets libres L/N/PE */
-      addW("qf1", "2", "vr1", "L", EX_L, 1.5);
-      addW("x2", "N", "vr1", "N", EX_N, 1.5);
-      addW("pe1", "PE", "vr1", "PE", EX_PE, 2.5);
-      addW("qf1", "2", "vr2", "L", EX_L, 1.5);
-      addW("x2", "N", "vr2", "N", EX_N, 1.5);
-      addW("pe1", "PE", "vr2", "PE", EX_PE, 2.5);
       return {
-        name: "facade-knx-tutor",
-        items: [
-          exIt("p1", "compteur_sonelgaz", "P1", 36, 20),
-          exIt("qf1", "edz_schneider_acti9_ic60n_2p_c16", "QF1", 88, 210),
-          { uid: "r1", type: "rail_din_35", tag: "X1", x: 190, y: 228, closed: true, pressed: false },
-          {
-            uid: "g1", type: "edz_schneider_mtn684064", tag: "G1",
-            x: 210, y: 178, closed: true, pressed: false, physAddr: "1.1.0"
-          },
-          {
-            uid: "ik1", type: "edz_hager_tyfs120", tag: "IK1",
-            x: 368, y: 178, closed: true, pressed: false, physAddr: "1.1.1"
-          },
-          {
-            uid: "ip1", type: "edz_schneider_mtn680329", tag: "IP1",
-            x: 422, y: 178, closed: true, pressed: false, physAddr: "1.1.2"
-          },
-          {
-            uid: "s1", type: "edz_hager_wkt304", tag: "S1",
-            x: 560, y: 40, closed: true, pressed: false,
-            physAddr: "1.1.10",
-            knxToggle: { 1: false, 2: false, 3: false, 4: false },
-            knxKeysProg: pushLight
-          },
-          {
-            uid: "s2", type: "edz_hager_wkt304", tag: "S2",
-            x: 700, y: 40, closed: true, pressed: false,
-            physAddr: "1.1.11",
-            knxToggle: { 1: false, 2: false, 3: false, 4: false },
-            knxKeysProg: pushShut
-          },
-          exIt("x2", "borniers", "X2", 36, 420),
-          exIt("pe1", "pe", "PE1", 200, 440),
-          {
-            uid: "fac1", type: "facade_maison", tag: "FH1",
-            x: 40, y: 520, closed: true, pressed: false,
-            w: g.w, h: g.h, physAddr: "1.1.13",
-            facade: facState
-          },
-          {
-            uid: "vr1", type: "fenetre_volet", tag: "VR1",
-            x: g.w + 80, y: 520, closed: true, pressed: false,
-            physAddr: "1.1.20",
-            roller: { dir: "stop", pos: 0 },
-            knxRollerProg: {
-              gaUp: "1/2/40", gaDown: "1/2/41", gaStop: "1/2/42",
-              nameUp: "VR1 montée", nameDown: "VR1 descente", nameStop: "VR1 arrêt"
-            }
-          },
-          {
-            uid: "vr2", type: "fenetre_volet", tag: "VR2",
-            x: g.w + 310, y: 520, closed: true, pressed: false,
-            physAddr: "1.1.21",
-            roller: { dir: "stop", pos: 0 },
-            knxRollerProg: {
-              gaUp: "1/2/43", gaDown: "1/2/44", gaStop: "1/2/45",
-              nameUp: "VR2 montée", nameDown: "VR2 descente", nameStop: "VR2 arrêt"
-            }
-          }
-        ],
-        wires: wires,
-        knx: {
-          projectName: "Façade maison KNX — tutorat",
-          lineMedia: "IP",
-          createLine: true,
-          lineType: "TP",
-          gaStyle: "3",
-          integMode: "S",
-          mainGroups: [
-            {
-              id: 1, name: "ECLAIRAGE",
-              mid: [{
-                id: 1, name: "Façade",
-                gas: [
-                  { a: "1/1/11", n: "Applique e1" },
-                  { a: "1/1/13", n: "Applique e2" },
-                  { a: "1/1/20", n: "Applique entrée" },
-                  { a: "1/1/30", n: "Gâche porte" }
-                ]
-              }]
-            },
-            {
-              id: 2, name: "VOLETS / STORES",
-              mid: [{
-                id: 1, name: "Façade + libres",
-                gas: [
-                  { a: "1/2/1", n: "Volet v1 montée" },
-                  { a: "1/2/2", n: "Volet v1 descente" },
-                  { a: "1/2/4", n: "Volet v2 montée" },
-                  { a: "1/2/5", n: "Volet v2 descente" },
-                  { a: "1/2/40", n: "VR1 montée" },
-                  { a: "1/2/41", n: "VR1 descente" },
-                  { a: "1/2/43", n: "VR2 montée" },
-                  { a: "1/2/44", n: "VR2 descente" }
-                ]
-              }]
-            },
-            { id: 3, name: "AUTOMATISMES", mid: [] }
-          ],
-          building: {
-            name: "Villa démo façade KNX",
-            rooms: [
-              { id: "gtl", name: "Local Elec / GTL" },
-              { id: "facade", name: "Façade" },
-              { id: "jardin", name: "Jardin / volets libres" }
-            ]
-          }
-        },
-        counts: { P: 1, QF: 1, X: 2, G: 1, IK: 1, IP: 1, S: 2, FH: 1, VR: 2, PE: 1 },
-        seq: 40,
-        wireNo: wn
+        name: "facade-knx",
+        items: [{
+          uid: "fac1", type: "facade_maison", tag: "FH1",
+          x: 120, y: 40, closed: true, pressed: false,
+          w: g.w, h: g.h,
+          facade: facadeFullState(4)
+        }],
+        wires: [],
+        counts: { FH: 1 },
+        seq: 2,
+        wireNo: 1
       };
     }
     function exampleCatalog() {
@@ -16962,16 +16306,12 @@
     function afterExampleLoaded() {
       /* Attendre un board mesurable puis cadrer.
          Hauteur absurde après retries → skip (pas de zoom sur demi-écran).
-         Jamais muter body/html / VV.
-         v139 : token — Play immédiat ne doit pas subir un 2e fit en retard. */
-      const token = bumpExampleFitToken();
+         Jamais muter body/html / VV. */
       try { syncPhoneLibSheetClass(); } catch (_) {}
       try { measureFootBandH(); } catch (_) {}
       const run = (attempt) => {
-        if (token !== exampleFitToken) return;
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            if (token !== exampleFitToken) return;
             try { measureFootBandH(); } catch (_) {}
             const vh = board ? board.clientHeight : 0;
             const ih = Math.max(1, window.innerHeight || 1);
@@ -16981,12 +16321,10 @@
               return;
             }
             if (absurd) return;
-            if (token !== exampleFitToken) return;
             try { centerBoardView(); } catch (_) {}
-            /* Relayout (fermeture lib) : second passage court — annulable. */
+            /* Relayout (fermeture lib) : second passage court. */
             if (attempt === 0) {
               setTimeout(() => {
-                if (token !== exampleFitToken) return;
                 try { centerBoardView(); } catch (_) {}
               }, 80);
             }
@@ -18785,7 +18123,6 @@
     const CAT_ORDER = [
       "Alimentation",
       "Structure",
-      "Goulotte",
       "Borniers",
       "Disjoncteurs modulaires",
       "Différentiel",
@@ -18885,19 +18222,8 @@
       if (!q) return true;
       const disp = (libDisplayName(id, def) || "").toLowerCase();
       const name = ((def && def.name) || "").toLowerCase();
-      const nameEn = ((def && def.nameEn) || "").toLowerCase();
       const badge = ((def && def.badge) || "").toLowerCase();
-      const idL = String(id).toLowerCase();
-      if (disp.indexOf(q) >= 0 || name.indexOf(q) >= 0 || nameEn.indexOf(q) >= 0
-          || badge.indexOf(q) >= 0 || idL.indexOf(q) >= 0) return true;
-      /* Synonymes recherche téléphone : « volet knx ext », « shutter », façade… */
-      const hay = disp + " " + name + " " + nameEn + " " + badge + " " + idL;
-      if ((/volet|shutter|roller|fenetre|fenêtre/.test(q) || /volet|shutter|roller/.test(hay))
-          && (def && (def.knxRoller || def.knxShutter || def.rollerBlind || idL.indexOf("volet") >= 0))) {
-        if (/ext|exter|extérieur|exterior|fenetre|fenêtre|window|knx|volet|shutter/.test(q)) return true;
-      }
-      if (/facade|façade|maison|house/.test(q) && def && def.houseFacade) return true;
-      return false;
+      return disp.indexOf(q) >= 0 || name.indexOf(q) >= 0 || badge.indexOf(q) >= 0 || String(id).toLowerCase().indexOf(q) >= 0;
     }
     function libCatVisibleEntries(cat) {
       const q = libQuery();
@@ -18968,8 +18294,6 @@
         b.innerHTML = `<span class="thumb barrette-t">${holes}</span><span>${disp}</span>`;
       } else if (def.kind === "rail") {
         b.innerHTML = `<span class="thumb rail-t">DIN</span><span>${disp}</span>`;
-      } else if (def.kind === "goulotte") {
-        b.innerHTML = `<span class="thumb goulotte-t">${(def.badge || "GOU").slice(0, 4)}</span><span>${disp}</span>`;
       } else if (def.kind === "pe") {
         b.innerHTML = `<span class="thumb" style="background:repeating-linear-gradient(-45deg,#c4d600 0 4px,#008c45 4px 8px);padding:2px">${peSymbolSvg()}</span><span>${disp}</span>`;
       } else if (def.pumpWell) {
@@ -18981,139 +18305,13 @@
       addLab.className = "lib-add";
       addLab.textContent = tOr("libAdd", "Ajouter");
       b.appendChild(addLab);
-      b.dataset.libType = id;
       b.onclick = () => {
-        if (b._libSkipClick) { b._libSkipClick = false; return; }
         if (!isTypeUnlocked(id)) { openTierGate(); return; }
-        /* v87 : 1er clic = fiche technique ; glisser sur le plan = pose directe. */
+        /* v87 : 1er clic = fiche technique ; Ajouter (dans la fiche) pose sur le plan. */
         openLibTechSheet(id);
       };
       target.appendChild(b);
     }
-
-    (function initLibPaletteDrag() {
-      const lib = document.getElementById("libTop");
-      if (!lib || lib.dataset.libDragBound === "1") return;
-      lib.dataset.libDragBound = "1";
-      let drag = null;
-      function overBoard(x, y) {
-        if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
-        try {
-          const r = board.getBoundingClientRect();
-          if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return true;
-        } catch (_) {}
-        let el = null;
-        try { el = document.elementFromPoint(x, y); } catch (_) {}
-        return !!(el && el.closest && el.closest("#board"));
-      }
-      function setBoardHot(on) {
-        try { board.classList.toggle("lib-drop-hot", !!on); } catch (_) {}
-      }
-      function cleanup() {
-        if (drag && drag.ghost && drag.ghost.parentNode) drag.ghost.parentNode.removeChild(drag.ghost);
-        document.body.classList.remove("lib-palette-drag");
-        setBoardHot(false);
-        drag = null;
-      }
-      function unbindDoc() {
-        document.removeEventListener("pointermove", onMove);
-        document.removeEventListener("pointerup", endDrag);
-        document.removeEventListener("pointercancel", onCancel);
-      }
-      function makeGhost(btn) {
-        const g = document.createElement("div");
-        g.className = "lib-ghost";
-        const img = btn.querySelector("img, .thumb, .fluke-lib-face");
-        if (img) g.appendChild(img.cloneNode(true));
-        const lab = document.createElement("span");
-        const name = btn.querySelector("span:not(.thumb):not(.lib-add):not(.fluke-lib-face)");
-        lab.textContent = (name && name.textContent) || btn.dataset.libType || "";
-        g.appendChild(lab);
-        document.body.appendChild(g);
-        return g;
-      }
-      function onMove(ev) {
-        if (!drag || ev.pointerId !== drag.pointerId) return;
-        const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
-        if (!drag.moved) {
-          if (dx * dx + dy * dy < 64) return;
-          /* Scroll vertical dans la biblio → ne pas démarrer le drag. */
-          if (Math.abs(dy) >= Math.abs(dx) * 1.15) {
-            unbindDoc();
-            cleanup();
-            return;
-          }
-          drag.moved = true;
-          drag.btn._libSkipClick = true;
-          document.body.classList.add("lib-palette-drag");
-          drag.ghost = makeGhost(drag.btn);
-          try { drag.btn.setPointerCapture(ev.pointerId); } catch (_) {}
-          try { closeLibTechSheet(); } catch (_) {}
-        }
-        drag.lastX = ev.clientX;
-        drag.lastY = ev.clientY;
-        if (drag.ghost) {
-          drag.ghost.style.left = ev.clientX + "px";
-          drag.ghost.style.top = ev.clientY + "px";
-        }
-        setBoardHot(overBoard(ev.clientX, ev.clientY));
-        if (ev.cancelable) ev.preventDefault();
-      }
-      function finishDrop(type, btn, x, y) {
-        btn._libSkipClick = true;
-        if (!overBoard(x, y)) return;
-        if (!isTypeUnlocked(type)) { openTierGate(); return; }
-        add(type, { x: x, y: y });
-        try { closeMobileLib(); } catch (_) {}
-      }
-      function endDrag(ev) {
-        if (!drag || ev.pointerId !== drag.pointerId) return;
-        const moved = drag.moved;
-        const type = drag.type;
-        const btn = drag.btn;
-        const x = Number.isFinite(ev.clientX) ? ev.clientX : drag.lastX;
-        const y = Number.isFinite(ev.clientY) ? ev.clientY : drag.lastY;
-        unbindDoc();
-        cleanup();
-        if (!moved) return;
-        finishDrop(type, btn, x, y);
-      }
-      function onCancel(ev) {
-        if (!drag || ev.pointerId !== drag.pointerId) return;
-        const moved = drag.moved;
-        const type = drag.type;
-        const btn = drag.btn;
-        const x = drag.lastX, y = drag.lastY;
-        unbindDoc();
-        cleanup();
-        /* pointercancel (capture / touch) : quand même poser si dernier point sur le plan. */
-        if (!moved) return;
-        finishDrop(type, btn, x, y);
-      }
-      lib.addEventListener("pointerdown", (ev) => {
-        if (ev.button) return;
-        const b = ev.target.closest("button.item[data-lib-type]");
-        if (!b || !lib.contains(b)) return;
-        const type = b.dataset.libType;
-        if (!type || !LIB[type]) return;
-        drag = {
-          type: type,
-          btn: b,
-          x: ev.clientX,
-          y: ev.clientY,
-          lastX: ev.clientX,
-          lastY: ev.clientY,
-          moved: false,
-          pointerId: ev.pointerId,
-          ghost: null
-        };
-        document.addEventListener("pointermove", onMove, { passive: false });
-        document.addEventListener("pointerup", endDrag);
-        document.addEventListener("pointercancel", onCancel);
-      });
-    })();
-
-
     function appendPaletteSection(cat, n, host) {
       const target = host || palette;
       if (!target) return;
@@ -19553,30 +18751,6 @@
       item.x = x0;
       item.y = y0;
     }
-    /** Pose sous le pointeur (drag & drop biblio → plan). */
-    function placeAtClient(item, clientX, clientY) {
-      if (!item || clientX == null || clientY == null) {
-        placeBesideAligned(item);
-        return;
-      }
-      let over = null;
-      try { over = document.elementFromPoint(clientX, clientY); } catch (_) {}
-      if (!over || !over.closest || !over.closest("#board")) {
-        placeBesideAligned(item);
-        return;
-      }
-      const pt = boardPointFromClient(clientX, clientY);
-      const sz = itemSize(item);
-      let x = pt.x - sz.w / 2;
-      let y = pt.y - sz.h / 2;
-      if (!Number.isFinite(x)) x = 8;
-      if (!Number.isFinite(y)) y = 8;
-      x = Math.max(0, x);
-      y = Math.max(0, y);
-      try { x = resolveDinX(item, x, y); } catch (_) {}
-      item.x = x;
-      item.y = y;
-    }
     /**
      * v53-place-beside-align : à l’ajout, si de la place → à côté du composant
      * sélectionné / dernier posé, même alignement Y (haut). Sinon centre viewport.
@@ -19692,16 +18866,12 @@
       }
       if (def.pvCable) item.lengthM = Number(def.lengthM) > 0 ? Number(def.lengthM) : 10;
       if (motorHasSixLeadPlate(def)) applyMotorBarPreset(item, "delta");
-      /* Goulottes / overWires : calque devant fils + modules (z ≥ 1000 → CSS 80–85). */
-      if (def.overWires || def.kind === "goulotte") item.z = 1000;
       return item;
     }
-    function add(type, atClient) {
+    function add(type) {
       if (!isTypeUnlocked(type)) { openTierGate(); return; }
       const def = LIB[type];
       if (!def) return;
-      const drop = atClient && Number.isFinite(atClient.x) && Number.isFinite(atClient.y)
-        ? atClient : null;
       if (def.kind === "barrette") {
         const host = state.selected && find(state.selected);
         if (host && isMotorDef(host.type, LIB[host.type]) && nextBarTermsOnMotor(host, def.holes || 2)) {
@@ -19721,8 +18891,7 @@
         if (!isTypeUnlocked(kmType) || !isTypeUnlocked(frType)) { openTierGate(); return; }
         pushHistory();
         const km = makeLibBoardItem(kmType);
-        if (drop) placeAtClient(km, drop.x, drop.y);
-        else placeBesideAligned(km);
+        placeBesideAligned(km);
         state.items.push(km);
         const fr = makeLibBoardItem(frType);
         attachFrUnderKm(km, fr);
@@ -19737,9 +18906,8 @@
       }
       pushHistory();
       const item = makeLibBoardItem(type);
-      /* Drag & drop : sous le doigt/souris. Sinon à côté / centre viewport. */
-      if (drop) placeAtClient(item, drop.x, drop.y);
-      else placeBesideAligned(item);
+      /* v53 : à côté + même alignement Y si place, sinon centre viewport. */
+      placeBesideAligned(item);
       state.items.push(item);
       if (isKnxDevice(def)) ensureKnxProgram(item);
       setSelection([item.uid], item.uid);
@@ -20052,7 +19220,7 @@
     }
     function proxCanBeTarget(item, def) {
       if (!item || !def) return false;
-      if (def.kind === "rail" || def.kind === "barrette" || def.kind === "goulotte") return false;
+      if (def.kind === "rail" || def.kind === "barrette") return false;
       return true;
     }
     function updateProxHits() {
@@ -20087,7 +19255,6 @@
       const svg = document.createElementNS(NS, "svg");
       svg.setAttribute("class", "prox-beams");
       svg.setAttribute("aria-hidden", "true");
-      sizeBoardSvg(svg);
       const defs = document.createElementNS(NS, "defs");
       svg.appendChild(defs);
       state.items.forEach((item) => {
@@ -20219,10 +19386,10 @@
       const refMode = !!(state._ctxRef && state.refSchematic && state.refSchematic.url);
       const ref = refMode ? state.refSchematic : null;
       if (lockBtn) {
-        const locked = refMode ? !!ref.locked : !!(item && isLayoutLocked(item));
+        const locked = refMode ? !!ref.locked : !!(item && item.locked);
         lockBtn.textContent = locked ? "Cadenassé ✓" : "Cadenassé";
         lockBtn.classList.toggle("on", locked);
-        lockBtn.hidden = !!state.sim;
+        lockBtn.hidden = false;
       }
       if (rotBtn) {
         const deg = refMode ? refRotDeg(ref) : itemRotDeg(item);
@@ -20440,7 +19607,7 @@
       item.prevY = y;
     }
     function resetItemPrevPos(item) {
-      if (!item || isLayoutLocked(item)) return false;
+      if (!item || item.locked) return false;
       if (item.prevX == null || item.prevY == null) return false;
       if (item.prevX === item.x && item.prevY === item.y) return false;
       pushHistory();
@@ -20452,7 +19619,7 @@
       return true;
     }
     function nudgeItemByMm(item, dxMm, dyMm) {
-      if (!item || isLayoutLocked(item)) return false;
+      if (!item || item.locked) return false;
       const dx = Number(dxMm) * MM_TO_PX;
       const dy = Number(dyMm) * MM_TO_PX;
       if (!dx && !dy) return false;
@@ -20465,7 +19632,7 @@
       return true;
     }
     function rotateItemBy(item, deltaDeg) {
-      if (!item || isLayoutLocked(item)) return false;
+      if (!item || item.locked) return false;
       pushHistory();
       const beforeEps = snapshotItemTermEps(item.uid);
       item.rot = itemRotDeg(item) + deltaDeg;
@@ -20478,13 +19645,6 @@
       item.locked = !item.locked;
       return true;
     }
-    /**
-     * Cadenas layout. v146 TEST : Play/Lecture ne verrouille PLUS le plan
-     * (seul item.locked manuel compte) — pour isoler le plantage zoom+Lecture.
-     */
-    function isLayoutLocked(item) {
-      return !!(item && item.locked);
-    }
     /** item.z : < OVER_WIRES_Z_BASE = sous les fils ; ≥ OVER_WIRES_Z_BASE = au-dessus des fils. */
     const OVER_WIRES_Z_BASE = 1000;
     function itemZKey(it) {
@@ -20496,7 +19656,7 @@
     }
     /** Devant = face couvre les fils (z ≥ 1000 → CSS 56–58). */
     function bringItemToFront(item) {
-      if (!item || isLayoutLocked(item)) return false;
+      if (!item || item.locked) return false;
       pushHistory();
       let max = OVER_WIRES_Z_BASE;
       state.items.forEach((it) => { max = Math.max(max, itemZKey(it)); });
@@ -20505,7 +19665,7 @@
     }
     /** Derrière = fils visibles par-dessus (z < 1000 → CSS 20–50). */
     function sendItemToBack(item) {
-      if (!item || isLayoutLocked(item)) return false;
+      if (!item || item.locked) return false;
       pushHistory();
       let min = 0;
       state.items.forEach((it) => {
@@ -20515,20 +19675,15 @@
       item.z = min - 1;
       return true;
     }
-    /** Map uid → CSS z-index.
-     *  Sous fils: 20–50 ; sur fils: 56–58 ; pastilles: 70 ; goulottes: 80–85
-     *  (couvrent modules + fils — comme un couvercle PVC réel). */
+    /** Map uid → CSS z-index. Sous fils: 20–50 ; sur fils: 56–58 ; pastilles: 70. */
     function computeDevCssZByUid() {
       const UNDER_LO = 20, UNDER_HI = 50;
       const OVER_LO = 56, OVER_HI = 58;
-      const GOU_LO = 80, GOU_HI = 85;
       const under = [];
       const over = [];
-      const gou = [];
       state.items.forEach((it) => {
         const def = LIB[it.type];
         if (def && def.kind === "rail") return;
-        if (def && def.kind === "goulotte") { gou.push(it); return; }
         if (itemOverWires(it)) over.push(it);
         else under.push(it);
       });
@@ -20542,7 +19697,6 @@
       };
       under.sort(byKey);
       over.sort(byKey);
-      gou.sort(byKey);
       const map = new Map();
       const mapBand = (list, lo, hi) => {
         const n = list.length;
@@ -20557,7 +19711,6 @@
       });
       mapBand(under, UNDER_LO, UNDER_HI);
       mapBand(over, OVER_LO, OVER_HI);
-      mapBand(gou, GOU_LO, GOU_HI);
       /* KM+FR : host au-dessus du guest, même bande (sous ou sur fils). */
       state.items.forEach((it) => {
         if (!isKmClipHostType(it.type)) return;
@@ -20573,71 +19726,6 @@
       });
       return map;
     }
-    function termShowsEmbout(ref) {
-      try { return wiresSharingTerm(ref).length === 1; } catch (_) { return false; }
-    }
-    /** Cosse verte (14×8) sur la vis, au-dessus de la photo du module. */
-    function appendTerminalClips(svg, NS) {
-      if (!svg || !NS) return;
-      const green = (typeof EMBOUT_GREEN !== "undefined") ? EMBOUT_GREEN : "#16a34a";
-      const edge = (typeof EMBOUT_GREEN_EDGE !== "undefined") ? EMBOUT_GREEN_EDGE : "#14532d";
-      const len = (typeof EMBOUT_LEN !== "undefined") ? EMBOUT_LEN : 14;
-      const th = (typeof EMBOUT_TH !== "undefined") ? EMBOUT_TH : 8;
-      (state.wires || []).forEach((w) => {
-        if (!w || !w.a || !w.b) return;
-        try {
-          if (typeof isFlukeMeterRef === "function" && (isFlukeMeterRef(w.a) || isFlukeMeterRef(w.b))) return;
-        } catch (_) {}
-        ["a", "b"].forEach((end) => {
-          try {
-            const ref = w[end];
-            if (!ref || !ref.uid || !termShowsEmbout(ref)) return;
-            let ep;
-            try { ep = endpoint(ref); } catch (_) { return; }
-            if (!ep || !Number.isFinite(ep.x) || !Number.isFinite(ep.y)) return;
-            const u = padUnit(ep);
-            const cx = ep.x + u[0] * (len * 0.46);
-            const cy = ep.y + u[1] * (len * 0.46);
-            const ang = Math.atan2(u[1], u[0]) * (180 / Math.PI);
-            const g = document.createElementNS(NS, "g");
-            g.setAttribute("class", "wc-boot");
-            g.setAttribute(
-              "transform",
-              "translate(" + cx.toFixed(2) + "," + cy.toFixed(2) + ") rotate(" + ang.toFixed(2) + ")"
-            );
-            const body = document.createElementNS(NS, "rect");
-            body.setAttribute("x", String(-len / 2));
-            body.setAttribute("y", String(-th / 2));
-            body.setAttribute("width", String(len));
-            body.setAttribute("height", String(th));
-            body.setAttribute("rx", "2.2");
-            body.setAttribute("fill", green);
-            body.setAttribute("stroke", edge);
-            body.setAttribute("stroke-width", "0.7");
-            g.appendChild(body);
-            const hi = document.createElementNS(NS, "rect");
-            hi.setAttribute("x", String(-len / 2 + 1.1));
-            hi.setAttribute("y", String(-th / 2 + 1.1));
-            hi.setAttribute("width", String(len * 0.42));
-            hi.setAttribute("height", String(Math.max(1.3, th * 0.32)));
-            hi.setAttribute("rx", "1");
-            hi.setAttribute("fill", "rgba(255,255,255,.42)");
-            g.appendChild(hi);
-            svg.appendChild(g);
-            const px = -u[1];
-            const py = u[0];
-            const slot = document.createElementNS(NS, "path");
-            const slotHalf = 2.2;
-            slot.setAttribute("d", "M" + (ep.x - px * slotHalf) + " " + (ep.y - py * slotHalf) + " L" + (ep.x + px * slotHalf) + " " + (ep.y + py * slotHalf));
-            slot.setAttribute("stroke", "rgba(255,255,255,.88)");
-            slot.setAttribute("stroke-width", "1.15");
-            slot.setAttribute("stroke-linecap", "round");
-            svg.appendChild(slot);
-          } catch (_) { /* un embout ne doit jamais tuer render() */ }
-        });
-      });
-    }
-
     function duplicateItem(item) {
       if (!item) return null;
       if (!isTypeUnlocked(item.type)) { openTierGate(); return null; }
@@ -20683,21 +19771,7 @@
         fc.y = pose.y;
         state.items.push(fc);
       }
-      if (isKnxDevice(def)) {
-        /* Dupliquer ≠ cloner les adresses : nouvelle IA + nouvelles GA par instance. */
-        delete copy.physAddr;
-        delete copy.knxKeysProg;
-        delete copy.knxChProg;
-        delete copy.knxShutterProg;
-        delete copy.knxRollerProg;
-        delete copy.knxDimProg;
-        delete copy.knxPresenceProg;
-        delete copy.knxTempProg;
-        delete copy.knxThermoProg;
-        delete copy.knxBinProg;
-        if (copy.facade && copy.facade.prog) delete copy.facade.prog;
-        ensureKnxProgram(copy);
-      }
+      if (isKnxDevice(def)) ensureKnxProgram(copy);
       state.selected = copy.uid;
       state.edzPropsUid = null;
       return copy;
@@ -20728,39 +19802,28 @@
       bar.setAttribute("aria-hidden", show ? "false" : "true");
       const sheetBtn = bar.querySelector('[data-chip="sheet"]');
       const dupBtn = bar.querySelector('[data-chip="dup"]');
-      const rotBtn = bar.querySelector('[data-chip="rot"]');
-      const delBtn = bar.querySelector('[data-chip="del"]');
       const etsBtn = bar.querySelector('[data-chip="ets"]');
       const astroDayBtn = bar.querySelector('[data-chip="astroDay"]');
       const astroForceBtn = bar.querySelector('[data-chip="astroForce"]');
       const atsPosBtn = bar.querySelector('[data-chip="atsPos"]');
       const pcrPosBtn = bar.querySelector('[data-chip="pcrPos"]');
-      const layoutOff = !!state.sim || !!(item && item.locked);
       if (sheetBtn) {
         sheetBtn.hidden = refOn;
         sheetBtn.setAttribute("aria-hidden", refOn ? "true" : "false");
       }
       if (dupBtn) {
-        dupBtn.hidden = refOn || !!state.sim;
-        dupBtn.setAttribute("aria-hidden", (refOn || !!state.sim) ? "true" : "false");
-      }
-      if (rotBtn) {
-        rotBtn.hidden = layoutOff;
-        rotBtn.setAttribute("aria-hidden", layoutOff ? "true" : "false");
-      }
-      if (delBtn) {
-        delBtn.hidden = !!state.sim;
-        delBtn.setAttribute("aria-hidden", state.sim ? "true" : "false");
+        dupBtn.hidden = refOn;
+        dupBtn.setAttribute("aria-hidden", refOn ? "true" : "false");
       }
       const frontBtn = bar.querySelector('[data-chip="front"]');
       const backBtn = bar.querySelector('[data-chip="back"]');
       if (frontBtn) {
-        frontBtn.hidden = refOn || layoutOff;
-        frontBtn.setAttribute("aria-hidden", (refOn || layoutOff) ? "true" : "false");
+        frontBtn.hidden = refOn;
+        frontBtn.setAttribute("aria-hidden", refOn ? "true" : "false");
       }
       if (backBtn) {
-        backBtn.hidden = refOn || layoutOff;
-        backBtn.setAttribute("aria-hidden", (refOn || layoutOff) ? "true" : "false");
+        backBtn.hidden = refOn;
+        backBtn.setAttribute("aria-hidden", refOn ? "true" : "false");
       }
       /* v35-ets-chip : ETS visible seulement si composant KNX sélectionné (pas cadre réf.). */
       const canEts = !refOn && !!(item && isKnxDevice(LIB[item.type]));
@@ -20837,8 +19900,6 @@
       const label = state.sim ? t("btnStopTitle") : t("btnPlayTitle");
       const btn = document.getElementById("btnPlay");
       const fab = document.getElementById("btnPlayFab");
-      const badge = document.getElementById("lectureBadge");
-      try { document.body.classList.toggle("sim-lecture", !!state.sim); } catch (_) {}
       if (btn) {
         btn.classList.toggle("on", state.sim);
         btn.title = label;
@@ -20851,20 +19912,8 @@
         fab.setAttribute("aria-label", label);
         fab.innerHTML = simIconHtml("fab-ico") + '<span class="fab-label">' + short + "</span>";
       }
-      /* v146 : badge cadenas Lecture masqué (option désactivée pour test). */
-      if (badge) {
-        badge.hidden = true;
-      }
     }
     function toggleSim() {
-      /* v139 : couper tout autofit exemplaire en vol (évite jump Play juste après charge). */
-      try { bumpExampleFitToken(); } catch (_) {}
-      let keepSl = 0, keepSt = 0, keepZ = 1;
-      try {
-        keepSl = board.scrollLeft;
-        keepSt = board.scrollTop;
-        keepZ = boardZoom();
-      } catch (_) {}
       try {
         if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       } catch (_) {}
@@ -20894,33 +19943,7 @@
           if (def && hasCoil(def) && !def.latch && !isOnDelayTimer(def, i.type)) i.closed = false;
         });
       }
-      /*
-       * v145 iPhone : zoom puis Lecture → render() avec boardWorld déjà en scale(z)
-       * saturait WebKit (écran blanc). Rebuild à scale(1), puis restaurer la vue.
-       * PC inchangé. Cadenas Lecture = toujours layout only (pas la caméra).
-       */
-      const safeLectureRender = !!PW_IOS;
-      try {
-        if (safeLectureRender) {
-          board.classList.add("is-board-zooming");
-          const world = document.getElementById("boardWorld");
-          if (world) world.style.transform = "translate3d(0,0,0) scale(1)";
-        }
-        render();
-      } catch (_) {
-        try { render(); } catch (_2) {}
-      } finally {
-        try {
-          state.boardZoom = keepZ;
-          applyBoardZoomStyles();
-          board.scrollLeft = keepSl;
-          board.scrollTop = keepSt;
-        } catch (_) {}
-        if (safeLectureRender) {
-          try { board.classList.remove("is-board-zooming"); } catch (_) {}
-          try { fitAllFlukeLiveFrames(); } catch (_) {}
-        }
-      }
+      render();
       if (state.etsOpen) renderEtsPanel();
       /* v12 : shell en flux (pas fixed) — ne jamais réécrire height/transform sur body. */
     }
@@ -21260,11 +20283,10 @@
     function oibtBaseHref() {
       try {
         /* APK : file:///android_asset/swissdz-panel/ → ../oibt-trainer/
-           Expo Metro / site : http(s)://host/swissdz-panel/ → /oibt-trainer/ (servi à côté) */
+           LAN (serve panel) : symlink swissdz-panel/oibt-trainer → même URL /oibt-trainer/ */
         return new URL("../oibt-trainer/", location.href).href;
       } catch (_) {
-        try { return new URL("/oibt-trainer/", location.origin).href; }
-        catch (_2) { return "/oibt-trainer/"; }
+        return "/oibt-trainer/";
       }
     }
     function oibtAsset(path) {
@@ -21313,14 +20335,14 @@
         if (host) {
           const uid = host.dataset && host.dataset.uid;
           const it = uid && typeof find === "function" ? find(uid) : null;
-          if (it) it.flukeUi = true;
-          host.classList.add("is-fluke-ui");
-          host.classList.add("is-live-ready"); /* v143 : masque underlay — une seule face */
-          const b = host.querySelector(".fluke-ui-btn");
-          if (b) { b.classList.add("on"); b.setAttribute("aria-pressed", "true"); }
-          try {
-            if (it && typeof fitFlukeLiveFrame === "function") fitFlukeLiveFrame(frame, it);
-          } catch (_) {}
+          if (it && !it.flukeUi) {
+            it.flukeUi = true;
+            host.classList.add("is-fluke-ui");
+            const b = host.querySelector(".fluke-ui-btn");
+            if (b) { b.classList.add("on"); b.setAttribute("aria-pressed", "true"); }
+          } else {
+            host.classList.add("is-fluke-ui");
+          }
         }
       } catch (_) {}
     }
@@ -21887,10 +20909,10 @@
         return el;
       }
       Array.from(el.children).forEach((c) => {
-        /* Jamais garder face PNG / logo WireLab (même avec data-fluke-keep d’anciennes versions).
-           v143 : garder fluke-underlay (secours) — ne plus le détruire à chaque render. */
+        /* Jamais garder face PNG / logo WireLab (même avec data-fluke-keep d’anciennes versions). */
         if (c.classList && (c.classList.contains("fluke-face") || c.classList.contains("fluke-logo") ||
-            c.classList.contains("fluke-dial") || c.classList.contains("fluke-lcd-overlay"))) {
+            c.classList.contains("fluke-dial") || c.classList.contains("fluke-lcd-overlay") ||
+            c.classList.contains("fluke-underlay"))) {
           c.remove();
           return;
         }
@@ -21916,15 +20938,11 @@
       item.w = w;
       item.h = h;
     }
-    /** Iframe toujours 400×214 px ; scale CSS = taille monde du .dev (suit le zoom plan). */
+    /** Iframe toujours 400×214 px ; scale CSS = taille visuelle (pas de canvas géant). */
     function fitFlukeLiveFrame(frame, item) {
       if (!frame || !item) return;
-      normalizeFlukeSize(item);
       const sz = itemSize(item);
-      const scaleW = Math.max(0.2, sz.w / FLUKE_BASE_W);
-      const scaleH = Math.max(0.2, sz.h / FLUKE_BASE_H);
-      /* Un seul facteur (ratio verrouillé) — évite étirement / décalage vs cadre. */
-      const scale = Math.min(scaleW, scaleH);
+      const scale = Math.max(0.2, sz.w / FLUKE_BASE_W);
       frame.style.width = FLUKE_BASE_W + "px";
       frame.style.height = FLUKE_BASE_H + "px";
       frame.style.transform = "scale(" + scale + ")";
@@ -21933,17 +20951,6 @@
       frame.style.top = "0";
       frame.style.right = "auto";
       frame.style.bottom = "auto";
-      frame.style.willChange = "auto";
-    }
-    function fitAllFlukeLiveFrames() {
-      try {
-        state.items.forEach((it) => {
-          const def = LIB[it.type];
-          if (!def || !def.flukeMeter) return;
-          const frame = flukeLiveFrames.get(it.uid);
-          if (frame) fitFlukeLiveFrame(frame, it);
-        });
-      } catch (_) {}
     }
     function appendFlukeFace(parent) {
       /* Vignette librairie seulement — le plan utilise l’iframe trainer, pas cette photo. */
@@ -21962,7 +20969,7 @@
       state.wireDrag = null;
       state.selected = item.uid;
       state.selectedWire = null;
-      if (isLayoutLocked(item)) { render(); return; }
+      if (item.locked) { render(); return; }
       const histKey = structuralKey(cloneEditableState());
       pushHistory();
       state.drag = {
@@ -21983,10 +20990,10 @@
       normalizeFlukeSize(item);
       flukeTipsOf(item);
       el.classList.add("fluke-meter");
-      item.flukeUi = true; /* v143 : toujours face live — plus de toggle UI */
-      el.classList.add("is-fluke-ui");
+      if (item.flukeUi == null) item.flukeUi = true; /* v94 : face interactive dès chargement */
+      el.classList.toggle("is-fluke-ui", !!item.flukeUi);
       el.title = "Fluke 1664 FC — poignée/cadre = déplacer · face = TEST/molette · pointes = mesurer";
-      /* Underlay = secours tant que Flutter n’est pas prêt ; masqué dès is-live-ready. */
+      /* v90 : underlay photo locale toujours visible (iframe Flutter peut rester vide en WebView). */
       Array.from(el.querySelectorAll(".fluke-logo, .fluke-dial, .fluke-lcd-overlay")).forEach((n) => n.remove());
       Array.from(el.querySelectorAll("iframe.fluke-live")).forEach((f, i) => {
         if (i > 0) f.remove();
@@ -21999,7 +21006,7 @@
         underlay.draggable = false;
         underlay.setAttribute("data-fluke-keep", "");
         underlay.src = flukeLocalFaceSrc();
-        underlay.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;z-index:0;pointer-events:none;background:#0b1220;";
+        underlay.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:0;pointer-events:none;background:#0b1220;";
         el.appendChild(underlay);
       } else {
         underlay.src = flukeLocalFaceSrc();
@@ -22042,25 +21049,36 @@
         uiBtn.textContent = "UI";
         el.appendChild(uiBtn);
       }
-      /* v143 : bouton UI retiré (display:none) — face toujours active. */
-      uiBtn.classList.add("on");
-      uiBtn.setAttribute("aria-pressed", "true");
-      uiBtn.onpointerdown = (ev) => { ev.stopPropagation(); };
-      uiBtn.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); };
+      uiBtn.title = item.flukeUi
+        ? "Face Fluke active — tap pour mesurer sans bloquer le plan"
+        : "Activer la face Fluke (TEST, molette, F1–F4)";
+      uiBtn.classList.toggle("on", !!item.flukeUi);
+      uiBtn.setAttribute("aria-pressed", item.flukeUi ? "true" : "false");
+      uiBtn.onpointerdown = (ev) => {
+        ev.stopPropagation();
+        if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
+      };
+      uiBtn.onclick = (ev) => {
+        ev.stopPropagation();
+        if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
+        ev.preventDefault();
+        item.flukeUi = !item.flukeUi;
+        el.classList.toggle("is-fluke-ui", !!item.flukeUi);
+        uiBtn.classList.toggle("on", !!item.flukeUi);
+        uiBtn.setAttribute("aria-pressed", item.flukeUi ? "true" : "false");
+        uiBtn.title = item.flukeUi
+          ? "Face Fluke active — tap pour mesurer sans bloquer le plan"
+          : "Activer la face Fluke (TEST, molette, F1–F4)";
+      };
+      try { if (typeof bindPlayInstantTap === "function") bindPlayInstantTap(uiBtn); } catch (_) {}
       Array.from(viewport.querySelectorAll("img, .fluke-logo, .fluke-face")).forEach((n) => n.remove());
       flukeWaitEl(viewport, "Chargement Fluke…");
       const frame = flukeLiveFrame(item.uid);
+      /* Fond transparent pour laisser voir l’underlay si CanvasKit rate. */
       try { frame.style.background = "transparent"; } catch (_) {}
       if (frame.parentNode !== viewport) viewport.appendChild(frame);
       fitFlukeLiveFrame(frame, item);
-      if (frame.dataset && frame.dataset.flukeReady === "1") {
-        el.classList.add("is-live-ready");
-        viewport.classList.add("is-ready");
-        Array.from(viewport.querySelectorAll(".fluke-wait")).forEach((n) => n.remove());
-      } else {
-        el.classList.remove("is-live-ready");
-        armFlukeReadyWatch(frame);
-      }
+      armFlukeReadyWatch(frame);
       pushFlukeEmbedVoltages();
     }
     function beginFlukeTipDrag(item, cab, ev) {
@@ -22552,12 +21570,11 @@
     }
     /* Affichage seul (guidage inchangé) : embouts + ancrage selon direction d’approche. */
     function wiresSharingTerm(ref) {
-      if (!ref || ref.uid == null) return [];
-      return (state.wires || []).filter((w) => {
-        if (!w || !w.a || !w.b) return false;
-        return (w.a.uid === ref.uid && w.a.term === ref.term)
-          || (w.b.uid === ref.uid && w.b.term === ref.term);
-      });
+      return state.wires.filter(
+        (w) =>
+          (w.a.uid === ref.uid && w.a.term === ref.term) ||
+          (w.b.uid === ref.uid && w.b.term === ref.term)
+      );
     }
     /** Côté d’arrivée du fil vers la borne (voisin → borne). */
     function approachSide(fromPt, toPt) {
@@ -24758,7 +23775,6 @@
       syncBoardRefBar();
       const svgWires = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       svgWires.setAttribute("class", "wires");
-      sizeBoardSvg(svgWires);
       const NS = svgWires.namespaceURI;
 
       boardCoordsExtentKey = "";
@@ -25369,7 +24385,6 @@
           el.classList.add("rail");
           if (!def.image) el.classList.add("rail-body");
         }
-        if (def.kind === "goulotte") el.classList.add("goulotte");
         if (def.pvSupport) el.classList.add("pv-support");
         if (def.kind === "pe") el.classList.add("source", "pe");
         if (def.kind === "barrette") el.classList.add("barrette-dev");
@@ -26044,7 +25059,7 @@
           el.appendChild(b);
         }
         /* Poignées de taille : tous les composants placés (din, rail, boutonnerie, KNX, etc.) */
-        if (isItemSelected(item.uid) && state.mode === "select" && canResizeItem(item) && !isLayoutLocked(item) && state.selected === item.uid) {
+        if (isItemSelected(item.uid) && state.mode === "select" && canResizeItem(item) && !item.locked && state.selected === item.uid) {
           ["nw", "n", "ne", "e", "se", "s", "sw", "w"].forEach((dir) => {
             const h = document.createElement("div");
             h.className = "rhandle " + dir;
@@ -26053,12 +25068,6 @@
               ev.stopPropagation();
               if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
               ev.preventDefault();
-              /* v135 : 2e doigt / pinch en cours → pas de resize (zoom plan). */
-              if (boardTouchPinch || boardGesturePinch
-                  || (boardPinchPtrs && boardPinchPtrs.size >= 2)
-                  || (board && board.classList && board.classList.contains("is-pinching"))) {
-                return;
-              }
               state.selected = item.uid;
               state.selectedWire = null;
               state.drag = null; /* priorité resize vs group-drag rail */
@@ -26119,9 +25128,9 @@
             }
             return;
           }
-          /* Platine cadenassée / Lecture : laisser remonter → pan du plan (comme le vide). Pas de drag groupe.
+          /* Platine cadenassée : laisser remonter → pan du plan (comme le vide). Pas de drag groupe.
              Les composants non verrouillés dessus restent des .dev séparés, donc déplaçables. */
-          if (isLayoutLocked(item) && isPlatine(item)) return;
+          if (item.locked && isPlatine(item)) return;
           ev.stopPropagation();
           if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
           ev.preventDefault();
@@ -26196,7 +25205,7 @@
           }
           /* Hors sim : disj. photo — clic court sur le corps = I-ON/O-OFF (sinon drag) */
           if (!state.sim && def.imageOff && (def.pair || def.pairs) && !def.selector && !def.push && !def.prox && !hasCoil(def)) {
-            if (isLayoutLocked(item)) { render(); return; }
+            if (item.locked) { render(); return; }
             const histKey = structuralKey(cloneEditableState());
             pushHistory();
             ev.preventDefault();
@@ -26217,7 +25226,7 @@
             render();
             return;
           }
-          if (isLayoutLocked(item)) { render(); return; }
+          if (item.locked) { render(); return; }
           const histKey = structuralKey(cloneEditableState());
           pushHistory();
           /* Mobile : empêche le pan/scroll du board ; capture sur #board (survit au render) */
@@ -26307,7 +25316,6 @@
       const svgFlukeLeads = document.createElementNS(NS, "svg");
       svgFlukeLeads.setAttribute("class", "fluke-leads");
       svgFlukeLeads.setAttribute("aria-hidden", "true");
-      sizeBoardSvg(svgFlukeLeads);
       world.appendChild(svgFlukeLeads);
       appendFlukeLeads(svgFlukeLeads, NS);
 
@@ -26346,13 +25354,6 @@
           }, item));
         });
       });
-
-      const svgClips = document.createElementNS(NS, "svg");
-      svgClips.setAttribute("class", "wire-clips");
-      svgClips.setAttribute("aria-hidden", "true");
-      sizeBoardSvg(svgClips);
-      world.appendChild(svgClips);
-      try { appendTerminalClips(svgClips, NS); } catch (_) {}
 
       /* 4) Effet court-circuit : bannière + arc / étincelles */
       if (state.short) {
@@ -26485,7 +25486,6 @@
     }
 
     function deleteSelection() {
-      /* v146 : suppression aussi autorisée en Lecture (cadenas Play off). */
       if (state.selectedBar) {
         const m = find(state.selectedBar.uid);
         if (m && m.bars) {
@@ -26671,14 +25671,6 @@
 
     function applyResizePointer(ev) {
       if (!state.resize) return false;
-      /* v135 : pinch / 2 doigts = zoom plan uniquement — jamais resize w/h. */
-      if (boardTouchPinch || boardGesturePinch
-          || (boardPinchPtrs && boardPinchPtrs.size >= 2)
-          || (board && board.classList && board.classList.contains("is-pinching"))) {
-        state.resize = null;
-        syncDragLock();
-        return true;
-      }
       if (state.resize.ref) {
         const ref = state.refSchematic;
         if (!ref || ref.locked) return true;
@@ -26763,7 +25755,6 @@
           nx = state.resize.x + (state.resize.w - nw) / 2;
         }
       }
-      /* Goulotte : resize libre (longueur + épaisseur / section). */
       const mins = resizeMinSize(item);
       /* Toujours positif : une largeur/hauteur négative miroirait L↔N via CSS. */
       nw = Math.max(mins.w, nw);
@@ -26779,9 +25770,8 @@
       /* Persiste dans le modèle item (pas seulement le DOM) — survit au re-select/render. */
       applyItemSize(item, nw, nh);
       if (defR && defR.flukeMeter) normalizeFlukeSize(item);
-      item.y = Math.max(0, ny);
-      /* Goulottes libres (pas d’aimant DIN / anti-chevauchement). */
-      item.x = isGoulotte(item) ? Math.max(0, nx) : resolveDinX(item, nx, item.y);
+      item.y = ny;
+      item.x = resolveDinX(item, nx, item.y);
       if (isPvSupportItem(item)) refitPvModules(item);
       else if (isPvModuleItem(item)) {
         delete item.pvHost;
@@ -26840,12 +25830,6 @@
         return;
       }
       if (state.wireDrag || state.resize) return;
-      /* v135 : pendant pinch, ne pas déplacer/resizer — zoom viewport only. */
-      if (boardTouchPinch || boardGesturePinch
-          || (board && board.classList && board.classList.contains("is-pinching"))) {
-        if (state.drag) { state.drag = null; syncDragLock(); }
-        return;
-      }
       if (state.drag) {
         if (state.drag.ref) {
           const ref = state.refSchematic;
@@ -26864,12 +25848,7 @@
           if (noteEdzLongPressMove(ev)) return;
         }
         if (state.drag.pendingToggle && moved < (state.drag.tapSlop || 8)) return;
-        if (state.drag.pendingToggle) {
-          /* Lecture / cadenas : tap = on/off seulement, jamais de déplacement. */
-          if (isLayoutLocked(item)) return;
-          state.drag.pendingToggle = false;
-        }
-        if (isLayoutLocked(item)) return;
+        if (state.drag.pendingToggle) state.drag.pendingToggle = false;
         const dlt = boardDeltaFromScreen(ev.clientX - state.drag.px, ev.clientY - state.drag.py);
         /* v110 : plus de plancher X/Y=0 — liberté sur le plan étendu. */
         const nx = state.drag.x + dlt.x;
@@ -27310,7 +26289,7 @@
           return;
         }
         if (act === "size") {
-          if (isLayoutLocked(item)) return;
+          if (item.locked) return;
           closeCtxMenu();
           openSizeDialog(item);
           return;
@@ -27338,7 +26317,7 @@
           return;
         }
         if (act === "detachFr") {
-          if (isLayoutLocked(item)) return;
+          if (item.locked) return;
           pushHistory();
           detachKmFr(item);
           closeCtxMenu();
@@ -27521,7 +26500,7 @@
       if (sizeLenWrap) sizeLenWrap.hidden = true;
     }
     function openSizeDialog(item) {
-      if (!item || isLayoutLocked(item)) return;
+      if (!item) return;
       state.selected = item.uid;
       state.selectedWire = null;
       state.drag = null;
@@ -27874,7 +26853,6 @@
       return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 };
     }
     function cancelBoardOpsForPinch() {
-      /* Pinch = caméra seule : annuler drag/resize (sinon w/h platine change + vibration). */
       if (state.drag) state.drag = null;
       if (state.resize) state.resize = null;
       if (state.wireDrag) state.wireDrag = null;
@@ -27884,11 +26862,6 @@
       if (typeof clearEdzLongPress === "function") clearEdzLongPress();
       if (typeof clearWireHold === "function") clearWireHold();
       syncDragLock();
-      try {
-        board.querySelectorAll(".rhandle").forEach(function (h) {
-          h.style.pointerEvents = "none";
-        });
-      } catch (_) {}
       if (boardMidPan) {
         const pid = boardMidPan.pointerId;
         boardMidPan = null;
@@ -27915,23 +26888,14 @@
       if (!(dist > 8)) return false;
       cancelBoardOpsForPinch();
       ensurePinchSpacerRoom(boardZoom());
-      const z0 = boardZoom();
-      const pad = BOARD_PAN_PAD;
-      const rect = board.getBoundingClientRect();
-      const ox0 = mid.x - rect.left;
-      const oy0 = mid.y - rect.top;
       boardTouchPinch = {
         dist0: dist,
-        z0: z0,
+        z0: boardZoom(),
         midX: mid.x,
         midY: mid.y,
         idA: a.identifier,
         idB: b.identifier,
-        via: "touch",
-        ox0: ox0,
-        oy0: oy0,
-        ax: (board.scrollLeft + ox0 - pad) / z0,
-        ay: (board.scrollTop + oy0 - pad) / z0
+        via: "touch"
       };
       boardGesturePinch = true;
       board.classList.add("is-pinching");
@@ -28044,32 +27008,14 @@
       boardGesturePinch = false;
       board.classList.remove("is-pinching");
       try { lockShellDuringPinch(false); } catch (_) {}
-      /* Appliquer le dernier frame pinch en attente, puis settle spacer. */
-      if (boardZoomRaf) {
-        try { cancelAnimationFrame(boardZoomRaf); } catch (_) {}
-        boardZoomRaf = 0;
-      }
-      if (boardZoomPend) {
-        const p = boardZoomPend;
-        boardZoomPend = null;
-        state.boardZoom = p.z1;
-        board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
-        board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
-      }
-      /* Settle spacer (hors pinch) + grille ; render différé si demandé pendant pinch.
-         v142 iOS : NE PAS rebuild le DOM après pinch (façade KNX + fils → OOM Safari).
-         Le zoom n’a touché que scale/scroll — les .dev/SVG déjà en place suffisent. */
+      /* Settle spacer (hors pinch) + grille ; render différé si demandé pendant pinch. */
       applyBoardZoomStyles();
       try { syncBoardCoords(); } catch (_) {}
       if (window.__pwNeedRenderAfterZoom) {
         window.__pwNeedRenderAfterZoom = false;
-        if (PW_IOS) {
-          try { applyBoardZoomStyles(); } catch (_) {}
-        } else {
-          requestAnimationFrame(function () {
-            try { render(); } catch (_) {}
-          });
-        }
+        requestAnimationFrame(function () {
+          try { render(); } catch (_) {}
+        });
       }
     }
     applyStableShellH();
@@ -28120,23 +27066,14 @@
       if (!boardTouchPinch) {
         cancelBoardOpsForPinch();
         ensurePinchSpacerRoom(boardZoom());
-        const z0 = boardZoom();
-        const pad = BOARD_PAN_PAD;
-        const rect = board.getBoundingClientRect();
-        const ox0 = midX - rect.left;
-        const oy0 = midY - rect.top;
         boardTouchPinch = {
           dist0: dist,
-          z0: z0,
+          z0: boardZoom(),
           midX: midX,
           midY: midY,
           idA: a.id,
           idB: b.id,
-          via: "pointer",
-          ox0: ox0,
-          oy0: oy0,
-          ax: (board.scrollLeft + ox0 - pad) / z0,
-          ay: (board.scrollTop + oy0 - pad) / z0
+          via: "pointer"
         };
         boardGesturePinch = true;
         board.classList.add("is-pinching");
@@ -28332,7 +27269,6 @@
           needRender = true;
         }
       }
-      try { bumpExampleFitToken(); } catch (_) {}
       boardMidPan = {
         pointerId: ev.pointerId,
         button: ev.button,
@@ -28591,12 +27527,9 @@
         ctrlTrainerBoot = null;
         if (status) {
           status.hidden = false;
-          const why = err && err.message ? String(err.message) : "";
-          status.textContent = why === "timeout"
-            ? "Le contrôle n’a pas pu démarrer (délai dépassé)."
-            : "Le contrôle n’a pas pu démarrer. Vérifiez /oibt-trainer/ (Metro ou assets APK).";
+          status.textContent = "Le contrôle n’a pas pu démarrer.";
         }
-        console.error("[controle-elec]", oibtBaseHref(), err);
+        console.error(err);
         throw err;
       });
       return ctrlTrainerBoot;
@@ -29603,26 +28536,8 @@
       openProjectFile(f);
     });
 
-    /* v141 : sur iPhone — désinstaller TOUS les SW (même sans fetch, WebKit peut crash-loop).
-       Desktop : purge anciens, puis registre minimal sans intercept. */
     if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-      var SW_VER = "safari-crash-v142";
-      var swNuke = function () {
-        if (!navigator.serviceWorker.getRegistrations) return Promise.resolve();
-        return navigator.serviceWorker.getRegistrations().then(function (regs) {
-          return Promise.all((regs || []).map(function (reg) {
-            try { return reg.unregister(); } catch (_) { return Promise.resolve(); }
-          }));
-        });
-      };
-      if (PW_IOS) {
-        swNuke().catch(function () {});
-      } else {
-        var swReg = function () {
-          navigator.serviceWorker.register("sw-pwire.js?v=" + SW_VER).catch(function () {});
-        };
-        swNuke().then(swReg).catch(swReg);
-      }
+      navigator.serviceWorker.register("sw-pwire.js?v=free-cats-vfd-r1").catch(function () {});
     }
     if ("launchQueue" in window && window.launchQueue && typeof window.launchQueue.setConsumer === "function") {
       window.launchQueue.setConsumer(function (params) {

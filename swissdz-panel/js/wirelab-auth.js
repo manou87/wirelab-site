@@ -10,9 +10,9 @@
  * Redirect OAuth (Supabase → Authentication → URL Configuration) :
  *   Site URL : https://wirelab.pro
  *   https://wirelab.pro/swissdz-panel/auth-callback.html
- *   https://wirelab.pro/swissdz-panel/ (wildcard sous le panneau)
+ *   https://wirelab.pro/swissdz-panel/**
  *   wirelab://auth-callback
- *   exp://HOST/--/auth-callback (Expo Go)
+ *   exp://* /--/auth-callback (Expo Go)
  * Le retour Google reste sur ce panneau (wirelab.pro).
  *
  * swissdz-rev: v36-own-supabase
