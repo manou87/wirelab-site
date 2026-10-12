@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v145-lecture-after-zoom" />
+  <meta name="swissdz-rev" content="native-shell-8777-v146-no-lecture-lock" />
+  <!-- v146: test — cadenas Lecture désactivé (Play ne verrouille plus le layout) -->
   <!-- v145: iPhone — Lecture après zoom : render à scale(1) puis restaurer pan/zoom (évite OOM) -->
   <!-- v144: téléphone — zoom/pad comme version-site-1 (plus de plafond iOS qui bloquait le pinch) -->
   <!-- v143: Fluke — une seule face (live) ; underlay masqué si prêt ; pendant zoom photo seule (anti double-échelle) -->
@@ -6226,12 +6227,12 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v145-lecture-after-zoom"></script>
+  <script src="i18n/panelwire-i18n.js?v=v146-no-lecture-lock"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
   <!-- v140 : 1st-party — plus de cdn.jsdelivr (jamais d’hôte tiers pour le panel) -->
-  <script src="js/supabase.min.js?v=v145-lecture-after-zoom"></script>
-  <script src="js/wirelab-auth.js?v=v145-lecture-after-zoom"></script>
+  <script src="js/supabase.min.js?v=v146-no-lecture-lock"></script>
+  <script src="js/wirelab-auth.js?v=v146-no-lecture-lock"></script>
   <script src="js/wirelab-auth-vitrine.js?v=vitrine10"></script>
   <script>
     /* Assets pré-cadrés (photos studio trop larges → bandes). */
@@ -20476,14 +20477,17 @@
       return true;
     }
     function toggleItemLock(item) {
-      if (!item || state.sim) return false;
+      if (!item) return false;
       pushHistory();
       item.locked = !item.locked;
       return true;
     }
-    /** Mode Lecture (Play) ou cadenas item : bloque drag / resize / delete / move. Interactions sim OK. */
+    /**
+     * Cadenas layout. v146 TEST : Play/Lecture ne verrouille PLUS le plan
+     * (seul item.locked manuel compte) — pour isoler le plantage zoom+Lecture.
+     */
     function isLayoutLocked(item) {
-      return !!state.sim || !!(item && item.locked);
+      return !!(item && item.locked);
     }
     /** item.z : < OVER_WIRES_Z_BASE = sous les fils ; ≥ OVER_WIRES_Z_BASE = au-dessus des fils. */
     const OVER_WIRES_Z_BASE = 1000;
@@ -20639,7 +20643,7 @@
     }
 
     function duplicateItem(item) {
-      if (!item || state.sim) return null;
+      if (!item) return null;
       if (!isTypeUnlocked(item.type)) { openTierGate(); return null; }
       const def = LIB[item.type];
       if (!def) return null;
@@ -20851,9 +20855,9 @@
         fab.setAttribute("aria-label", label);
         fab.innerHTML = simIconHtml("fab-ico") + '<span class="fab-label">' + short + "</span>";
       }
+      /* v146 : badge cadenas Lecture masqué (option désactivée pour test). */
       if (badge) {
-        badge.hidden = !state.sim;
-        badge.textContent = t("lectureBadge") || "🔒 Lecture";
+        badge.hidden = true;
       }
     }
     function toggleSim() {
@@ -26485,8 +26489,7 @@
     }
 
     function deleteSelection() {
-      /* Mode Lecture : pas de suppression (composants / fils / barres). */
-      if (state.sim) return false;
+      /* v146 : suppression aussi autorisée en Lecture (cadenas Play off). */
       if (state.selectedBar) {
         const m = find(state.selectedBar.uid);
         if (m && m.bars) {
@@ -27333,7 +27336,6 @@
           return;
         }
         if (act === "dup") {
-          if (state.sim) return;
           closeCtxMenu();
           duplicateItem(item);
           render();
