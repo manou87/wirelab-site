@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v146-no-lecture-lock" />
+  <meta name="swissdz-rev" content="native-shell-8777-v147-hide-lecture-badge" />
+  <!-- v147: badge 🔒 Lecture vraiment masqué (CSS body.sim-lecture le réaffichait) -->
   <!-- v146: test — cadenas Lecture désactivé (Play ne verrouille plus le layout) -->
   <!-- v145: iPhone — Lecture après zoom : render à scale(1) puis restaurer pan/zoom (évite OOM) -->
   <!-- v144: téléphone — zoom/pad comme version-site-1 (plus de plafond iOS qui bloquait le pinch) -->
@@ -1499,18 +1500,13 @@
       font-size:11px; line-height:1; pointer-events:none;
       filter:drop-shadow(0 1px 1px rgba(15,23,42,.35));
     }
-    /* Mode Lecture (Play) : indicateur discret — hors flux (jamais élargir le footer → jump board). */
-    .lecture-badge {
-      display:none; align-items:center; gap:3px;
-      position:absolute; left:50%; bottom:calc(100% + 4px);
-      transform:translateX(-50%);
-      margin:0; padding:4px 8px;
-      border-radius:6px; font:700 11px/1.2 system-ui,sans-serif;
-      background:#166534; color:#fff; white-space:nowrap;
-      pointer-events:none; user-select:none;
-      z-index:9;
+    /* Mode Lecture (Play) : badge off en v146/v147 (test sans cadenas). */
+    .lecture-badge,
+    body.sim-lecture .lecture-badge,
+    #lectureBadge {
+      display:none !important;
+      visibility:hidden !important;
     }
-    body.sim-lecture .lecture-badge { display:inline-flex; }
     html[data-theme="dark"] .lecture-badge { background:#16a34a; }
     .play-fab { display:none !important; }
     @media (max-width: 1100px) {
@@ -6227,12 +6223,12 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v146-no-lecture-lock"></script>
+  <script src="i18n/panelwire-i18n.js?v=v147-hide-lecture-badge"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
   <!-- v140 : 1st-party — plus de cdn.jsdelivr (jamais d’hôte tiers pour le panel) -->
-  <script src="js/supabase.min.js?v=v146-no-lecture-lock"></script>
-  <script src="js/wirelab-auth.js?v=v146-no-lecture-lock"></script>
+  <script src="js/supabase.min.js?v=v147-hide-lecture-badge"></script>
+  <script src="js/wirelab-auth.js?v=v147-hide-lecture-badge"></script>
   <script src="js/wirelab-auth-vitrine.js?v=vitrine10"></script>
   <script>
     /* Assets pré-cadrés (photos studio trop larges → bandes). */
