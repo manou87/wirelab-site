@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v142-iphone-zoomout" />
+  <meta name="swissdz-rev" content="native-shell-8777-v143-fluke-one-face" />
+  <!-- v143: Fluke — une seule face (live) ; underlay masqué si prêt ; pendant zoom photo seule (anti double-échelle) -->
   <!-- v142: iPhone zoom-out façade KNX — pas de render() après pinch ; zoom min relevé ; imgs/SVG masqués au pinch -->
   <!-- v141: iPhone — zoom/Lecture OOM : SVG sans attrs 2600×1800, pad/zoom plafonnés, SW off, calques masqués au pinch -->
   <!-- v140: iOS Safari — SW sans fetch intercept ; calques SVG sans min 2000×1400 (OOM WebKit) ; supabase 1st-party ; embouts harden -->
@@ -3185,13 +3186,30 @@
     .dev.fluke-meter > img.fluke-underlay {
       display:block !important;
       position:absolute; inset:0; width:100%; height:100%;
-      object-fit:contain; z-index:0; pointer-events:none;
+      object-fit:contain; object-position:center; z-index:0; pointer-events:none;
       background:#0b1220;
     }
     .dev.fluke-meter .fluke-underlay-hidden {
       display:none !important; visibility:hidden !important;
       pointer-events:none !important; opacity:0 !important;
       width:0 !important; height:0 !important;
+    }
+    /* v143 : face live prête → une seule couche (plus de photo sous l’iframe = double Fluke). */
+    .dev.fluke-meter.is-live-ready > img.fluke-underlay {
+      display:none !important; visibility:hidden !important; opacity:0 !important;
+      pointer-events:none !important;
+    }
+    /* Pendant zoom plan : iframe WebKit décroche du scale parent → photo seule, taille = cadre. */
+    #board.is-pinching .dev.fluke-meter.is-live-ready > img.fluke-underlay,
+    #board.is-board-zooming .dev.fluke-meter.is-live-ready > img.fluke-underlay {
+      display:block !important; visibility:visible !important; opacity:1 !important;
+      width:100% !important; height:100% !important;
+    }
+    #board.is-pinching .dev.fluke-meter.is-live-ready .fluke-viewport,
+    #board.is-pinching .dev.fluke-meter.is-live-ready iframe.fluke-live,
+    #board.is-board-zooming .dev.fluke-meter.is-live-ready .fluke-viewport,
+    #board.is-board-zooming .dev.fluke-meter.is-live-ready iframe.fluke-live {
+      visibility:hidden !important; opacity:0 !important; pointer-events:none !important;
     }
     /* Viewport / iframe : pointer-events none (mesure sans tap lecteur). UI = .is-fluke-ui */
     .dev.fluke-meter .fluke-viewport {
@@ -3213,17 +3231,21 @@
       touch-action:none;
       pointer-events:none;
       transform-origin:0 0;
-      will-change:transform;
+      /* v143 : pas de will-change — couche GPU séparée = échelle différente au zoom plan */
       -webkit-backface-visibility:hidden; backface-visibility:hidden;
       /* v90 : tant que Flutter n’est pas prêt, underlay photo reste visible */
       opacity:0;
     }
     .dev.fluke-meter iframe.fluke-live[data-fluke-ready="1"] { opacity:1; }
-    /* Face interactive seulement si UI activée (bouton cadre) — sinon pointes + Play directs. */
+    /* Face interactive dès que live prêt (plus de bouton UI). */
     .dev.fluke-meter.is-fluke-ui .fluke-viewport,
-    .dev.fluke-meter.is-fluke-ui iframe.fluke-live { pointer-events:auto; }
+    .dev.fluke-meter.is-fluke-ui iframe.fluke-live,
+    .dev.fluke-meter.is-live-ready .fluke-viewport,
+    .dev.fluke-meter.is-live-ready iframe.fluke-live { pointer-events:auto; }
     #board.mode-wire .dev.fluke-meter.is-fluke-ui iframe.fluke-live,
-    #board.mode-wire .dev.fluke-meter.is-fluke-ui .fluke-viewport { pointer-events:none; }
+    #board.mode-wire .dev.fluke-meter.is-fluke-ui .fluke-viewport,
+    #board.mode-wire .dev.fluke-meter.is-live-ready iframe.fluke-live,
+    #board.mode-wire .dev.fluke-meter.is-live-ready .fluke-viewport { pointer-events:none; }
     #board.is-dragging .dev.fluke-meter iframe.fluke-live { pointer-events:none; }
     .dev.fluke-meter .fluke-drag-handle {
       position:absolute; left:16%; right:16%; top:0; height:16px; z-index:6;
@@ -3238,14 +3260,10 @@
       width:30px; height:3px; margin:-1.5px 0 0 -15px;
       border-radius:2px; background:rgba(148,163,184,.6);
     }
+    /* v143 : plus de bouton UI — face live seule, zoom = cadre appareil. */
     .dev.fluke-meter .fluke-ui-btn {
-      position:absolute; right:4px; bottom:4px; z-index:7;
-      min-width:28px; height:22px; padding:0 6px;
-      border-radius:6px; border:1px solid rgba(148,163,184,.55);
-      background:rgba(15,23,42,.72); color:#e2e8f0;
-      font:700 10px/20px system-ui,sans-serif; letter-spacing:.02em;
-      cursor:pointer; touch-action:manipulation; pointer-events:auto;
-      -webkit-user-select:none; user-select:none;
+      display:none !important;
+      pointer-events:none !important;
     }
     .dev.fluke-meter .fluke-ui-btn.on {
       background:#166534; border-color:#22c55e; color:#fff;
@@ -6206,12 +6224,12 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v142-iphone-zoomout"></script>
+  <script src="i18n/panelwire-i18n.js?v=v143-fluke-one-face"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
   <!-- v140 : 1st-party — plus de cdn.jsdelivr (jamais d’hôte tiers pour le panel) -->
-  <script src="js/supabase.min.js?v=v142-iphone-zoomout"></script>
-  <script src="js/wirelab-auth.js?v=v142-iphone-zoomout"></script>
+  <script src="js/supabase.min.js?v=v143-fluke-one-face"></script>
+  <script src="js/wirelab-auth.js?v=v143-fluke-one-face"></script>
   <script src="js/wirelab-auth-vitrine.js?v=vitrine10"></script>
   <script>
     /* Assets pré-cadrés (photos studio trop larges → bandes). */
@@ -10954,6 +10972,7 @@
         board.scrollTop = pad;
       }
       if (!pinching) {
+        try { fitAllFlukeLiveFrames(); } catch (_) {}
         const zin = document.getElementById("btnZoomIn");
         const zout = document.getElementById("btnZoomOut");
         if (zin) zin.disabled = z >= BOARD_ZOOM_MAX - 1e-6;
@@ -11031,6 +11050,15 @@
         return;
       }
       state.boardZoom = z1;
+      /* v143 : molette / boutons zoom — masquer iframe Fluke le temps du scale (anti double face). */
+      try {
+        board.classList.add("is-board-zooming");
+        if (window.__pwFlukeZoomHideT) clearTimeout(window.__pwFlukeZoomHideT);
+        window.__pwFlukeZoomHideT = setTimeout(function () {
+          try { board.classList.remove("is-board-zooming"); } catch (_) {}
+          try { fitAllFlukeLiveFrames(); } catch (_) {}
+        }, 160);
+      } catch (_) {}
       applyBoardZoomStyles(opts);
       board.scrollLeft = ax * z1 - ox + pad;
       board.scrollTop = ay * z1 - oy + pad;
@@ -21271,14 +21299,14 @@
         if (host) {
           const uid = host.dataset && host.dataset.uid;
           const it = uid && typeof find === "function" ? find(uid) : null;
-          if (it && !it.flukeUi) {
-            it.flukeUi = true;
-            host.classList.add("is-fluke-ui");
-            const b = host.querySelector(".fluke-ui-btn");
-            if (b) { b.classList.add("on"); b.setAttribute("aria-pressed", "true"); }
-          } else {
-            host.classList.add("is-fluke-ui");
-          }
+          if (it) it.flukeUi = true;
+          host.classList.add("is-fluke-ui");
+          host.classList.add("is-live-ready"); /* v143 : masque underlay — une seule face */
+          const b = host.querySelector(".fluke-ui-btn");
+          if (b) { b.classList.add("on"); b.setAttribute("aria-pressed", "true"); }
+          try {
+            if (it && typeof fitFlukeLiveFrame === "function") fitFlukeLiveFrame(frame, it);
+          } catch (_) {}
         }
       } catch (_) {}
     }
@@ -21845,10 +21873,10 @@
         return el;
       }
       Array.from(el.children).forEach((c) => {
-        /* Jamais garder face PNG / logo WireLab (même avec data-fluke-keep d’anciennes versions). */
+        /* Jamais garder face PNG / logo WireLab (même avec data-fluke-keep d’anciennes versions).
+           v143 : garder fluke-underlay (secours) — ne plus le détruire à chaque render. */
         if (c.classList && (c.classList.contains("fluke-face") || c.classList.contains("fluke-logo") ||
-            c.classList.contains("fluke-dial") || c.classList.contains("fluke-lcd-overlay") ||
-            c.classList.contains("fluke-underlay"))) {
+            c.classList.contains("fluke-dial") || c.classList.contains("fluke-lcd-overlay"))) {
           c.remove();
           return;
         }
@@ -21874,11 +21902,15 @@
       item.w = w;
       item.h = h;
     }
-    /** Iframe toujours 400×214 px ; scale CSS = taille visuelle (pas de canvas géant). */
+    /** Iframe toujours 400×214 px ; scale CSS = taille monde du .dev (suit le zoom plan). */
     function fitFlukeLiveFrame(frame, item) {
       if (!frame || !item) return;
+      normalizeFlukeSize(item);
       const sz = itemSize(item);
-      const scale = Math.max(0.2, sz.w / FLUKE_BASE_W);
+      const scaleW = Math.max(0.2, sz.w / FLUKE_BASE_W);
+      const scaleH = Math.max(0.2, sz.h / FLUKE_BASE_H);
+      /* Un seul facteur (ratio verrouillé) — évite étirement / décalage vs cadre. */
+      const scale = Math.min(scaleW, scaleH);
       frame.style.width = FLUKE_BASE_W + "px";
       frame.style.height = FLUKE_BASE_H + "px";
       frame.style.transform = "scale(" + scale + ")";
@@ -21887,6 +21919,17 @@
       frame.style.top = "0";
       frame.style.right = "auto";
       frame.style.bottom = "auto";
+      frame.style.willChange = "auto";
+    }
+    function fitAllFlukeLiveFrames() {
+      try {
+        state.items.forEach((it) => {
+          const def = LIB[it.type];
+          if (!def || !def.flukeMeter) return;
+          const frame = flukeLiveFrames.get(it.uid);
+          if (frame) fitFlukeLiveFrame(frame, it);
+        });
+      } catch (_) {}
     }
     function appendFlukeFace(parent) {
       /* Vignette librairie seulement — le plan utilise l’iframe trainer, pas cette photo. */
@@ -21926,10 +21969,10 @@
       normalizeFlukeSize(item);
       flukeTipsOf(item);
       el.classList.add("fluke-meter");
-      if (item.flukeUi == null) item.flukeUi = true; /* v94 : face interactive dès chargement */
-      el.classList.toggle("is-fluke-ui", !!item.flukeUi);
+      item.flukeUi = true; /* v143 : toujours face live — plus de toggle UI */
+      el.classList.add("is-fluke-ui");
       el.title = "Fluke 1664 FC — poignée/cadre = déplacer · face = TEST/molette · pointes = mesurer";
-      /* v90 : underlay photo locale toujours visible (iframe Flutter peut rester vide en WebView). */
+      /* Underlay = secours tant que Flutter n’est pas prêt ; masqué dès is-live-ready. */
       Array.from(el.querySelectorAll(".fluke-logo, .fluke-dial, .fluke-lcd-overlay")).forEach((n) => n.remove());
       Array.from(el.querySelectorAll("iframe.fluke-live")).forEach((f, i) => {
         if (i > 0) f.remove();
@@ -21942,7 +21985,7 @@
         underlay.draggable = false;
         underlay.setAttribute("data-fluke-keep", "");
         underlay.src = flukeLocalFaceSrc();
-        underlay.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:0;pointer-events:none;background:#0b1220;";
+        underlay.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;z-index:0;pointer-events:none;background:#0b1220;";
         el.appendChild(underlay);
       } else {
         underlay.src = flukeLocalFaceSrc();
@@ -21985,36 +22028,25 @@
         uiBtn.textContent = "UI";
         el.appendChild(uiBtn);
       }
-      uiBtn.title = item.flukeUi
-        ? "Face Fluke active — tap pour mesurer sans bloquer le plan"
-        : "Activer la face Fluke (TEST, molette, F1–F4)";
-      uiBtn.classList.toggle("on", !!item.flukeUi);
-      uiBtn.setAttribute("aria-pressed", item.flukeUi ? "true" : "false");
-      uiBtn.onpointerdown = (ev) => {
-        ev.stopPropagation();
-        if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
-      };
-      uiBtn.onclick = (ev) => {
-        ev.stopPropagation();
-        if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
-        ev.preventDefault();
-        item.flukeUi = !item.flukeUi;
-        el.classList.toggle("is-fluke-ui", !!item.flukeUi);
-        uiBtn.classList.toggle("on", !!item.flukeUi);
-        uiBtn.setAttribute("aria-pressed", item.flukeUi ? "true" : "false");
-        uiBtn.title = item.flukeUi
-          ? "Face Fluke active — tap pour mesurer sans bloquer le plan"
-          : "Activer la face Fluke (TEST, molette, F1–F4)";
-      };
-      try { if (typeof bindPlayInstantTap === "function") bindPlayInstantTap(uiBtn); } catch (_) {}
+      /* v143 : bouton UI retiré (display:none) — face toujours active. */
+      uiBtn.classList.add("on");
+      uiBtn.setAttribute("aria-pressed", "true");
+      uiBtn.onpointerdown = (ev) => { ev.stopPropagation(); };
+      uiBtn.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); };
       Array.from(viewport.querySelectorAll("img, .fluke-logo, .fluke-face")).forEach((n) => n.remove());
       flukeWaitEl(viewport, "Chargement Fluke…");
       const frame = flukeLiveFrame(item.uid);
-      /* Fond transparent pour laisser voir l’underlay si CanvasKit rate. */
       try { frame.style.background = "transparent"; } catch (_) {}
       if (frame.parentNode !== viewport) viewport.appendChild(frame);
       fitFlukeLiveFrame(frame, item);
-      armFlukeReadyWatch(frame);
+      if (frame.dataset && frame.dataset.flukeReady === "1") {
+        el.classList.add("is-live-ready");
+        viewport.classList.add("is-ready");
+        Array.from(viewport.querySelectorAll(".fluke-wait")).forEach((n) => n.remove());
+      } else {
+        el.classList.remove("is-live-ready");
+        armFlukeReadyWatch(frame);
+      }
       pushFlukeEmbedVoltages();
     }
     function beginFlukeTipDrag(item, cab, ev) {
