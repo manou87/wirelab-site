@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v150-features-no-lock" />
+  <meta name="swissdz-rev" content="native-shell-8777-v151-rail-on-platine" />
+  <!-- v151: rail DIN toujours sur la platine (si platine) ; modules aimantés sur le rail ; z platine&lt;rail&lt;modules -->
   <!-- v150: features demandées (goulottes/embouts/façade/dnd/lang/liste) + zoom backup ; SANS cadenas Lecture -->
   <!-- v138: téléphone — feuille composants visiblement plus basse (top explicite, plus de height vh clipée par work) -->
   <!-- v137: ETS à la demande (pas au clic KNX) ; GA/IA uniques par instance ; exemple façade câblée ; Contrôle Expo via /oibt-trainer/ -->
@@ -6234,11 +6235,11 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v150-features-no-lock"></script>
+  <script src="i18n/panelwire-i18n.js?v=v151-rail-on-platine"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
-  <script src="js/supabase.min.js?v=v150-features-no-lock"></script>
-  <script src="js/wirelab-auth.js?v=v150-features-no-lock"></script>
+  <script src="js/supabase.min.js?v=v151-rail-on-platine"></script>
+  <script src="js/wirelab-auth.js?v=v151-rail-on-platine"></script>
   <script src="js/wirelab-auth-vitrine.js?v=vitrine10"></script>
   <script>
     /* Assets pré-cadrés (photos studio trop larges → bandes). */
@@ -9352,9 +9353,19 @@
       return String(type || "").startsWith("edz_hager_");
     }
 
-    // Déplacement libre X/Y : pas de snap rail (modules non verrouillés sur le DIN).
-    function snapToRailY(_item, _x, y) {
-      return y;
+    /** Modules DIN : aimanter Y sur le rail le plus proche (composant sur la rail). */
+    function snapToRailY(item, x, y) {
+      if (!item || !isDinModule(item)) return y;
+      const probe = { uid: item.uid, type: item.type, x: x, y: y, w: item.w, h: item.h };
+      const rail = nearestRailToItem(probe);
+      if (!rail) return y;
+      const rs = itemSize(rail);
+      const sz = itemSize(item);
+      const railCy = rail.y + rs.h / 2;
+      const targetY = railCy - sz.h / 2;
+      const mCy = y + sz.h / 2;
+      if (Math.abs(mCy - railCy) > Math.max(rs.h, sz.h) * 0.85) return y;
+      return targetY;
     }
 
     function isRail(item) {
@@ -9390,6 +9401,75 @@
         return nearY || overlapY;
       });
     }
+
+    /** Platines présentes sur le plan. */
+    function platinesOnBoard() {
+      return state.items.filter((it) => isPlatine(it));
+    }
+    /** Platine cible pour un rectangle (centre dedans sinon la plus proche). */
+    function nearestPlatineForRect(x, y, w, h) {
+      const list = platinesOnBoard();
+      if (!list.length) return null;
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+      let best = null;
+      let bestScore = Infinity;
+      list.forEach((p) => {
+        const pb = itemWorldAabb(p);
+        const pcx = (pb.minX + pb.maxX) / 2;
+        const pcy = (pb.minY + pb.maxY) / 2;
+        const inside = cx >= pb.minX && cx <= pb.maxX && cy >= pb.minY && cy <= pb.maxY;
+        const dist = Math.hypot(cx - pcx, cy - pcy);
+        const score = inside ? dist * 0.01 : dist + 1e6;
+        if (score < bestScore) {
+          bestScore = score;
+          best = p;
+        }
+      });
+      return best;
+    }
+    /**
+     * Rail DIN : toujours sur une platine s’il y en a une.
+     * Clamp dans le cadre (marge) ; si le rail dépasse, centre sur la platine.
+     */
+    function constrainRailToPlatine(rail, x, y) {
+      if (!rail || !isRail(rail)) return { x: x, y: y };
+      const sz = itemSize(rail);
+      const plat = nearestPlatineForRect(x, y, sz.w, sz.h);
+      if (!plat) return { x: x, y: y };
+      const pb = itemWorldAabb(plat);
+      const pad = 10;
+      const minX = pb.minX + pad;
+      const minY = pb.minY + pad;
+      const maxX = pb.maxX - pad - sz.w;
+      const maxY = pb.maxY - pad - sz.h;
+      let nx = x;
+      let ny = y;
+      if (!(maxX >= minX)) nx = (pb.minX + pb.maxX - sz.w) / 2;
+      else nx = Math.max(minX, Math.min(maxX, x));
+      if (!(maxY >= minY)) ny = (pb.minY + pb.maxY - sz.h) / 2;
+      else ny = Math.max(minY, Math.min(maxY, y));
+      return { x: nx, y: ny };
+    }
+    function attachRailToPlatine(rail) {
+      if (!rail || !isRail(rail)) return false;
+      const c = constrainRailToPlatine(rail, rail.x, rail.y);
+      if (c.x === rail.x && c.y === rail.y) return false;
+      rail.x = c.x;
+      rail.y = c.y;
+      return true;
+    }
+    /** Décale un groupe (rail + modules) après clamp platine. */
+    function shiftGroupByDelta(groupIds, dx, dy) {
+      if (!groupIds || !(dx || dy)) return;
+      groupIds.forEach((uid) => {
+        const it = find(uid);
+        if (!it) return;
+        it.x += dx;
+        it.y += dy;
+      });
+    }
+
     /** Tout ce qui est « dans » la platine (centre du composant dans le cadre) — rails, modules, etc. */
     function itemsOnPlatine(platine) {
       if (!platine || !isPlatine(platine)) return [];
@@ -10269,6 +10349,9 @@
     /** Applique anti-chevauchement au lâcher ; revert si encore empilé. */
     function settleItemPlacement(item, startX, startY, excludeUids) {
       if (!item || !isCollidableItem(item)) return;
+      /* Drop : modules DIN → rail ; rail → platine. */
+      try { item.y = snapToRailY(item, item.x, item.y); } catch (_) {}
+      if (isRail(item)) attachRailToPlatine(item);
       const nx = resolveDinX(item, item.x, item.y, excludeUids);
       if (itemOverlapsAny(item, nx, item.y, excludeUids)) {
         item.x = startX;
@@ -19479,7 +19562,7 @@
       const x0 = c.x - sz.w / 2;
       const y0 = c.y - sz.h / 2;
       const fits = (x, y) => x >= 8 && y >= 8 && !itemOverlapsAny(item, x, y);
-      if (fits(x0, y0)) { item.x = x0; item.y = y0; return; }
+      if (fits(x0, y0)) { item.x = x0; item.y = y0; if (isRail(item)) attachRailToPlatine(item); return; }
       const step = Math.max(40, Math.round(Math.max(sz.w, sz.h) * 0.45));
       for (let ring = 1; ring <= 10; ring++) {
         const spots = [
@@ -19496,12 +19579,14 @@
           if (fits(spots[i][0], spots[i][1])) {
             item.x = spots[i][0];
             item.y = spots[i][1];
+            if (isRail(item)) attachRailToPlatine(item);
             return;
           }
         }
       }
       item.x = x0;
       item.y = y0;
+      if (isRail(item)) attachRailToPlatine(item);
     }
     /** Pose sous le pointeur (drag & drop biblio → plan). */
     function placeAtClient(item, clientX, clientY) {
@@ -19524,6 +19609,11 @@
       x = Math.max(0, x);
       y = Math.max(0, y);
       try { x = resolveDinX(item, x, y); } catch (_) {}
+      try { y = snapToRailY(item, x, y); } catch (_) {}
+      if (isRail(item)) {
+        const c = constrainRailToPlatine(item, x, y);
+        x = c.x; y = c.y;
+      }
       item.x = x;
       item.y = y;
     }
@@ -19690,6 +19780,7 @@
       /* Drag & drop : sous le doigt/souris. Sinon à côté / centre viewport. */
       if (drop) placeAtClient(item, drop.x, drop.y);
       else placeBesideAligned(item);
+      if (isRail(item)) attachRailToPlatine(item);
       state.items.push(item);
       if (isKnxDevice(def)) ensureKnxProgram(item);
       setSelection([item.uid], item.uid);
@@ -20470,6 +20561,7 @@
       state.items.forEach((it) => {
         const def = LIB[it.type];
         if (def && def.kind === "rail") return;
+        if (isPlatine(it)) return; /* z=3 sous rails — pas dans la bande modules */
         if (def && def.kind === "goulotte") { gou.push(it); return; }
         if (itemOverWires(it)) over.push(it);
         else under.push(it);
@@ -20493,6 +20585,9 @@
           map.set(it.uid, cssZ);
         });
       };
+      state.items.forEach((it) => {
+        if (isPlatine(it)) map.set(it.uid, 3);
+      });
       state.items.forEach((it) => {
         const def = LIB[it.type];
         if (def && def.kind === "rail") map.set(it.uid, 8);
@@ -26763,7 +26858,8 @@
         if (state.drag.group) {
           if ((isRail(item) || isPlatine(item)) && !state.drag.group.kmFr) {
             const soft = applySoftAlign(item, nx, ny);
-            applyRailGroupDrag(state.drag, soft.x, soft.y);
+            const pose = isRail(item) ? constrainRailToPlatine(item, soft.x, soft.y) : soft;
+            applyRailGroupDrag(state.drag, pose.x, pose.y);
           } else {
             applyRailGroupDrag(state.drag, nx, ny);
           }
@@ -26803,7 +26899,9 @@
         } else {
           const prevX = item.x, prevY = item.y;
           const soft = applySoftAlign(item, nx, ny);
-          item.y = soft.y;
+          let my = soft.y;
+          try { my = snapToRailY(item, soft.x, soft.y); } catch (_) {}
+          item.y = my;
           item.x = resolveDinX(item, soft.x, item.y);
           shiftWiresForItemDelta(item.uid, item.x - prevX, item.y - prevY);
         }
@@ -27028,10 +27126,15 @@
       } else if (dragged && !ctxByHold) {
         if (state.drag.group && state.drag.group.items) {
           const ex = state.drag.group.groupIds || null;
+          if (isRail(dragged)) {
+            const ox = dragged.x, oy = dragged.y;
+            const c = constrainRailToPlatine(dragged, ox, oy);
+            shiftGroupByDelta(ex || state.drag.group.groupIds, c.x - ox, c.y - oy);
+          }
           state.drag.group.items.forEach((s) => {
             const it = find(s.uid);
             if (!it || isRail(it)) return;
-            settleItemPlacement(it, s.x, s.y, ex);
+            settleItemPlacement(it, it.x, it.y, ex);
           });
           if (state.drag.group.kmFr) snapKmFrOnDrop(dragged);
         } else if (isPvSupportItem(dragged)) {
