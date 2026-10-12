@@ -6163,7 +6163,7 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v134-wirelab-sync"></script>
+  <script src="i18n/panelwire-i18n.js?v=v135-lang-zorder"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -6194,6 +6194,11 @@
     const COLOR_N = "#0088ce";
     const COLOR_PE = "#c4d600";
     const COLOR_PE_STRIPE = "#008c45";
+    /* Cosses / embouts sur les vis-bornes — requis par appendTerminalClips (sinon render() plante → ↑↓ z-order morts). */
+    const EMBOUT_GREEN = "#16a34a";
+    const EMBOUT_GREEN_EDGE = "#14532d";
+    const EMBOUT_LEN = 14;
+    const EMBOUT_TH = 8;
     const COLOR_KNX = "#009640"; /* gaine / câble bus KNX (vert) */
 
 
