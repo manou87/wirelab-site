@@ -8,16 +8,9 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v147-hide-lecture-badge" />
-  <!-- v147: badge 🔒 Lecture vraiment masqué (CSS body.sim-lecture le réaffichait) -->
-  <!-- v146: test — cadenas Lecture désactivé (Play ne verrouille plus le layout) -->
-  <!-- v145: iPhone — Lecture après zoom : render à scale(1) puis restaurer pan/zoom (évite OOM) -->
-  <!-- v144: téléphone — zoom/pad comme version-site-1 (plus de plafond iOS qui bloquait le pinch) -->
-  <!-- v143: Fluke — une seule face (live) ; underlay masqué si prêt ; pendant zoom photo seule (anti double-échelle) -->
-  <!-- v142: iPhone zoom-out façade KNX — pas de render() après pinch ; zoom min relevé ; imgs/SVG masqués au pinch -->
-  <!-- v141: iPhone — zoom/Lecture OOM : SVG sans attrs 2600×1800, pad/zoom plafonnés, SW off, calques masqués au pinch -->
-  <!-- v140: iOS Safari — SW sans fetch intercept ; calques SVG sans min 2000×1400 (OOM WebKit) ; supabase 1st-party ; embouts harden -->
-  <!-- v139: Play/Lecture — badge hors flux (pas de shift footer) ; annule autofit exemplaire en retard ; conserve pan/zoom -->
+  <meta name="swissdz-rev" content="native-shell-8777-v151-rail-on-platine" />
+  <!-- v151: rail DIN toujours sur la platine (si platine) ; modules aimantés sur le rail ; z platine&lt;rail&lt;modules -->
+  <!-- v150: features demandées (goulottes/embouts/façade/dnd/lang/liste) + zoom backup ; SANS cadenas Lecture -->
   <!-- v138: téléphone — feuille composants visiblement plus basse (top explicite, plus de height vh clipée par work) -->
   <!-- v137: ETS à la demande (pas au clic KNX) ; GA/IA uniques par instance ; exemple façade câblée ; Contrôle Expo via /oibt-trainer/ -->
   <!-- v136: téléphone — feuille composants ~10 % plus basse (82vh) — ineffective web: 82vh≈92vh après clip overflow -->
@@ -985,7 +978,6 @@
        Mobile (≤900px) : .bar reprend flex:1 pour épingler le play à droite. */
     .foot-pin-play {
       display:flex; align-items:center; flex:0 0 auto; z-index:5;
-      position:relative; /* ancre badge Lecture hors flux */
     }
     .bar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; flex:0 1 auto; min-width:0; }
     /* Desktop : wrapper projet en ligne flex */
@@ -1500,14 +1492,6 @@
       font-size:11px; line-height:1; pointer-events:none;
       filter:drop-shadow(0 1px 1px rgba(15,23,42,.35));
     }
-    /* Mode Lecture (Play) : badge off en v146/v147 (test sans cadenas). */
-    .lecture-badge,
-    body.sim-lecture .lecture-badge,
-    #lectureBadge {
-      display:none !important;
-      visibility:hidden !important;
-    }
-    html[data-theme="dark"] .lecture-badge { background:#16a34a; }
     .play-fab { display:none !important; }
     @media (max-width: 1100px) {
       .app-shell { grid-template-columns:240px minmax(0,1fr); }
@@ -2993,25 +2977,6 @@
       transition:none !important;
       animation:none !important;
     }
-    /* v141/v142 : pinch iPhone — masquer calques + photos (re-raster GPU → crash zoom-out façade). */
-    html.pw-ios #board.is-pinching svg.wire-clips,
-    html.pw-ios #board.is-pinching svg.fluke-leads,
-    html.pw-ios #board.is-pinching svg.prox-beams,
-    html.pw-ios #board.is-pinching svg.align-guides,
-    html.pw-ios #board.is-pinching svg.board-coords,
-    html.pw-ios #board.is-pinching svg.wires {
-      visibility:hidden !important;
-    }
-    html.pw-ios #board.is-pinching #boardWorld .dev img,
-    html.pw-ios #board.is-pinching #boardWorld .knx-shutter,
-    html.pw-ios #board.is-pinching #boardWorld .roller-opening,
-    html.pw-ios #board.is-pinching #boardWorld .board-ref-layer {
-      visibility:hidden !important;
-    }
-    html.pw-ios .knx-shutter .slats,
-    html.pw-ios .roller-opening .cloth {
-      will-change:auto !important;
-    }
     /* v135 : poignées resize invisibles/inertes pendant pinch — évite resize géométrique vs zoom. */
     #board.is-pinching .rhandle {
       display:none !important;
@@ -3156,43 +3121,6 @@
       -webkit-user-select:none; user-select:none;
       -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent;
     }
-    /* Fluke : UN SEUL calque = iframe oibt-trainer live (pas de photo inventée sur le plan).
-       Boîtier ≈ rectangle arrondi (ratio réel ~1.87). */
-    .dev.fluke-meter {
-      z-index:22; overflow:visible !important;
-      background:transparent !important; background-color:transparent !important;
-      border:0 !important; border-radius:10% / 14% !important; cursor:default; touch-action:none;
-      box-shadow:none !important; outline:none;
-      min-width:120px; min-height:64px;
-      pointer-events:none;
-      -webkit-backface-visibility:hidden; backface-visibility:hidden;
-      transform:translateZ(0);
-    }
-    .dev.fluke-meter.sel {
-      outline:2px solid #93c5fd;
-      outline-offset:2px;
-      border-radius:10% / 14% !important;
-      background:transparent !important;
-    }
-    /* Jamais de PNG / logo / dial inventés sur le plan. */
-    .dev.fluke-meter > .fluke-face,
-    .dev.fluke-meter > .fluke-logo,
-    .dev.fluke-meter > .fluke-dial,
-    .dev.fluke-meter > img.fluke-face,
-    .dev.fluke-meter > img.fluke-logo {
-      display:none !important;
-    }
-    .dev.fluke-meter > img.fluke-underlay {
-      display:block !important;
-      position:absolute; inset:0; width:100%; height:100%;
-      object-fit:contain; object-position:center; z-index:0; pointer-events:none;
-      background:#0b1220;
-    }
-    .dev.fluke-meter .fluke-underlay-hidden {
-      display:none !important; visibility:hidden !important;
-      pointer-events:none !important; opacity:0 !important;
-      width:0 !important; height:0 !important;
-    }
     /* v143 : face live prête → une seule couche (plus de photo sous l’iframe = double Fluke). */
     .dev.fluke-meter.is-live-ready > img.fluke-underlay {
       display:none !important; visibility:hidden !important; opacity:0 !important;
@@ -3260,9 +3188,97 @@
       border-radius:2px; background:rgba(148,163,184,.6);
     }
     /* v143 : plus de bouton UI — face live seule, zoom = cadre appareil. */
-    .dev.fluke-meter .fluke-ui-btn {
+
+/* Fluke : UN SEUL calque = iframe oibt-trainer live (pas de photo inventée sur le plan).
+       Boîtier ≈ rectangle arrondi (ratio réel ~1.87). */
+    .dev.fluke-meter {
+      z-index:22; overflow:visible !important;
+      background:transparent !important; background-color:transparent !important;
+      border:0 !important; border-radius:10% / 14% !important; cursor:default; touch-action:none;
+      box-shadow:none !important; outline:none;
+      min-width:120px; min-height:64px;
+      pointer-events:none;
+      -webkit-backface-visibility:hidden; backface-visibility:hidden;
+      transform:translateZ(0);
+    }
+    .dev.fluke-meter.sel {
+      outline:2px solid #93c5fd;
+      outline-offset:2px;
+      border-radius:10% / 14% !important;
+      background:transparent !important;
+    }
+    /* Jamais de PNG / logo / dial inventés sur le plan. */
+    .dev.fluke-meter > .fluke-face,
+    .dev.fluke-meter > .fluke-logo,
+    .dev.fluke-meter > .fluke-dial,
+    .dev.fluke-meter > img.fluke-face,
+    .dev.fluke-meter > img.fluke-logo {
       display:none !important;
-      pointer-events:none !important;
+    }
+    .dev.fluke-meter > img.fluke-underlay {
+      display:block !important;
+      position:absolute; inset:0; width:100%; height:100%;
+      object-fit:contain; z-index:0; pointer-events:none;
+      background:#0b1220;
+    }
+    .dev.fluke-meter .fluke-underlay-hidden {
+      display:none !important; visibility:hidden !important;
+      pointer-events:none !important; opacity:0 !important;
+      width:0 !important; height:0 !important;
+    }
+    /* Viewport / iframe : pointer-events none (mesure sans tap lecteur). UI = .is-fluke-ui */
+    .dev.fluke-meter .fluke-viewport {
+      position:absolute; inset:0; z-index:1;
+      overflow:hidden;
+      border-radius:10% / 14%;
+      background:transparent !important; background-color:transparent !important;
+      border:0 !important;
+      box-shadow:none !important; pointer-events:none;
+      -webkit-mask-image:none; mask-image:none;
+    }
+    /* Canvas Flutter à taille fixe (400×214) + scale CSS : agrandir n’explose plus le WebGL. */
+    .dev.fluke-meter iframe.fluke-live {
+      position:absolute; left:0; top:0; z-index:1;
+      width:400px; height:214px;
+      border:0 !important; margin:0; padding:0;
+      background:transparent !important; background-color:transparent !important;
+      color-scheme:only light;
+      touch-action:none;
+      pointer-events:none;
+      transform-origin:0 0;
+      will-change:transform;
+      -webkit-backface-visibility:hidden; backface-visibility:hidden;
+      /* v90 : tant que Flutter n’est pas prêt, underlay photo reste visible */
+      opacity:0;
+    }
+    .dev.fluke-meter iframe.fluke-live[data-fluke-ready="1"] { opacity:1; }
+    /* Face interactive seulement si UI activée (bouton cadre) — sinon pointes + Play directs. */
+    .dev.fluke-meter.is-fluke-ui .fluke-viewport,
+    .dev.fluke-meter.is-fluke-ui iframe.fluke-live { pointer-events:auto; }
+    #board.mode-wire .dev.fluke-meter.is-fluke-ui iframe.fluke-live,
+    #board.mode-wire .dev.fluke-meter.is-fluke-ui .fluke-viewport { pointer-events:none; }
+    #board.is-dragging .dev.fluke-meter iframe.fluke-live { pointer-events:none; }
+    .dev.fluke-meter .fluke-drag-handle {
+      position:absolute; left:16%; right:16%; top:0; height:16px; z-index:6;
+      cursor:grab; touch-action:none; pointer-events:auto;
+      background:linear-gradient(180deg, rgba(15,23,42,.32), rgba(15,23,42,.02));
+      border-radius:0 0 7px 7px;
+      border-bottom:1px solid rgba(148,163,184,.28);
+    }
+    .dev.fluke-meter .fluke-drag-handle:active { cursor:grabbing; }
+    .dev.fluke-meter .fluke-drag-handle::after {
+      content:""; position:absolute; left:50%; top:50%;
+      width:30px; height:3px; margin:-1.5px 0 0 -15px;
+      border-radius:2px; background:rgba(148,163,184,.6);
+    }
+    .dev.fluke-meter .fluke-ui-btn {
+      position:absolute; right:4px; bottom:4px; z-index:7;
+      min-width:28px; height:22px; padding:0 6px;
+      border-radius:6px; border:1px solid rgba(148,163,184,.55);
+      background:rgba(15,23,42,.72); color:#e2e8f0;
+      font:700 10px/20px system-ui,sans-serif; letter-spacing:.02em;
+      cursor:pointer; touch-action:manipulation; pointer-events:auto;
+      -webkit-user-select:none; user-select:none;
     }
     .dev.fluke-meter .fluke-ui-btn.on {
       background:#166534; border-color:#22c55e; color:#fff;
@@ -3309,8 +3325,7 @@
     /* Cordons Fluke : calque dédié, jamais clipés par l’iframe / masque trainer */
     svg.fluke-leads {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible !important;
-      /* v140 : pas de min-width/height forcés — calques géants = OOM WebKit iOS */
-      pointer-events:none; z-index:59;
+      pointer-events:none; min-width:1600px; min-height:1000px; z-index:59;
     }
     svg.fluke-leads path.fluke-lead,
     svg.wires path.fluke-lead {
@@ -3428,8 +3443,7 @@
     .dev.source.neutre { background:#bfdbfe; }
     svg.wire-clips {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible;
-      /* v140 : embouts — taille = boardWorld (pas min 2000×1400 → crash GPU iPhone) */
-      pointer-events:none; z-index:66;
+      pointer-events:none; min-width:2000px; min-height:1400px; z-index:66;
     }
 
     /* Pastilles : L1 marron · L2 noir · L3 gris · N bleu · PE jaune-vert · BUS KNX.
@@ -4388,7 +4402,7 @@
     /* Guides d’alignement DIN : traits fins, pistache = rail / distance, violet = bords */
     svg.align-guides {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible;
-      pointer-events:none; z-index:45;
+      pointer-events:none; min-width:1600px; min-height:1000px; z-index:45;
     }
     svg.align-guides line {
       vector-effect:non-scaling-stroke;
@@ -4400,15 +4414,14 @@
     }
     svg.wires {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible;
-      /* v140 : size via viewBox JS / 100% parent — min 2000×1400 tuait Safari iOS */
-      pointer-events:none; z-index:55;
+      pointer-events:none; min-width:2000px; min-height:1400px; z-index:55;
       -webkit-user-select:none; user-select:none;
       -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent;
     }
     /* Faisceau capteur prox / photo : secteur depuis le nez, sous les modules */
     svg.prox-beams {
       position:absolute; inset:0; width:100%; height:100%; overflow:visible;
-      pointer-events:none; z-index:14;
+      pointer-events:none; min-width:2000px; min-height:1400px; z-index:14;
     }
     svg.prox-beams .prox-cone {
       stroke-linejoin:round; stroke-linecap:round;
@@ -5920,7 +5933,6 @@
         <button id="btnPlay" class="btn-ico" type="button" data-i18n-title="btnPlayTitle" data-i18n-aria="btnPlayAria" title="Vérifier le courant" aria-label="Vérifier le courant">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.2v13.6L19.2 12 8 5.2z"/></svg>
         </button>
-        <span id="lectureBadge" class="lecture-badge" hidden aria-live="polite" data-i18n="lectureBadge">🔒 Lecture</span>
       </div>
     </div>
   </footer>
@@ -6223,12 +6235,11 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v147-hide-lecture-badge"></script>
+  <script src="i18n/panelwire-i18n.js?v=v151-rail-on-platine"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
-  <!-- v140 : 1st-party — plus de cdn.jsdelivr (jamais d’hôte tiers pour le panel) -->
-  <script src="js/supabase.min.js?v=v147-hide-lecture-badge"></script>
-  <script src="js/wirelab-auth.js?v=v147-hide-lecture-badge"></script>
+  <script src="js/supabase.min.js?v=v151-rail-on-platine"></script>
+  <script src="js/wirelab-auth.js?v=v151-rail-on-platine"></script>
   <script src="js/wirelab-auth-vitrine.js?v=vitrine10"></script>
   <script>
     /* Assets pré-cadrés (photos studio trop larges → bandes). */
@@ -9342,9 +9353,19 @@
       return String(type || "").startsWith("edz_hager_");
     }
 
-    // Déplacement libre X/Y : pas de snap rail (modules non verrouillés sur le DIN).
-    function snapToRailY(_item, _x, y) {
-      return y;
+    /** Modules DIN : aimanter Y sur le rail le plus proche (composant sur la rail). */
+    function snapToRailY(item, x, y) {
+      if (!item || !isDinModule(item)) return y;
+      const probe = { uid: item.uid, type: item.type, x: x, y: y, w: item.w, h: item.h };
+      const rail = nearestRailToItem(probe);
+      if (!rail) return y;
+      const rs = itemSize(rail);
+      const sz = itemSize(item);
+      const railCy = rail.y + rs.h / 2;
+      const targetY = railCy - sz.h / 2;
+      const mCy = y + sz.h / 2;
+      if (Math.abs(mCy - railCy) > Math.max(rs.h, sz.h) * 0.85) return y;
+      return targetY;
     }
 
     function isRail(item) {
@@ -9380,6 +9401,75 @@
         return nearY || overlapY;
       });
     }
+
+    /** Platines présentes sur le plan. */
+    function platinesOnBoard() {
+      return state.items.filter((it) => isPlatine(it));
+    }
+    /** Platine cible pour un rectangle (centre dedans sinon la plus proche). */
+    function nearestPlatineForRect(x, y, w, h) {
+      const list = platinesOnBoard();
+      if (!list.length) return null;
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+      let best = null;
+      let bestScore = Infinity;
+      list.forEach((p) => {
+        const pb = itemWorldAabb(p);
+        const pcx = (pb.minX + pb.maxX) / 2;
+        const pcy = (pb.minY + pb.maxY) / 2;
+        const inside = cx >= pb.minX && cx <= pb.maxX && cy >= pb.minY && cy <= pb.maxY;
+        const dist = Math.hypot(cx - pcx, cy - pcy);
+        const score = inside ? dist * 0.01 : dist + 1e6;
+        if (score < bestScore) {
+          bestScore = score;
+          best = p;
+        }
+      });
+      return best;
+    }
+    /**
+     * Rail DIN : toujours sur une platine s’il y en a une.
+     * Clamp dans le cadre (marge) ; si le rail dépasse, centre sur la platine.
+     */
+    function constrainRailToPlatine(rail, x, y) {
+      if (!rail || !isRail(rail)) return { x: x, y: y };
+      const sz = itemSize(rail);
+      const plat = nearestPlatineForRect(x, y, sz.w, sz.h);
+      if (!plat) return { x: x, y: y };
+      const pb = itemWorldAabb(plat);
+      const pad = 10;
+      const minX = pb.minX + pad;
+      const minY = pb.minY + pad;
+      const maxX = pb.maxX - pad - sz.w;
+      const maxY = pb.maxY - pad - sz.h;
+      let nx = x;
+      let ny = y;
+      if (!(maxX >= minX)) nx = (pb.minX + pb.maxX - sz.w) / 2;
+      else nx = Math.max(minX, Math.min(maxX, x));
+      if (!(maxY >= minY)) ny = (pb.minY + pb.maxY - sz.h) / 2;
+      else ny = Math.max(minY, Math.min(maxY, y));
+      return { x: nx, y: ny };
+    }
+    function attachRailToPlatine(rail) {
+      if (!rail || !isRail(rail)) return false;
+      const c = constrainRailToPlatine(rail, rail.x, rail.y);
+      if (c.x === rail.x && c.y === rail.y) return false;
+      rail.x = c.x;
+      rail.y = c.y;
+      return true;
+    }
+    /** Décale un groupe (rail + modules) après clamp platine. */
+    function shiftGroupByDelta(groupIds, dx, dy) {
+      if (!groupIds || !(dx || dy)) return;
+      groupIds.forEach((uid) => {
+        const it = find(uid);
+        if (!it) return;
+        it.x += dx;
+        it.y += dy;
+      });
+    }
+
     /** Tout ce qui est « dans » la platine (centre du composant dans le cadre) — rails, modules, etc. */
     function itemsOnPlatine(platine) {
       if (!platine || !isPlatine(platine)) return [];
@@ -10259,6 +10349,9 @@
     /** Applique anti-chevauchement au lâcher ; revert si encore empilé. */
     function settleItemPlacement(item, startX, startY, excludeUids) {
       if (!item || !isCollidableItem(item)) return;
+      /* Drop : modules DIN → rail ; rail → platine. */
+      try { item.y = snapToRailY(item, item.x, item.y); } catch (_) {}
+      if (isRail(item)) attachRailToPlatine(item);
       const nx = resolveDinX(item, item.x, item.y, excludeUids);
       if (itemOverlapsAny(item, nx, item.y, excludeUids)) {
         item.x = startX;
@@ -10690,50 +10783,19 @@
       showWireTags: true
     };
 
-    /* v141 : iPhone/iPad WebKit — mémoire GPU limitée ; détecter tôt pour plafonner zoom/pad. */
-    const PW_IOS = (function () {
-      try {
-        const ua = navigator.userAgent || "";
-        if (/iPhone|iPad|iPod/i.test(ua)) return true;
-        if (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1) return true;
-      } catch (_) {}
-      return false;
-    })();
-    try {
-      if (PW_IOS) document.documentElement.classList.add("pw-ios");
-    } catch (_) {}
-    /* v144 : mêmes limites zoom/pad que version-site-1 / PC — le plafond iOS
-       (0.38–2.2) bloquait le pinch après chargement d’exemplaire (~fit). */
     const BOARD_ZOOM_MIN = 0.2;
     const BOARD_ZOOM_ABS_MIN = 0.08;
     const BOARD_ZOOM_MAX = 5;
     const BOARD_ZOOM_STEP = 1.15;
     const BOARD_WORLD_W = 2600;
     const BOARD_WORLD_H = 1800;
-    /* v106 = WireLabPro-1.0.1 : grande marge fixe → pan fluide 4 directions. */
+    /* v106 = WireLabPro-1.0.1 : grande marge fixe → pan fluide 4 directions (pas letterbox dynamique). */
     const BOARD_PAN_PAD = 2400;
     const BOARD_PAN_ROOM = 0;
     const BOARD_COORDS_STEP = 100;
     const BOARD_FIT_ZOOM_MIN = 0.45;
     let boardOriginReady = false;
     let boardCoordsExtentKey = "";
-    /* Token : annule centerBoardView différé (exemplaire) si Play / pan / zoom avant la fin. */
-    let exampleFitToken = 0;
-    function bumpExampleFitToken() {
-      exampleFitToken++;
-      return exampleFitToken;
-    }
-    /** Calque SVG plan : viewBox monde uniquement — attrs width/height 2600×1800 = backing-store OOM iOS. */
-    function sizeBoardSvg(svg) {
-      if (!svg) return;
-      try {
-        svg.setAttribute("width", "100%");
-        svg.setAttribute("height", "100%");
-        svg.setAttribute("viewBox", "0 0 " + BOARD_WORLD_W + " " + BOARD_WORLD_H);
-        svg.setAttribute("preserveAspectRatio", "none");
-        svg.removeAttribute("xmlns:xlink");
-      } catch (_) {}
-    }
 
     function boardZoom() {
       const z = Number(state.boardZoom);
@@ -10914,8 +10976,6 @@
     /* Déclaré tôt : utilisé pendant pinch (défini avant les handlers). */
     var boardTouchPinch = null;
     var boardPinchPtrs = new Map();
-    var boardZoomRaf = 0;
-    var boardZoomPend = null;
     /*
      * v108 : zoom 1.0.1 + spacer FIGÉ pendant pinch.
      * Cause user : plan vide fluide ; dès qu’un .dev (photo) est posé → tremblement.
@@ -10937,6 +10997,16 @@
       const curH = parseFloat(spacer.style.height) || spacer.offsetHeight || 0;
       if (needW > curW) spacer.style.width = needW + "px";
       if (needH > curH) spacer.style.height = needH + "px";
+    }
+    function fitAllFlukeLiveFrames() {
+      try {
+        state.items.forEach((it) => {
+          const def = LIB[it.type];
+          if (!def || !def.flukeMeter) return;
+          const frame = flukeLiveFrames.get(it.uid);
+          if (frame) fitFlukeLiveFrame(frame, it);
+        });
+      } catch (_) {}
     }
     function applyBoardZoomStyles(opts) {
       const pinching = !!(opts && opts.livePinch) || board.classList.contains("is-pinching");
@@ -10997,62 +11067,31 @@
     }
     /* Zoom ancré sous curseur/doigts — viewport only (jamais item.w/h). */
     function setBoardZoomAt(next, clientX, clientY, opts) {
-      /* Zoom utilisateur / pinch : annule autofit exemplaire différé. */
       try { bumpExampleFitToken(); } catch (_) {}
       const z0 = boardZoom();
       const z1 = clampBoardZoom(next);
       const rect = board.getBoundingClientRect();
       const pad = BOARD_PAN_PAD;
-      const pinching = !!(opts && opts.livePinch) || board.classList.contains("is-pinching");
-      let ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
-      let oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
-      /* Ancre monde figée au début du pinch (évite oscillation si doigts bougent). */
-      let ax, ay;
-      if (pinching && boardTouchPinch && Number.isFinite(boardTouchPinch.ax)) {
-        ax = boardTouchPinch.ax;
-        ay = boardTouchPinch.ay;
-        if (Number.isFinite(boardTouchPinch.ox0)) ox = boardTouchPinch.ox0;
-        if (Number.isFinite(boardTouchPinch.oy0)) oy = boardTouchPinch.oy0;
-      } else {
-        ax = (board.scrollLeft + ox - pad) / z0;
-        ay = (board.scrollTop + oy - pad) / z0;
-      }
-      if (Math.abs(z1 - z0) < 1e-9 && !pinching) {
+      const ox = (clientX == null) ? board.clientWidth / 2 : (clientX - rect.left);
+      const oy = (clientY == null) ? board.clientHeight / 2 : (clientY - rect.top);
+      const ax = (board.scrollLeft + ox - pad) / z0;
+      const ay = (board.scrollTop + oy - pad) / z0;
+      if (Math.abs(z1 - z0) < 1e-9) {
         applyBoardZoomStyles(opts);
         return;
       }
-      if (pinching) {
-        if (boardTouchPinch && !Number.isFinite(boardTouchPinch.ax)) {
-          boardTouchPinch.ax = ax;
-          boardTouchPinch.ay = ay;
-          boardTouchPinch.ox0 = ox;
-          boardTouchPinch.oy0 = oy;
-        }
-        boardZoomPend = { z1: z1, ox: ox, oy: oy, ax: ax, ay: ay, pad: pad };
-        if (!boardZoomRaf) {
-          boardZoomRaf = requestAnimationFrame(function () {
-            boardZoomRaf = 0;
-            const p = boardZoomPend;
-            boardZoomPend = null;
-            if (!p) return;
-            state.boardZoom = p.z1;
-            applyBoardZoomStyles({ livePinch: true });
-            board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
-            board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
-          });
-        }
-        return;
-      }
       state.boardZoom = z1;
-      /* v143 : molette / boutons zoom — masquer iframe Fluke le temps du scale (anti double face). */
-      try {
-        board.classList.add("is-board-zooming");
-        if (window.__pwFlukeZoomHideT) clearTimeout(window.__pwFlukeZoomHideT);
-        window.__pwFlukeZoomHideT = setTimeout(function () {
-          try { board.classList.remove("is-board-zooming"); } catch (_) {}
-          try { fitAllFlukeLiveFrames(); } catch (_) {}
-        }, 160);
-      } catch (_) {}
+      const pinching = !!(opts && opts.livePinch) || board.classList.contains("is-pinching");
+      if (!pinching) {
+        try {
+          board.classList.add("is-board-zooming");
+          if (window.__pwFlukeZoomHideT) clearTimeout(window.__pwFlukeZoomHideT);
+          window.__pwFlukeZoomHideT = setTimeout(function () {
+            try { board.classList.remove("is-board-zooming"); } catch (_) {}
+            try { fitAllFlukeLiveFrames(); } catch (_) {}
+          }, 160);
+        } catch (_) {}
+      }
       applyBoardZoomStyles(opts);
       board.scrollLeft = ax * z1 - ox + pad;
       board.scrollTop = ay * z1 - oy + pad;
@@ -16962,16 +17001,12 @@
     function afterExampleLoaded() {
       /* Attendre un board mesurable puis cadrer.
          Hauteur absurde après retries → skip (pas de zoom sur demi-écran).
-         Jamais muter body/html / VV.
-         v139 : token — Play immédiat ne doit pas subir un 2e fit en retard. */
-      const token = bumpExampleFitToken();
+         Jamais muter body/html / VV. */
       try { syncPhoneLibSheetClass(); } catch (_) {}
       try { measureFootBandH(); } catch (_) {}
       const run = (attempt) => {
-        if (token !== exampleFitToken) return;
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            if (token !== exampleFitToken) return;
             try { measureFootBandH(); } catch (_) {}
             const vh = board ? board.clientHeight : 0;
             const ih = Math.max(1, window.innerHeight || 1);
@@ -16981,12 +17016,10 @@
               return;
             }
             if (absurd) return;
-            if (token !== exampleFitToken) return;
             try { centerBoardView(); } catch (_) {}
-            /* Relayout (fermeture lib) : second passage court — annulable. */
+            /* Relayout (fermeture lib) : second passage court. */
             if (attempt === 0) {
               setTimeout(() => {
-                if (token !== exampleFitToken) return;
                 try { centerBoardView(); } catch (_) {}
               }, 80);
             }
@@ -19529,7 +19562,7 @@
       const x0 = c.x - sz.w / 2;
       const y0 = c.y - sz.h / 2;
       const fits = (x, y) => x >= 8 && y >= 8 && !itemOverlapsAny(item, x, y);
-      if (fits(x0, y0)) { item.x = x0; item.y = y0; return; }
+      if (fits(x0, y0)) { item.x = x0; item.y = y0; if (isRail(item)) attachRailToPlatine(item); return; }
       const step = Math.max(40, Math.round(Math.max(sz.w, sz.h) * 0.45));
       for (let ring = 1; ring <= 10; ring++) {
         const spots = [
@@ -19546,12 +19579,14 @@
           if (fits(spots[i][0], spots[i][1])) {
             item.x = spots[i][0];
             item.y = spots[i][1];
+            if (isRail(item)) attachRailToPlatine(item);
             return;
           }
         }
       }
       item.x = x0;
       item.y = y0;
+      if (isRail(item)) attachRailToPlatine(item);
     }
     /** Pose sous le pointeur (drag & drop biblio → plan). */
     function placeAtClient(item, clientX, clientY) {
@@ -19574,6 +19609,11 @@
       x = Math.max(0, x);
       y = Math.max(0, y);
       try { x = resolveDinX(item, x, y); } catch (_) {}
+      try { y = snapToRailY(item, x, y); } catch (_) {}
+      if (isRail(item)) {
+        const c = constrainRailToPlatine(item, x, y);
+        x = c.x; y = c.y;
+      }
       item.x = x;
       item.y = y;
     }
@@ -19740,6 +19780,7 @@
       /* Drag & drop : sous le doigt/souris. Sinon à côté / centre viewport. */
       if (drop) placeAtClient(item, drop.x, drop.y);
       else placeBesideAligned(item);
+      if (isRail(item)) attachRailToPlatine(item);
       state.items.push(item);
       if (isKnxDevice(def)) ensureKnxProgram(item);
       setSelection([item.uid], item.uid);
@@ -20087,7 +20128,6 @@
       const svg = document.createElementNS(NS, "svg");
       svg.setAttribute("class", "prox-beams");
       svg.setAttribute("aria-hidden", "true");
-      sizeBoardSvg(svg);
       const defs = document.createElementNS(NS, "defs");
       svg.appendChild(defs);
       state.items.forEach((item) => {
@@ -20219,10 +20259,10 @@
       const refMode = !!(state._ctxRef && state.refSchematic && state.refSchematic.url);
       const ref = refMode ? state.refSchematic : null;
       if (lockBtn) {
-        const locked = refMode ? !!ref.locked : !!(item && isLayoutLocked(item));
+        const locked = refMode ? !!ref.locked : !!(item && item.locked);
         lockBtn.textContent = locked ? "Cadenassé ✓" : "Cadenassé";
         lockBtn.classList.toggle("on", locked);
-        lockBtn.hidden = !!state.sim;
+        lockBtn.hidden = false;
       }
       if (rotBtn) {
         const deg = refMode ? refRotDeg(ref) : itemRotDeg(item);
@@ -20440,7 +20480,7 @@
       item.prevY = y;
     }
     function resetItemPrevPos(item) {
-      if (!item || isLayoutLocked(item)) return false;
+      if (!item || item.locked) return false;
       if (item.prevX == null || item.prevY == null) return false;
       if (item.prevX === item.x && item.prevY === item.y) return false;
       pushHistory();
@@ -20452,7 +20492,7 @@
       return true;
     }
     function nudgeItemByMm(item, dxMm, dyMm) {
-      if (!item || isLayoutLocked(item)) return false;
+      if (!item || item.locked) return false;
       const dx = Number(dxMm) * MM_TO_PX;
       const dy = Number(dyMm) * MM_TO_PX;
       if (!dx && !dy) return false;
@@ -20465,7 +20505,7 @@
       return true;
     }
     function rotateItemBy(item, deltaDeg) {
-      if (!item || isLayoutLocked(item)) return false;
+      if (!item || item.locked) return false;
       pushHistory();
       const beforeEps = snapshotItemTermEps(item.uid);
       item.rot = itemRotDeg(item) + deltaDeg;
@@ -20478,13 +20518,6 @@
       item.locked = !item.locked;
       return true;
     }
-    /**
-     * Cadenas layout. v146 TEST : Play/Lecture ne verrouille PLUS le plan
-     * (seul item.locked manuel compte) — pour isoler le plantage zoom+Lecture.
-     */
-    function isLayoutLocked(item) {
-      return !!(item && item.locked);
-    }
     /** item.z : < OVER_WIRES_Z_BASE = sous les fils ; ≥ OVER_WIRES_Z_BASE = au-dessus des fils. */
     const OVER_WIRES_Z_BASE = 1000;
     function itemZKey(it) {
@@ -20496,7 +20529,7 @@
     }
     /** Devant = face couvre les fils (z ≥ 1000 → CSS 56–58). */
     function bringItemToFront(item) {
-      if (!item || isLayoutLocked(item)) return false;
+      if (!item || item.locked) return false;
       pushHistory();
       let max = OVER_WIRES_Z_BASE;
       state.items.forEach((it) => { max = Math.max(max, itemZKey(it)); });
@@ -20505,7 +20538,7 @@
     }
     /** Derrière = fils visibles par-dessus (z < 1000 → CSS 20–50). */
     function sendItemToBack(item) {
-      if (!item || isLayoutLocked(item)) return false;
+      if (!item || item.locked) return false;
       pushHistory();
       let min = 0;
       state.items.forEach((it) => {
@@ -20528,6 +20561,7 @@
       state.items.forEach((it) => {
         const def = LIB[it.type];
         if (def && def.kind === "rail") return;
+        if (isPlatine(it)) return; /* z=3 sous rails — pas dans la bande modules */
         if (def && def.kind === "goulotte") { gou.push(it); return; }
         if (itemOverWires(it)) over.push(it);
         else under.push(it);
@@ -20552,6 +20586,9 @@
         });
       };
       state.items.forEach((it) => {
+        if (isPlatine(it)) map.set(it.uid, 3);
+      });
+      state.items.forEach((it) => {
         const def = LIB[it.type];
         if (def && def.kind === "rail") map.set(it.uid, 8);
       });
@@ -20574,66 +20611,62 @@
       return map;
     }
     function termShowsEmbout(ref) {
-      try { return wiresSharingTerm(ref).length === 1; } catch (_) { return false; }
+      return wiresSharingTerm(ref).length === 1;
     }
     /** Cosse verte (14×8) sur la vis, au-dessus de la photo du module. */
     function appendTerminalClips(svg, NS) {
       if (!svg || !NS) return;
-      const green = (typeof EMBOUT_GREEN !== "undefined") ? EMBOUT_GREEN : "#16a34a";
-      const edge = (typeof EMBOUT_GREEN_EDGE !== "undefined") ? EMBOUT_GREEN_EDGE : "#14532d";
-      const len = (typeof EMBOUT_LEN !== "undefined") ? EMBOUT_LEN : 14;
-      const th = (typeof EMBOUT_TH !== "undefined") ? EMBOUT_TH : 8;
       (state.wires || []).forEach((w) => {
         if (!w || !w.a || !w.b) return;
         try {
           if (typeof isFlukeMeterRef === "function" && (isFlukeMeterRef(w.a) || isFlukeMeterRef(w.b))) return;
         } catch (_) {}
         ["a", "b"].forEach((end) => {
-          try {
-            const ref = w[end];
-            if (!ref || !ref.uid || !termShowsEmbout(ref)) return;
-            let ep;
-            try { ep = endpoint(ref); } catch (_) { return; }
-            if (!ep || !Number.isFinite(ep.x) || !Number.isFinite(ep.y)) return;
-            const u = padUnit(ep);
-            const cx = ep.x + u[0] * (len * 0.46);
-            const cy = ep.y + u[1] * (len * 0.46);
-            const ang = Math.atan2(u[1], u[0]) * (180 / Math.PI);
-            const g = document.createElementNS(NS, "g");
-            g.setAttribute("class", "wc-boot");
-            g.setAttribute(
-              "transform",
-              "translate(" + cx.toFixed(2) + "," + cy.toFixed(2) + ") rotate(" + ang.toFixed(2) + ")"
-            );
-            const body = document.createElementNS(NS, "rect");
-            body.setAttribute("x", String(-len / 2));
-            body.setAttribute("y", String(-th / 2));
-            body.setAttribute("width", String(len));
-            body.setAttribute("height", String(th));
-            body.setAttribute("rx", "2.2");
-            body.setAttribute("fill", green);
-            body.setAttribute("stroke", edge);
-            body.setAttribute("stroke-width", "0.7");
-            g.appendChild(body);
-            const hi = document.createElementNS(NS, "rect");
-            hi.setAttribute("x", String(-len / 2 + 1.1));
-            hi.setAttribute("y", String(-th / 2 + 1.1));
-            hi.setAttribute("width", String(len * 0.42));
-            hi.setAttribute("height", String(Math.max(1.3, th * 0.32)));
-            hi.setAttribute("rx", "1");
-            hi.setAttribute("fill", "rgba(255,255,255,.42)");
-            g.appendChild(hi);
-            svg.appendChild(g);
-            const px = -u[1];
-            const py = u[0];
-            const slot = document.createElementNS(NS, "path");
-            const slotHalf = 2.2;
-            slot.setAttribute("d", "M" + (ep.x - px * slotHalf) + " " + (ep.y - py * slotHalf) + " L" + (ep.x + px * slotHalf) + " " + (ep.y + py * slotHalf));
-            slot.setAttribute("stroke", "rgba(255,255,255,.88)");
-            slot.setAttribute("stroke-width", "1.15");
-            slot.setAttribute("stroke-linecap", "round");
-            svg.appendChild(slot);
-          } catch (_) { /* un embout ne doit jamais tuer render() */ }
+          const ref = w[end];
+          if (!ref || !termShowsEmbout(ref)) return;
+          let ep;
+          try { ep = endpoint(ref); } catch (_) { return; }
+          if (!ep) return;
+          const u = padUnit(ep);
+          const len = EMBOUT_LEN;
+          const th = EMBOUT_TH;
+          const cx = ep.x + u[0] * (len * 0.46);
+          const cy = ep.y + u[1] * (len * 0.46);
+          const ang = Math.atan2(u[1], u[0]) * (180 / Math.PI);
+          const g = document.createElementNS(NS, "g");
+          g.setAttribute("class", "wc-boot");
+          g.setAttribute(
+            "transform",
+            "translate(" + cx.toFixed(2) + "," + cy.toFixed(2) + ") rotate(" + ang.toFixed(2) + ")"
+          );
+          const body = document.createElementNS(NS, "rect");
+          body.setAttribute("x", String(-len / 2));
+          body.setAttribute("y", String(-th / 2));
+          body.setAttribute("width", String(len));
+          body.setAttribute("height", String(th));
+          body.setAttribute("rx", "2.2");
+          body.setAttribute("fill", EMBOUT_GREEN);
+          body.setAttribute("stroke", EMBOUT_GREEN_EDGE);
+          body.setAttribute("stroke-width", "0.7");
+          g.appendChild(body);
+          const hi = document.createElementNS(NS, "rect");
+          hi.setAttribute("x", String(-len / 2 + 1.1));
+          hi.setAttribute("y", String(-th / 2 + 1.1));
+          hi.setAttribute("width", String(len * 0.42));
+          hi.setAttribute("height", String(Math.max(1.3, th * 0.32)));
+          hi.setAttribute("rx", "1");
+          hi.setAttribute("fill", "rgba(255,255,255,.42)");
+          g.appendChild(hi);
+          svg.appendChild(g);
+          const px = -u[1];
+          const py = u[0];
+          const slot = document.createElementNS(NS, "path");
+          const slotHalf = 2.2;
+          slot.setAttribute("d", "M" + (ep.x - px * slotHalf) + " " + (ep.y - py * slotHalf) + " L" + (ep.x + px * slotHalf) + " " + (ep.y + py * slotHalf));
+          slot.setAttribute("stroke", "rgba(255,255,255,.88)");
+          slot.setAttribute("stroke-width", "1.15");
+          slot.setAttribute("stroke-linecap", "round");
+          svg.appendChild(slot);
         });
       });
     }
@@ -20728,39 +20761,28 @@
       bar.setAttribute("aria-hidden", show ? "false" : "true");
       const sheetBtn = bar.querySelector('[data-chip="sheet"]');
       const dupBtn = bar.querySelector('[data-chip="dup"]');
-      const rotBtn = bar.querySelector('[data-chip="rot"]');
-      const delBtn = bar.querySelector('[data-chip="del"]');
       const etsBtn = bar.querySelector('[data-chip="ets"]');
       const astroDayBtn = bar.querySelector('[data-chip="astroDay"]');
       const astroForceBtn = bar.querySelector('[data-chip="astroForce"]');
       const atsPosBtn = bar.querySelector('[data-chip="atsPos"]');
       const pcrPosBtn = bar.querySelector('[data-chip="pcrPos"]');
-      const layoutOff = !!state.sim || !!(item && item.locked);
       if (sheetBtn) {
         sheetBtn.hidden = refOn;
         sheetBtn.setAttribute("aria-hidden", refOn ? "true" : "false");
       }
       if (dupBtn) {
-        dupBtn.hidden = refOn || !!state.sim;
-        dupBtn.setAttribute("aria-hidden", (refOn || !!state.sim) ? "true" : "false");
-      }
-      if (rotBtn) {
-        rotBtn.hidden = layoutOff;
-        rotBtn.setAttribute("aria-hidden", layoutOff ? "true" : "false");
-      }
-      if (delBtn) {
-        delBtn.hidden = !!state.sim;
-        delBtn.setAttribute("aria-hidden", state.sim ? "true" : "false");
+        dupBtn.hidden = refOn;
+        dupBtn.setAttribute("aria-hidden", refOn ? "true" : "false");
       }
       const frontBtn = bar.querySelector('[data-chip="front"]');
       const backBtn = bar.querySelector('[data-chip="back"]');
       if (frontBtn) {
-        frontBtn.hidden = refOn || layoutOff;
-        frontBtn.setAttribute("aria-hidden", (refOn || layoutOff) ? "true" : "false");
+        frontBtn.hidden = refOn;
+        frontBtn.setAttribute("aria-hidden", refOn ? "true" : "false");
       }
       if (backBtn) {
-        backBtn.hidden = refOn || layoutOff;
-        backBtn.setAttribute("aria-hidden", (refOn || layoutOff) ? "true" : "false");
+        backBtn.hidden = refOn;
+        backBtn.setAttribute("aria-hidden", refOn ? "true" : "false");
       }
       /* v35-ets-chip : ETS visible seulement si composant KNX sélectionné (pas cadre réf.). */
       const canEts = !refOn && !!(item && isKnxDevice(LIB[item.type]));
@@ -20837,8 +20859,6 @@
       const label = state.sim ? t("btnStopTitle") : t("btnPlayTitle");
       const btn = document.getElementById("btnPlay");
       const fab = document.getElementById("btnPlayFab");
-      const badge = document.getElementById("lectureBadge");
-      try { document.body.classList.toggle("sim-lecture", !!state.sim); } catch (_) {}
       if (btn) {
         btn.classList.toggle("on", state.sim);
         btn.title = label;
@@ -20851,20 +20871,15 @@
         fab.setAttribute("aria-label", label);
         fab.innerHTML = simIconHtml("fab-ico") + '<span class="fab-label">' + short + "</span>";
       }
-      /* v146 : badge cadenas Lecture masqué (option désactivée pour test). */
-      if (badge) {
-        badge.hidden = true;
-      }
+    }
+    function bumpExampleFitToken() {
+      exampleFitToken++;
+      return exampleFitToken;
     }
     function toggleSim() {
-      /* v139 : couper tout autofit exemplaire en vol (évite jump Play juste après charge). */
       try { bumpExampleFitToken(); } catch (_) {}
       let keepSl = 0, keepSt = 0, keepZ = 1;
-      try {
-        keepSl = board.scrollLeft;
-        keepSt = board.scrollTop;
-        keepZ = boardZoom();
-      } catch (_) {}
+      try { keepSl = board.scrollLeft; keepSt = board.scrollTop; keepZ = boardZoom(); } catch (_) {}
       try {
         if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       } catch (_) {}
@@ -20894,33 +20909,13 @@
           if (def && hasCoil(def) && !def.latch && !isOnDelayTimer(def, i.type)) i.closed = false;
         });
       }
-      /*
-       * v145 iPhone : zoom puis Lecture → render() avec boardWorld déjà en scale(z)
-       * saturait WebKit (écran blanc). Rebuild à scale(1), puis restaurer la vue.
-       * PC inchangé. Cadenas Lecture = toujours layout only (pas la caméra).
-       */
-      const safeLectureRender = !!PW_IOS;
+      render();
       try {
-        if (safeLectureRender) {
-          board.classList.add("is-board-zooming");
-          const world = document.getElementById("boardWorld");
-          if (world) world.style.transform = "translate3d(0,0,0) scale(1)";
-        }
-        render();
-      } catch (_) {
-        try { render(); } catch (_2) {}
-      } finally {
-        try {
-          state.boardZoom = keepZ;
-          applyBoardZoomStyles();
-          board.scrollLeft = keepSl;
-          board.scrollTop = keepSt;
-        } catch (_) {}
-        if (safeLectureRender) {
-          try { board.classList.remove("is-board-zooming"); } catch (_) {}
-          try { fitAllFlukeLiveFrames(); } catch (_) {}
-        }
-      }
+        state.boardZoom = keepZ;
+        applyBoardZoomStyles();
+        board.scrollLeft = keepSl;
+        board.scrollTop = keepSt;
+      } catch (_) {}
       if (state.etsOpen) renderEtsPanel();
       /* v12 : shell en flux (pas fixed) — ne jamais réécrire height/transform sur body. */
     }
@@ -21313,14 +21308,14 @@
         if (host) {
           const uid = host.dataset && host.dataset.uid;
           const it = uid && typeof find === "function" ? find(uid) : null;
-          if (it) it.flukeUi = true;
-          host.classList.add("is-fluke-ui");
-          host.classList.add("is-live-ready"); /* v143 : masque underlay — une seule face */
-          const b = host.querySelector(".fluke-ui-btn");
-          if (b) { b.classList.add("on"); b.setAttribute("aria-pressed", "true"); }
-          try {
-            if (it && typeof fitFlukeLiveFrame === "function") fitFlukeLiveFrame(frame, it);
-          } catch (_) {}
+          if (it && !it.flukeUi) {
+            it.flukeUi = true;
+            host.classList.add("is-fluke-ui");
+            const b = host.querySelector(".fluke-ui-btn");
+            if (b) { b.classList.add("on"); b.setAttribute("aria-pressed", "true"); }
+          } else {
+            host.classList.add("is-fluke-ui");
+          }
         }
       } catch (_) {}
     }
@@ -21887,10 +21882,10 @@
         return el;
       }
       Array.from(el.children).forEach((c) => {
-        /* Jamais garder face PNG / logo WireLab (même avec data-fluke-keep d’anciennes versions).
-           v143 : garder fluke-underlay (secours) — ne plus le détruire à chaque render. */
+        /* Jamais garder face PNG / logo WireLab (même avec data-fluke-keep d’anciennes versions). */
         if (c.classList && (c.classList.contains("fluke-face") || c.classList.contains("fluke-logo") ||
-            c.classList.contains("fluke-dial") || c.classList.contains("fluke-lcd-overlay"))) {
+            c.classList.contains("fluke-dial") || c.classList.contains("fluke-lcd-overlay") ||
+            c.classList.contains("fluke-underlay"))) {
           c.remove();
           return;
         }
@@ -21916,15 +21911,11 @@
       item.w = w;
       item.h = h;
     }
-    /** Iframe toujours 400×214 px ; scale CSS = taille monde du .dev (suit le zoom plan). */
+    /** Iframe toujours 400×214 px ; scale CSS = taille visuelle (pas de canvas géant). */
     function fitFlukeLiveFrame(frame, item) {
       if (!frame || !item) return;
-      normalizeFlukeSize(item);
       const sz = itemSize(item);
-      const scaleW = Math.max(0.2, sz.w / FLUKE_BASE_W);
-      const scaleH = Math.max(0.2, sz.h / FLUKE_BASE_H);
-      /* Un seul facteur (ratio verrouillé) — évite étirement / décalage vs cadre. */
-      const scale = Math.min(scaleW, scaleH);
+      const scale = Math.max(0.2, sz.w / FLUKE_BASE_W);
       frame.style.width = FLUKE_BASE_W + "px";
       frame.style.height = FLUKE_BASE_H + "px";
       frame.style.transform = "scale(" + scale + ")";
@@ -21933,17 +21924,6 @@
       frame.style.top = "0";
       frame.style.right = "auto";
       frame.style.bottom = "auto";
-      frame.style.willChange = "auto";
-    }
-    function fitAllFlukeLiveFrames() {
-      try {
-        state.items.forEach((it) => {
-          const def = LIB[it.type];
-          if (!def || !def.flukeMeter) return;
-          const frame = flukeLiveFrames.get(it.uid);
-          if (frame) fitFlukeLiveFrame(frame, it);
-        });
-      } catch (_) {}
     }
     function appendFlukeFace(parent) {
       /* Vignette librairie seulement — le plan utilise l’iframe trainer, pas cette photo. */
@@ -21962,7 +21942,7 @@
       state.wireDrag = null;
       state.selected = item.uid;
       state.selectedWire = null;
-      if (isLayoutLocked(item)) { render(); return; }
+      if (item.locked) { render(); return; }
       const histKey = structuralKey(cloneEditableState());
       pushHistory();
       state.drag = {
@@ -21983,10 +21963,10 @@
       normalizeFlukeSize(item);
       flukeTipsOf(item);
       el.classList.add("fluke-meter");
-      item.flukeUi = true; /* v143 : toujours face live — plus de toggle UI */
-      el.classList.add("is-fluke-ui");
+      if (item.flukeUi == null) item.flukeUi = true; /* v94 : face interactive dès chargement */
+      el.classList.toggle("is-fluke-ui", !!item.flukeUi);
       el.title = "Fluke 1664 FC — poignée/cadre = déplacer · face = TEST/molette · pointes = mesurer";
-      /* Underlay = secours tant que Flutter n’est pas prêt ; masqué dès is-live-ready. */
+      /* v90 : underlay photo locale toujours visible (iframe Flutter peut rester vide en WebView). */
       Array.from(el.querySelectorAll(".fluke-logo, .fluke-dial, .fluke-lcd-overlay")).forEach((n) => n.remove());
       Array.from(el.querySelectorAll("iframe.fluke-live")).forEach((f, i) => {
         if (i > 0) f.remove();
@@ -21999,7 +21979,7 @@
         underlay.draggable = false;
         underlay.setAttribute("data-fluke-keep", "");
         underlay.src = flukeLocalFaceSrc();
-        underlay.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;z-index:0;pointer-events:none;background:#0b1220;";
+        underlay.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:0;pointer-events:none;background:#0b1220;";
         el.appendChild(underlay);
       } else {
         underlay.src = flukeLocalFaceSrc();
@@ -22042,25 +22022,36 @@
         uiBtn.textContent = "UI";
         el.appendChild(uiBtn);
       }
-      /* v143 : bouton UI retiré (display:none) — face toujours active. */
-      uiBtn.classList.add("on");
-      uiBtn.setAttribute("aria-pressed", "true");
-      uiBtn.onpointerdown = (ev) => { ev.stopPropagation(); };
-      uiBtn.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); };
+      uiBtn.title = item.flukeUi
+        ? "Face Fluke active — tap pour mesurer sans bloquer le plan"
+        : "Activer la face Fluke (TEST, molette, F1–F4)";
+      uiBtn.classList.toggle("on", !!item.flukeUi);
+      uiBtn.setAttribute("aria-pressed", item.flukeUi ? "true" : "false");
+      uiBtn.onpointerdown = (ev) => {
+        ev.stopPropagation();
+        if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
+      };
+      uiBtn.onclick = (ev) => {
+        ev.stopPropagation();
+        if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
+        ev.preventDefault();
+        item.flukeUi = !item.flukeUi;
+        el.classList.toggle("is-fluke-ui", !!item.flukeUi);
+        uiBtn.classList.toggle("on", !!item.flukeUi);
+        uiBtn.setAttribute("aria-pressed", item.flukeUi ? "true" : "false");
+        uiBtn.title = item.flukeUi
+          ? "Face Fluke active — tap pour mesurer sans bloquer le plan"
+          : "Activer la face Fluke (TEST, molette, F1–F4)";
+      };
+      try { if (typeof bindPlayInstantTap === "function") bindPlayInstantTap(uiBtn); } catch (_) {}
       Array.from(viewport.querySelectorAll("img, .fluke-logo, .fluke-face")).forEach((n) => n.remove());
       flukeWaitEl(viewport, "Chargement Fluke…");
       const frame = flukeLiveFrame(item.uid);
+      /* Fond transparent pour laisser voir l’underlay si CanvasKit rate. */
       try { frame.style.background = "transparent"; } catch (_) {}
       if (frame.parentNode !== viewport) viewport.appendChild(frame);
       fitFlukeLiveFrame(frame, item);
-      if (frame.dataset && frame.dataset.flukeReady === "1") {
-        el.classList.add("is-live-ready");
-        viewport.classList.add("is-ready");
-        Array.from(viewport.querySelectorAll(".fluke-wait")).forEach((n) => n.remove());
-      } else {
-        el.classList.remove("is-live-ready");
-        armFlukeReadyWatch(frame);
-      }
+      armFlukeReadyWatch(frame);
       pushFlukeEmbedVoltages();
     }
     function beginFlukeTipDrag(item, cab, ev) {
@@ -22552,12 +22543,11 @@
     }
     /* Affichage seul (guidage inchangé) : embouts + ancrage selon direction d’approche. */
     function wiresSharingTerm(ref) {
-      if (!ref || ref.uid == null) return [];
-      return (state.wires || []).filter((w) => {
-        if (!w || !w.a || !w.b) return false;
-        return (w.a.uid === ref.uid && w.a.term === ref.term)
-          || (w.b.uid === ref.uid && w.b.term === ref.term);
-      });
+      return state.wires.filter(
+        (w) =>
+          (w.a.uid === ref.uid && w.a.term === ref.term) ||
+          (w.b.uid === ref.uid && w.b.term === ref.term)
+      );
     }
     /** Côté d’arrivée du fil vers la borne (voisin → borne). */
     function approachSide(fromPt, toPt) {
@@ -24758,7 +24748,6 @@
       syncBoardRefBar();
       const svgWires = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       svgWires.setAttribute("class", "wires");
-      sizeBoardSvg(svgWires);
       const NS = svgWires.namespaceURI;
 
       boardCoordsExtentKey = "";
@@ -26044,7 +26033,7 @@
           el.appendChild(b);
         }
         /* Poignées de taille : tous les composants placés (din, rail, boutonnerie, KNX, etc.) */
-        if (isItemSelected(item.uid) && state.mode === "select" && canResizeItem(item) && !isLayoutLocked(item) && state.selected === item.uid) {
+        if (isItemSelected(item.uid) && state.mode === "select" && canResizeItem(item) && !item.locked && state.selected === item.uid) {
           ["nw", "n", "ne", "e", "se", "s", "sw", "w"].forEach((dir) => {
             const h = document.createElement("div");
             h.className = "rhandle " + dir;
@@ -26119,9 +26108,9 @@
             }
             return;
           }
-          /* Platine cadenassée / Lecture : laisser remonter → pan du plan (comme le vide). Pas de drag groupe.
+          /* Platine cadenassée : laisser remonter → pan du plan (comme le vide). Pas de drag groupe.
              Les composants non verrouillés dessus restent des .dev séparés, donc déplaçables. */
-          if (isLayoutLocked(item) && isPlatine(item)) return;
+          if (item.locked && isPlatine(item)) return;
           ev.stopPropagation();
           if (typeof ev.stopImmediatePropagation === "function") ev.stopImmediatePropagation();
           ev.preventDefault();
@@ -26196,7 +26185,7 @@
           }
           /* Hors sim : disj. photo — clic court sur le corps = I-ON/O-OFF (sinon drag) */
           if (!state.sim && def.imageOff && (def.pair || def.pairs) && !def.selector && !def.push && !def.prox && !hasCoil(def)) {
-            if (isLayoutLocked(item)) { render(); return; }
+            if (item.locked) { render(); return; }
             const histKey = structuralKey(cloneEditableState());
             pushHistory();
             ev.preventDefault();
@@ -26217,7 +26206,7 @@
             render();
             return;
           }
-          if (isLayoutLocked(item)) { render(); return; }
+          if (item.locked) { render(); return; }
           const histKey = structuralKey(cloneEditableState());
           pushHistory();
           /* Mobile : empêche le pan/scroll du board ; capture sur #board (survit au render) */
@@ -26307,7 +26296,6 @@
       const svgFlukeLeads = document.createElementNS(NS, "svg");
       svgFlukeLeads.setAttribute("class", "fluke-leads");
       svgFlukeLeads.setAttribute("aria-hidden", "true");
-      sizeBoardSvg(svgFlukeLeads);
       world.appendChild(svgFlukeLeads);
       appendFlukeLeads(svgFlukeLeads, NS);
 
@@ -26350,9 +26338,8 @@
       const svgClips = document.createElementNS(NS, "svg");
       svgClips.setAttribute("class", "wire-clips");
       svgClips.setAttribute("aria-hidden", "true");
-      sizeBoardSvg(svgClips);
       world.appendChild(svgClips);
-      try { appendTerminalClips(svgClips, NS); } catch (_) {}
+      appendTerminalClips(svgClips, NS);
 
       /* 4) Effet court-circuit : bannière + arc / étincelles */
       if (state.short) {
@@ -26485,7 +26472,6 @@
     }
 
     function deleteSelection() {
-      /* v146 : suppression aussi autorisée en Lecture (cadenas Play off). */
       if (state.selectedBar) {
         const m = find(state.selectedBar.uid);
         if (m && m.bars) {
@@ -26864,12 +26850,7 @@
           if (noteEdzLongPressMove(ev)) return;
         }
         if (state.drag.pendingToggle && moved < (state.drag.tapSlop || 8)) return;
-        if (state.drag.pendingToggle) {
-          /* Lecture / cadenas : tap = on/off seulement, jamais de déplacement. */
-          if (isLayoutLocked(item)) return;
-          state.drag.pendingToggle = false;
-        }
-        if (isLayoutLocked(item)) return;
+        if (state.drag.pendingToggle) state.drag.pendingToggle = false;
         const dlt = boardDeltaFromScreen(ev.clientX - state.drag.px, ev.clientY - state.drag.py);
         /* v110 : plus de plancher X/Y=0 — liberté sur le plan étendu. */
         const nx = state.drag.x + dlt.x;
@@ -26877,7 +26858,8 @@
         if (state.drag.group) {
           if ((isRail(item) || isPlatine(item)) && !state.drag.group.kmFr) {
             const soft = applySoftAlign(item, nx, ny);
-            applyRailGroupDrag(state.drag, soft.x, soft.y);
+            const pose = isRail(item) ? constrainRailToPlatine(item, soft.x, soft.y) : soft;
+            applyRailGroupDrag(state.drag, pose.x, pose.y);
           } else {
             applyRailGroupDrag(state.drag, nx, ny);
           }
@@ -26917,7 +26899,9 @@
         } else {
           const prevX = item.x, prevY = item.y;
           const soft = applySoftAlign(item, nx, ny);
-          item.y = soft.y;
+          let my = soft.y;
+          try { my = snapToRailY(item, soft.x, soft.y); } catch (_) {}
+          item.y = my;
           item.x = resolveDinX(item, soft.x, item.y);
           shiftWiresForItemDelta(item.uid, item.x - prevX, item.y - prevY);
         }
@@ -27142,10 +27126,15 @@
       } else if (dragged && !ctxByHold) {
         if (state.drag.group && state.drag.group.items) {
           const ex = state.drag.group.groupIds || null;
+          if (isRail(dragged)) {
+            const ox = dragged.x, oy = dragged.y;
+            const c = constrainRailToPlatine(dragged, ox, oy);
+            shiftGroupByDelta(ex || state.drag.group.groupIds, c.x - ox, c.y - oy);
+          }
           state.drag.group.items.forEach((s) => {
             const it = find(s.uid);
             if (!it || isRail(it)) return;
-            settleItemPlacement(it, s.x, s.y, ex);
+            settleItemPlacement(it, it.x, it.y, ex);
           });
           if (state.drag.group.kmFr) snapKmFrOnDrop(dragged);
         } else if (isPvSupportItem(dragged)) {
@@ -27310,7 +27299,7 @@
           return;
         }
         if (act === "size") {
-          if (isLayoutLocked(item)) return;
+          if (item.locked) return;
           closeCtxMenu();
           openSizeDialog(item);
           return;
@@ -27338,7 +27327,7 @@
           return;
         }
         if (act === "detachFr") {
-          if (isLayoutLocked(item)) return;
+          if (item.locked) return;
           pushHistory();
           detachKmFr(item);
           closeCtxMenu();
@@ -27521,7 +27510,7 @@
       if (sizeLenWrap) sizeLenWrap.hidden = true;
     }
     function openSizeDialog(item) {
-      if (!item || isLayoutLocked(item)) return;
+      if (!item) return;
       state.selected = item.uid;
       state.selectedWire = null;
       state.drag = null;
@@ -27915,23 +27904,14 @@
       if (!(dist > 8)) return false;
       cancelBoardOpsForPinch();
       ensurePinchSpacerRoom(boardZoom());
-      const z0 = boardZoom();
-      const pad = BOARD_PAN_PAD;
-      const rect = board.getBoundingClientRect();
-      const ox0 = mid.x - rect.left;
-      const oy0 = mid.y - rect.top;
       boardTouchPinch = {
         dist0: dist,
-        z0: z0,
+        z0: boardZoom(),
         midX: mid.x,
         midY: mid.y,
         idA: a.identifier,
         idB: b.identifier,
-        via: "touch",
-        ox0: ox0,
-        oy0: oy0,
-        ax: (board.scrollLeft + ox0 - pad) / z0,
-        ay: (board.scrollTop + oy0 - pad) / z0
+        via: "touch"
       };
       boardGesturePinch = true;
       board.classList.add("is-pinching");
@@ -28044,32 +28024,14 @@
       boardGesturePinch = false;
       board.classList.remove("is-pinching");
       try { lockShellDuringPinch(false); } catch (_) {}
-      /* Appliquer le dernier frame pinch en attente, puis settle spacer. */
-      if (boardZoomRaf) {
-        try { cancelAnimationFrame(boardZoomRaf); } catch (_) {}
-        boardZoomRaf = 0;
-      }
-      if (boardZoomPend) {
-        const p = boardZoomPend;
-        boardZoomPend = null;
-        state.boardZoom = p.z1;
-        board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
-        board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
-      }
-      /* Settle spacer (hors pinch) + grille ; render différé si demandé pendant pinch.
-         v142 iOS : NE PAS rebuild le DOM après pinch (façade KNX + fils → OOM Safari).
-         Le zoom n’a touché que scale/scroll — les .dev/SVG déjà en place suffisent. */
+      /* Settle spacer (hors pinch) + grille ; render différé si demandé pendant pinch. */
       applyBoardZoomStyles();
       try { syncBoardCoords(); } catch (_) {}
       if (window.__pwNeedRenderAfterZoom) {
         window.__pwNeedRenderAfterZoom = false;
-        if (PW_IOS) {
-          try { applyBoardZoomStyles(); } catch (_) {}
-        } else {
-          requestAnimationFrame(function () {
-            try { render(); } catch (_) {}
-          });
-        }
+        requestAnimationFrame(function () {
+          try { render(); } catch (_) {}
+        });
       }
     }
     applyStableShellH();
@@ -28120,23 +28082,14 @@
       if (!boardTouchPinch) {
         cancelBoardOpsForPinch();
         ensurePinchSpacerRoom(boardZoom());
-        const z0 = boardZoom();
-        const pad = BOARD_PAN_PAD;
-        const rect = board.getBoundingClientRect();
-        const ox0 = midX - rect.left;
-        const oy0 = midY - rect.top;
         boardTouchPinch = {
           dist0: dist,
-          z0: z0,
+          z0: boardZoom(),
           midX: midX,
           midY: midY,
           idA: a.id,
           idB: b.id,
-          via: "pointer",
-          ox0: ox0,
-          oy0: oy0,
-          ax: (board.scrollLeft + ox0 - pad) / z0,
-          ay: (board.scrollTop + oy0 - pad) / z0
+          via: "pointer"
         };
         boardGesturePinch = true;
         board.classList.add("is-pinching");
@@ -28332,7 +28285,6 @@
           needRender = true;
         }
       }
-      try { bumpExampleFitToken(); } catch (_) {}
       boardMidPan = {
         pointerId: ev.pointerId,
         button: ev.button,
@@ -29603,26 +29555,8 @@
       openProjectFile(f);
     });
 
-    /* v141 : sur iPhone — désinstaller TOUS les SW (même sans fetch, WebKit peut crash-loop).
-       Desktop : purge anciens, puis registre minimal sans intercept. */
     if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-      var SW_VER = "safari-crash-v142";
-      var swNuke = function () {
-        if (!navigator.serviceWorker.getRegistrations) return Promise.resolve();
-        return navigator.serviceWorker.getRegistrations().then(function (regs) {
-          return Promise.all((regs || []).map(function (reg) {
-            try { return reg.unregister(); } catch (_) { return Promise.resolve(); }
-          }));
-        });
-      };
-      if (PW_IOS) {
-        swNuke().catch(function () {});
-      } else {
-        var swReg = function () {
-          navigator.serviceWorker.register("sw-pwire.js?v=" + SW_VER).catch(function () {});
-        };
-        swNuke().then(swReg).catch(swReg);
-      }
+      navigator.serviceWorker.register("sw-pwire.js?v=lib-phone-lower-v138").catch(function () {});
     }
     if ("launchQueue" in window && window.launchQueue && typeof window.launchQueue.setConsumer === "function") {
       window.launchQueue.setConsumer(function (params) {
