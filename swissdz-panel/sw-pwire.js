@@ -1,5 +1,5 @@
 /* Service worker minimal : installe WireLab comme application (ouverture des .pwire).
- * v=safari-crash-v141
+ * v=safari-crash-v142
  * IMPORTANT : aucun listener fetch — un respondWith(fetch()) pass-through provoquait
  * des crash-loops WebKit iOS (« Un problème récurrent est survenu »).
  * Sur iPhone le panel n’enregistre plus ce SW (v141) ; fichier gardé pour desktop / PWA.

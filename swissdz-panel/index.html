@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v141-iphone-oom" />
+  <meta name="swissdz-rev" content="native-shell-8777-v142-iphone-zoomout" />
+  <!-- v142: iPhone zoom-out façade KNX — pas de render() après pinch ; zoom min relevé ; imgs/SVG masqués au pinch -->
   <!-- v141: iPhone — zoom/Lecture OOM : SVG sans attrs 2600×1800, pad/zoom plafonnés, SW off, calques masqués au pinch -->
   <!-- v140: iOS Safari — SW sans fetch intercept ; calques SVG sans min 2000×1400 (OOM WebKit) ; supabase 1st-party ; embouts harden -->
   <!-- v139: Play/Lecture — badge hors flux (pas de shift footer) ; annule autofit exemplaire en retard ; conserve pan/zoom -->
@@ -2992,16 +2993,24 @@
       transition:none !important;
       animation:none !important;
     }
-    /* v141 : pendant pinch iPhone — masquer calques SVG lourds (évite re-raster GPU → crash). */
+    /* v141/v142 : pinch iPhone — masquer calques + photos (re-raster GPU → crash zoom-out façade). */
     html.pw-ios #board.is-pinching svg.wire-clips,
     html.pw-ios #board.is-pinching svg.fluke-leads,
     html.pw-ios #board.is-pinching svg.prox-beams,
     html.pw-ios #board.is-pinching svg.align-guides,
-    html.pw-ios #board.is-pinching svg.board-coords {
+    html.pw-ios #board.is-pinching svg.board-coords,
+    html.pw-ios #board.is-pinching svg.wires {
       visibility:hidden !important;
     }
-    html.pw-ios #board.is-pinching svg.wires {
-      opacity:0.25 !important;
+    html.pw-ios #board.is-pinching #boardWorld .dev img,
+    html.pw-ios #board.is-pinching #boardWorld .knx-shutter,
+    html.pw-ios #board.is-pinching #boardWorld .roller-opening,
+    html.pw-ios #board.is-pinching #boardWorld .board-ref-layer {
+      visibility:hidden !important;
+    }
+    html.pw-ios .knx-shutter .slats,
+    html.pw-ios .roller-opening .cloth {
+      will-change:auto !important;
     }
     /* v135 : poignées resize invisibles/inertes pendant pinch — évite resize géométrique vs zoom. */
     #board.is-pinching .rhandle {
@@ -6197,12 +6206,12 @@
   </div>
   <link rel="stylesheet" href="labo-terre/labo-terre.css?v=v129-terre-espace" />
   <link rel="stylesheet" href="controle-elec/mains-cable.css?v=mains-cable-4" />
-  <script src="i18n/panelwire-i18n.js?v=v141-iphone-oom"></script>
+  <script src="i18n/panelwire-i18n.js?v=v142-iphone-zoomout"></script>
   <script src="labo-terre/labo-terre.js?v=v129-terre-espace"></script>
   <script src="controle-elec/mains-cable.js?v=mains-cable-4"></script>
   <!-- v140 : 1st-party — plus de cdn.jsdelivr (jamais d’hôte tiers pour le panel) -->
-  <script src="js/supabase.min.js?v=v141-iphone-oom"></script>
-  <script src="js/wirelab-auth.js?v=v141-iphone-oom"></script>
+  <script src="js/supabase.min.js?v=v142-iphone-zoomout"></script>
+  <script src="js/wirelab-auth.js?v=v142-iphone-zoomout"></script>
   <script src="js/wirelab-auth-vitrine.js?v=vitrine10"></script>
   <script>
     /* Assets pré-cadrés (photos studio trop larges → bandes). */
@@ -10676,10 +10685,11 @@
     try {
       if (PW_IOS) document.documentElement.classList.add("pw-ios");
     } catch (_) {}
-    const BOARD_ZOOM_MIN = 0.2;
-    const BOARD_ZOOM_ABS_MIN = 0.08;
+    /* v142 iOS : zoom-out extrême (0.08) sur façade KNX = OOM ; plancher ~fit. */
+    const BOARD_ZOOM_MIN = PW_IOS ? 0.42 : 0.2;
+    const BOARD_ZOOM_ABS_MIN = PW_IOS ? 0.38 : 0.08;
     /* v141 iOS : zoom max 2.4 (×5 + SVG géants = OOM Safari). */
-    const BOARD_ZOOM_MAX = PW_IOS ? 2.4 : 5;
+    const BOARD_ZOOM_MAX = PW_IOS ? 2.2 : 5;
     const BOARD_ZOOM_STEP = 1.15;
     const BOARD_WORLD_W = 2600;
     const BOARD_WORLD_H = 1800;
@@ -28002,14 +28012,20 @@
         board.scrollLeft = p.ax * p.z1 - p.ox + p.pad;
         board.scrollTop = p.ay * p.z1 - p.oy + p.pad;
       }
-      /* Settle spacer (hors pinch) + grille ; render différé si demandé pendant pinch. */
+      /* Settle spacer (hors pinch) + grille ; render différé si demandé pendant pinch.
+         v142 iOS : NE PAS rebuild le DOM après pinch (façade KNX + fils → OOM Safari).
+         Le zoom n’a touché que scale/scroll — les .dev/SVG déjà en place suffisent. */
       applyBoardZoomStyles();
       try { syncBoardCoords(); } catch (_) {}
       if (window.__pwNeedRenderAfterZoom) {
         window.__pwNeedRenderAfterZoom = false;
-        requestAnimationFrame(function () {
-          try { render(); } catch (_) {}
-        });
+        if (PW_IOS) {
+          try { applyBoardZoomStyles(); } catch (_) {}
+        } else {
+          requestAnimationFrame(function () {
+            try { render(); } catch (_) {}
+          });
+        }
       }
     }
     applyStableShellH();
@@ -29546,7 +29562,7 @@
     /* v141 : sur iPhone — désinstaller TOUS les SW (même sans fetch, WebKit peut crash-loop).
        Desktop : purge anciens, puis registre minimal sans intercept. */
     if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-      var SW_VER = "safari-crash-v141";
+      var SW_VER = "safari-crash-v142";
       var swNuke = function () {
         if (!navigator.serviceWorker.getRegistrations) return Promise.resolve();
         return navigator.serviceWorker.getRegistrations().then(function (regs) {
