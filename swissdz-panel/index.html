@@ -8,8 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v153-bornes-bord" />
-  <!-- v153: style bord ABB — embouts sur le bord (ny≈0.025/0.975), nx face vis ; DEHN + S203 + EE180 -->
+  <meta name="swissdz-rev" content="native-shell-8777-v154-bandelette-borne" />
+  <!-- v154: bandelettes = id borne ; embouts visibles même à 2 fils/borne (éventail ≥ épaisseur) ; style bord ABB -->
   <!-- v147: badge 🔒 Lecture vraiment masqué (CSS body.sim-lecture le réaffichait) -->
   <!-- v146: test — cadenas Lecture désactivé (Play ne verrouille plus le layout) -->
   <!-- v145: iPhone — Lecture après zoom : render à scale(1) puis restaurer pan/zoom (évite OOM) -->
@@ -20589,7 +20589,31 @@
       return map;
     }
     function termShowsEmbout(ref) {
-      try { return wiresSharingTerm(ref).length === 1; } catch (_) { return false; }
+      /* v154 : embout aussi si plusieurs fils sur la même borne (avant : masqué dès 2 fils). */
+      try { return wiresSharingTerm(ref).length >= 1; } catch (_) { return false; }
+    }
+    /** Pas latéral entre embouts frères — ≥ épaisseur pour qu’ils ne se superposent pas. */
+    function termEmboutFanStep() {
+      const th = (typeof EMBOUT_TH !== "undefined") ? EMBOUT_TH : 8;
+      return Math.max(th + 2, 10);
+    }
+    /** Index / décalage latéral des fils qui partagent la borne du même côté. */
+    function termSiblingFan(w, end) {
+      const ref = w && w[end];
+      if (!ref) return { lateral: 0, count: 1, idx: 0, side: "top" };
+      let side = "top";
+      try { side = wireEndApproach(w, end); } catch (_) {}
+      const sibs = wiresSharingTerm(ref);
+      const same = sibs.filter((sib) => {
+        const e = wireEndRefSide(sib, ref);
+        try { return wireEndApproach(sib, e) === side; } catch (_) { return false; }
+      });
+      const count = Math.max(1, same.length);
+      let idx = same.findIndex((x) => x.id === w.id);
+      if (idx < 0) idx = 0;
+      const step = termEmboutFanStep();
+      const lateral = count >= 2 ? (idx - (count - 1) / 2) * step : 0;
+      return { lateral, count, idx, side, step };
     }
     /** Cosse verte (14×8) sur la vis, au-dessus de la photo du module. */
     function appendTerminalClips(svg, NS) {
@@ -20611,8 +20635,10 @@
             try { ep = endpoint(ref); } catch (_) { return; }
             if (!ep || !Number.isFinite(ep.x) || !Number.isFinite(ep.y)) return;
             const u = padUnit(ep);
-            const cx = ep.x + u[0] * (len * 0.46);
-            const cy = ep.y + u[1] * (len * 0.46);
+            const lat = [-u[1], u[0]];
+            const fan = termSiblingFan(w, end);
+            const cx = ep.x + u[0] * (len * 0.46) + lat[0] * fan.lateral;
+            const cy = ep.y + u[1] * (len * 0.46) + lat[1] * fan.lateral;
             const ang = Math.atan2(u[1], u[0]) * (180 / Math.PI);
             const g = document.createElementNS(NS, "g");
             g.setAttribute("class", "wc-boot");
@@ -20639,11 +20665,13 @@
             hi.setAttribute("fill", "rgba(255,255,255,.42)");
             g.appendChild(hi);
             svg.appendChild(g);
-            const px = -u[1];
-            const py = u[0];
+            const px = lat[0];
+            const py = lat[1];
             const slot = document.createElementNS(NS, "path");
             const slotHalf = 2.2;
-            slot.setAttribute("d", "M" + (ep.x - px * slotHalf) + " " + (ep.y - py * slotHalf) + " L" + (ep.x + px * slotHalf) + " " + (ep.y + py * slotHalf));
+            const sx = ep.x + lat[0] * fan.lateral;
+            const sy = ep.y + lat[1] * fan.lateral;
+            slot.setAttribute("d", "M" + (sx - px * slotHalf) + " " + (sy - py * slotHalf) + " L" + (sx + px * slotHalf) + " " + (sy + py * slotHalf));
             slot.setAttribute("stroke", "rgba(255,255,255,.88)");
             slot.setAttribute("stroke-width", "1.15");
             slot.setAttribute("stroke-linecap", "round");
@@ -22607,25 +22635,15 @@
     function termDrawDelta(w, end) {
       const ref = w[end];
       if (!ref) return { dx: 0, dy: 0, side: "top" };
-      const side = wireEndApproach(w, end);
+      const fan = termSiblingFan(w, end);
+      const side = fan.side;
       const r = termPadRadius(ref);
       const u = side === "left" ? [-1, 0]
         : side === "right" ? [1, 0]
         : side === "bottom" ? [0, 1]
         : [0, -1];
       const lat = (side === "left" || side === "right") ? [0, 1] : [1, 0];
-      let lateral = 0;
-      const sibs = wiresSharingTerm(ref);
-      if (sibs.length >= 2) {
-        const same = sibs.filter((sib) => {
-          const e = wireEndRefSide(sib, ref);
-          return wireEndApproach(sib, e) === side;
-        });
-        if (same.length >= 2) {
-          const idx = same.findIndex((x) => x.id === w.id);
-          if (idx >= 0) lateral = (idx - (same.length - 1) / 2) * 5;
-        }
-      }
+      const lateral = fan.lateral;
       return {
         dx: u[0] * r + lat[0] * lateral,
         dy: u[1] * r + lat[1] * lateral,
@@ -22945,11 +22963,12 @@
       return (ra === "dcplus" && rb === "dcminus") || (ra === "dcminus" && rb === "dcplus");
     }
     function defaultWireTag(w, end) {
+      /* v154 : bandelette = lettre/id de la borne (L, N, 1, PE…) — plus de W22.L1. */
+      const term = (w && w[end] && w[end].term != null) ? String(w[end].term).trim() : "";
+      if (term) return term;
+      /* Filet de sécurité si borne inconnue : numéro de fil court. */
       const no = Number.isFinite(Number(w && w.no)) ? Number(w.no) : 0;
-      /* v78-pv-series : série module→module = Wn seulement (pas W4.DC+ / W4.DC− sur le même fil). */
-      if (isPvSeriesBridgeWire(w)) return "W" + no;
-      const term = (w && w[end] && w[end].term != null) ? String(w[end].term) : "";
-      return "W" + no + (term ? "." + term : "");
+      return no ? String(no) : "";
     }
     function wireTagStored(w, end) {
       const raw = end === "a" ? (w && w.tagA) : (w && w.tagB);
