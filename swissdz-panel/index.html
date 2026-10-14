@@ -8,8 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v154-bandelette-borne" />
-  <!-- v154: bandelettes = id borne ; embouts visibles même à 2 fils/borne (éventail ≥ épaisseur) ; style bord ABB -->
+  <meta name="swissdz-rev" content="native-shell-8777-v155-embout-unique" />
+  <!-- v155: un seul embout vert (plus de bombé couleur sur le fil) ; N fils = N embouts, pas de fantôme -->
   <!-- v147: badge 🔒 Lecture vraiment masqué (CSS body.sim-lecture le réaffichait) -->
   <!-- v146: test — cadenas Lecture désactivé (Play ne verrouille plus le layout) -->
   <!-- v145: iPhone — Lecture après zoom : render à scale(1) puis restaurer pan/zoom (évite OOM) -->
@@ -20597,23 +20597,27 @@
       const th = (typeof EMBOUT_TH !== "undefined") ? EMBOUT_TH : 8;
       return Math.max(th + 2, 10);
     }
-    /** Index / décalage latéral des fils qui partagent la borne du même côté. */
+    /** Index / décalage latéral : tous les fils sur la borne (ordre stable par id). */
     function termSiblingFan(w, end) {
       const ref = w && w[end];
       if (!ref) return { lateral: 0, count: 1, idx: 0, side: "top" };
       let side = "top";
       try { side = wireEndApproach(w, end); } catch (_) {}
-      const sibs = wiresSharingTerm(ref);
-      const same = sibs.filter((sib) => {
-        const e = wireEndRefSide(sib, ref);
-        try { return wireEndApproach(sib, e) === side; } catch (_) { return false; }
-      });
-      const count = Math.max(1, same.length);
-      let idx = same.findIndex((x) => x.id === w.id);
+      const sibs = (wiresSharingTerm(ref) || []).slice().sort((a, b) => String(a.id).localeCompare(String(b.id)));
+      const count = Math.max(1, sibs.length);
+      let idx = sibs.findIndex((x) => x.id === w.id);
       if (idx < 0) idx = 0;
       const step = termEmboutFanStep();
       const lateral = count >= 2 ? (idx - (count - 1) / 2) * step : 0;
       return { lateral, count, idx, side, step };
+    }
+    /** Embout vert de borne actif pour cette extrémité → pas de second embout coloré sur le fil. */
+    function endUsesGreenClip(ref) {
+      if (!ref || ref.uid == null) return false;
+      try {
+        if (typeof isFlukeMeterRef === "function" && isFlukeMeterRef(ref)) return false;
+      } catch (_) {}
+      return termShowsEmbout(ref);
     }
     /** Cosse verte (14×8) sur la vis, au-dessus de la photo du module. */
     function appendTerminalClips(svg, NS) {
@@ -24998,13 +25002,16 @@
           });
         }
 
-        /* Embouts : manchon cylindrique à chaque bout (photo WiriLab). */
+        /* Embout coloré sur le fil uniquement si pas d’embout vert de borne (évite double bombé). */
         const peCap = isPeWireColor(color) && !live && !liveN;
         const capFill = peCap ? COLOR_PE : stroke;
         const eh = Math.max(width + 3.2, 7.2);
         const ew = Math.max(11, width * 2.6);
-        /* Bord loin du pad = centre (0.42·ew) + demi-longueur. */
-        const ferruleAlong = ew * 0.92;
+        const greenLen = (typeof EMBOUT_LEN !== "undefined") ? EMBOUT_LEN : 14;
+        const skipEmboutA = !!(wObj && endUsesGreenClip(wObj.a));
+        const skipEmboutB = !!(wObj && endUsesGreenClip(wObj.b));
+        const ferruleAlongA = skipEmboutA ? greenLen * 0.92 : ew * 0.92;
+        const ferruleAlongB = skipEmboutB ? greenLen * 0.92 : ew * 0.92;
         const drawEmbout = (endPt, adjPt) => {
           const dx = adjPt.x - endPt.x;
           const dy = adjPt.y - endPt.y;
@@ -25063,8 +25070,8 @@
           g.appendChild(collar);
           svgWires.appendChild(g);
         };
-        drawEmbout(pts[0], pts[1]);
-        drawEmbout(pts[pts.length - 1], pts[pts.length - 2]);
+        if (!skipEmboutA) drawEmbout(pts[0], pts[1]);
+        if (!skipEmboutB) drawEmbout(pts[pts.length - 1], pts[pts.length - 2]);
 
         if (state.showWireTags !== false && wObj) {
           /* Sur la sortie droite de CETTE borne, après l’embout ; angle = tangente. */
@@ -25079,6 +25086,7 @@
             const sdx = b0.x - a0.x, sdy = b0.y - a0.y;
             const slen = Math.hypot(sdx, sdy) || 1;
             const ux = sdx / slen, uy = sdy / slen;
+            const ferruleAlong = fromA ? ferruleAlongA : ferruleAlongB;
             const along = Math.min(
               ferruleAlong + TAG_GAP + m.bw / 2,
               Math.max(ferruleAlong + TAG_GAP + 1, slen * 0.42)
