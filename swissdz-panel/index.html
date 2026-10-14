@@ -8,8 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v155-embout-unique" />
-  <!-- v155: un seul embout vert (plus de bombé couleur sur le fil) ; N fils = N embouts, pas de fantôme -->
+  <meta name="swissdz-rev" content="native-shell-8777-v156-bord-abb" />
+  <!-- v156: technique ABB — fils collés au bord (ny≈0.025/0.975), pas sur la vis ; Compteur + LOGO + kit -->
   <!-- v147: badge 🔒 Lecture vraiment masqué (CSS body.sim-lecture le réaffichait) -->
   <!-- v146: test — cadenas Lecture désactivé (Play ne verrouille plus le layout) -->
   <!-- v145: iPhone — Lecture après zoom : render à scale(1) puis restaurer pan/zoom (évite OOM) -->
@@ -7231,9 +7231,10 @@
       /* L/N = uniquement via compteur Sonelgaz — pas de pastilles source L/N dans la lib. PE Terre seul. */
       pe: {name:"Terre PE",prefix:"PE",cat:"Borniers",w:56,h:56,kind:"pe",terminals:[{id:"PE",nx:0.5,ny:0.5,direction:"left"}],badge:"PE"},
       /* Tête de réseau : compteur → L+N uniquement (jamais PE). PE = prise de terre / bornier PE. Empilable avec AGCP. */
-      compteur_sonelgaz: {name:"Compteur Sonelgaz (L+N)",prefix:"P",cat:"Alimentation",w:129,h:172,image:"assets/compteur-sonelgaz.png",badge:"Sonelgaz",iec:"P",kind:"compteur",source:true,terminals:[{id:"L",nx:0.2312,ny:0.8215,direction:"bottom"},{id:"N",nx:0.4991,ny:0.8215,direction:"bottom"}],leds:[{id:"imp",cls:"imp",nx:0.2270,ny:0.2943},{id:"etat",cls:"etat",nx:0.7619,ny:0.2942}]},
+      compteur_sonelgaz: {name:"Compteur Sonelgaz (L+N)",prefix:"P",cat:"Alimentation",w:129,h:172,image:"assets/compteur-sonelgaz.png",badge:"Sonelgaz",iec:"P",kind:"compteur",source:true,terminals:[{id:"L",nx:0.2312,ny:0.975,direction:"bottom"},{id:"N",nx:0.4991,ny:0.975,direction:"bottom"}],leds:[{id:"imp",cls:"imp",nx:0.2270,ny:0.2943},{id:"etat",cls:"etat",nx:0.7619,ny:0.2942}]},
       /* Compteur tri 3P+N : L1/L2/L3/N (jamais PE). Face adaptée de compteur-sonelgaz — assets/COMPTEUR-3PN-SOURCE.md */
-      compteur_sonelgaz_3pn: {name:"Compteur Sonelgaz 3P+N (L1 L2 L3 N)",prefix:"P",cat:"Alimentation",w:178,h:172,image:"assets/compteur-sonelgaz-3pn.png",badge:"3P+N",iec:"P",kind:"compteur3",source:true,terminals:[{id:"L1",nx:0.215,ny:0.815,direction:"bottom"},{id:"L2",nx:0.405,ny:0.815,direction:"bottom"},{id:"L3",nx:0.595,ny:0.815,direction:"bottom"},{id:"N",nx:0.785,ny:0.815,direction:"bottom"}],leds:[{id:"imp",cls:"imp",nx:0.2270,ny:0.2943},{id:"etat",cls:"etat",nx:0.7619,ny:0.2942}]},
+      /* v156 : ny bord ABB (0.975) — plus sur le centre des vis (0.815). */
+      compteur_sonelgaz_3pn: {name:"Compteur Sonelgaz 3P+N (L1 L2 L3 N)",prefix:"P",cat:"Alimentation",w:178,h:172,image:"assets/compteur-sonelgaz-3pn.png",badge:"3P+N",iec:"P",kind:"compteur3",source:true,terminals:[{id:"L1",nx:0.215,ny:0.975,direction:"bottom"},{id:"L2",nx:0.405,ny:0.975,direction:"bottom"},{id:"L3",nx:0.595,ny:0.975,direction:"bottom"},{id:"N",nx:0.785,ny:0.975,direction:"bottom"}],leds:[{id:"imp",cls:"imp",nx:0.2270,ny:0.2943},{id:"etat",cls:"etat",nx:0.7619,ny:0.2942}]},
       /* AGCP mono Sonelgaz : face 2D 1P+N (L/N), pas 3P / pas perspective 3D. */
       agcp_principal: {name:"Disj. principal AGCP 1P+N SwissDz",prefix:"QA",cat:"Disjoncteurs modulaires",w:83,h:172,din:true,image:"assets/disj-2p-on.png",imageOff:"assets/disj-2p-off.png",badge:"AGCP",iec:"QA",terminals:[{id:"L",nx:0.2816,ny:0.025,direction:"top"},{id:"L'",nx:0.2816,ny:0.975,direction:"bottom"},{id:"N",nx:0.7531,ny:0.025,direction:"top"},{id:"N'",nx:0.7531,ny:0.975,direction:"bottom"}],pair:["L","L'"],pairs:[["L","L'"],["N","N'"]]},
       disj1pn: {name:"Disj. 1P+N SwissDz",prefix:"QF",cat:"Disjoncteurs modulaires",w:83,h:172,din:true,image:"assets/disj-2p-on.png",imageOff:"assets/disj-2p-off.png",badge:"1P+N",iec:"QF",terminals:[{id:"1",nx:0.2816,ny:0.025,direction:"top"},{id:"2",nx:0.2816,ny:0.975,direction:"bottom"},{id:"3",nx:0.7531,ny:0.025,direction:"top"},{id:"4",nx:0.7531,ny:0.975,direction:"bottom"}],pair:["1","2"],pairs:[["1","2"],["3","4"]]},
@@ -7283,15 +7284,16 @@
          Sim : L+N → LCD ON ; Ix au potentiel L → highlight Ix ; sorties Qi pilotées par le Ladder (pas de map fixe I→Q).
          Bornes : L/N/I1–I8 haut ; Qi.1/Qi.2 = paire de vis bas (contact sec relais quand Ladder active Qi). w/h = ratio image entière. */
       plc: {name:"PLC Siemens LOGO! 8 12/24RCE",prefix:"A",cat:"PLC",w:136,h:187,din:true,image:"assets/plc-logo8-front.png",iec:"A",plc:true,plcFamily:"logo",plcRole:"cpu",lamp:true,lcd:{nx:0.0533,ny:0.3187,nw:0.4505,nh:0.3087},terminals:[
-        {id:"L",nx:0.0736,ny:0.0463,direction:"top"},{id:"N",nx:0.1602,ny:0.0463,direction:"top"},
-        {id:"I1",nx:0.2436,ny:0.0463,direction:"top"},{id:"I2",nx:0.3323,ny:0.0463,direction:"top"},
-        {id:"I3",nx:0.4179,ny:0.0463,direction:"top"},{id:"I4",nx:0.5013,ny:0.0463,direction:"top"},
-        {id:"I5",nx:0.6681,ny:0.0463,direction:"top"},{id:"I6",nx:0.7504,ny:0.0463,direction:"top"},
-        {id:"I7",nx:0.8339,ny:0.0463,direction:"top"},{id:"I8",nx:0.9162,ny:0.0463,direction:"top"},
-        {id:"Q1.1",nx:0.0829,ny:0.8654,direction:"bottom"},{id:"Q1.2",nx:0.1670,ny:0.8654,direction:"bottom"},
-        {id:"Q2.1",nx:0.3379,ny:0.8654,direction:"bottom"},{id:"Q2.2",nx:0.4221,ny:0.8654,direction:"bottom"},
-        {id:"Q3.1",nx:0.5891,ny:0.8654,direction:"bottom"},{id:"Q3.2",nx:0.6757,ny:0.8654,direction:"bottom"},
-        {id:"Q4.1",nx:0.8317,ny:0.8654,direction:"bottom"},{id:"Q4.2",nx:0.9159,ny:0.8654,direction:"bottom"}
+        /* v156 : bord ABB — haut 0.025 / bas 0.975 (plus sur les vis 0.046 / 0.865). */
+        {id:"L",nx:0.0736,ny:0.025,direction:"top"},{id:"N",nx:0.1602,ny:0.025,direction:"top"},
+        {id:"I1",nx:0.2436,ny:0.025,direction:"top"},{id:"I2",nx:0.3323,ny:0.025,direction:"top"},
+        {id:"I3",nx:0.4179,ny:0.025,direction:"top"},{id:"I4",nx:0.5013,ny:0.025,direction:"top"},
+        {id:"I5",nx:0.6681,ny:0.025,direction:"top"},{id:"I6",nx:0.7504,ny:0.025,direction:"top"},
+        {id:"I7",nx:0.8339,ny:0.025,direction:"top"},{id:"I8",nx:0.9162,ny:0.025,direction:"top"},
+        {id:"Q1.1",nx:0.0829,ny:0.975,direction:"bottom"},{id:"Q1.2",nx:0.1670,ny:0.975,direction:"bottom"},
+        {id:"Q2.1",nx:0.3379,ny:0.975,direction:"bottom"},{id:"Q2.2",nx:0.4221,ny:0.975,direction:"bottom"},
+        {id:"Q3.1",nx:0.5891,ny:0.975,direction:"bottom"},{id:"Q3.2",nx:0.6757,ny:0.975,direction:"bottom"},
+        {id:"Q4.1",nx:0.8317,ny:0.975,direction:"bottom"},{id:"Q4.2",nx:0.9159,ny:0.975,direction:"bottom"}
       ],pairs:[["Q1.1","Q1.2"],["Q2.1","Q2.2"],["Q3.1","Q3.2"],["Q4.1","Q4.2"]]},
       /* Kit école Siemens (1 de chaque). Visuels officiels Siemens Industry Image Database (automation.siemens.com/bilddb).
          Réfs. demandées : LOGO!Power 6ED1057-3BA00-0AA8 · DM8 24R 6ED1055-1HB00-0BA2 · AM2 6ED1055-1MA00-0BA2 ·
