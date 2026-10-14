@@ -8,8 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v157-bord-abb-all" />
-  <!-- v157: technique bord ABB sur TOUTES les bornes LIB (top/bottom/left/right → 0.025/0.975) -->
+  <meta name="swissdz-rev" content="native-shell-8777-v158-fix-drag" />
+  <!-- v158: drag — pointercancel / lostcapture terminent le drag (sinon 1er OK, suivants bloqués) -->
   <!-- v147: badge 🔒 Lecture vraiment masqué (CSS body.sim-lecture le réaffichait) -->
   <!-- v146: test — cadenas Lecture désactivé (Play ne verrouille plus le layout) -->
   <!-- v145: iPhone — Lecture après zoom : render à scale(1) puis restaurer pan/zoom (évite OOM) -->
@@ -27063,8 +27063,9 @@
       }
       render();
     });
-    window.addEventListener("pointercancel", () => { clearEdzLongPress(); });
-    window.addEventListener("pointerup", (ev) => {
+    /* v158 : pointerup ET pointercancel — sinon un cancel tactile laisse state.drag
+       + #board.is-dragging bloqués → le 1er glisser marche, les suivants buguent. */
+    function onBoardPointerEnd(ev) {
       if (state.wireDrag && state.wireDrag.bendIndex != null && state.wireDrag.bendLive) {
         const wd = state.wireDrag;
         const bw = state.wires.find((x) => x.id === wd.id);
@@ -27257,7 +27258,21 @@
       if (wasProxRange) discardHistoryIfUnchanged(proxRangeHistKey);
       if (state.sim || wasWireDrag || wasFlukeTip || wasFlukeBend || wasDrag || wasResize || wasProxRange) render();
       else writeAutosave();
-    });
+    }
+    window.addEventListener("pointerup", onBoardPointerEnd);
+    window.addEventListener("pointercancel", onBoardPointerEnd);
+    try {
+      board.addEventListener("lostpointercapture", (ev) => {
+        if (!(state.drag || state.resize || state.flukeTipDrag || state.flukeBendDrag || state.proxRangeDrag)) return;
+        const pid = (state.drag && state.drag.pointerId)
+          || (state.resize && state.resize.pointerId)
+          || (state.flukeTipDrag && state.flukeTipDrag.pointerId)
+          || (state.flukeBendDrag && state.flukeBendDrag.pointerId)
+          || (state.proxRangeDrag && state.proxRangeDrag.pointerId);
+        if (pid != null && ev.pointerId != null && pid !== ev.pointerId) return;
+        onBoardPointerEnd(ev);
+      });
+    } catch (_) {}
 
 
     /* --- Menu contexte composant (appui long / clic droit / barre ⋯) --- */
