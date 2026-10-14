@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v147-hide-lecture-badge" />
+  <meta name="swissdz-rev" content="native-shell-8777-v152-bornes-hitbox" />
+  <!-- v152: bornes = hitbox invisible taille vis (plus de pastilles) ; DEHN + Hager EE180 recalés -->
   <!-- v147: badge 🔒 Lecture vraiment masqué (CSS body.sim-lecture le réaffichait) -->
   <!-- v146: test — cadenas Lecture désactivé (Play ne verrouille plus le layout) -->
   <!-- v145: iPhone — Lecture après zoom : render à scale(1) puis restaurer pan/zoom (évite OOM) -->
@@ -3432,28 +3433,39 @@
       pointer-events:none; z-index:66;
     }
 
-    /* Pastilles : L1 marron · L2 noir · L3 gris · N bleu · PE jaune-vert · BUS KNX.
-       Taille de base ; le JS scale width/height/margin/font avec le resize composant.
+    /* Bornes = hitbox invisible calée sur la vis photo (pas d’icône / pastille colorée).
+       Taille JS ≈ diamètre vis ; feedback seulement au câblage (wire-from / snap / hot).
        --term-snap-aim-* partagés avec JS termVisualSnapRadius (v40-terminal-snap). */
     .term {
-      /* v50-snap-aim-brown : détection = taille borne, brun (plus de halo vert agrandi). */
       --term-snap-aim-ring: 0px;
       --term-snap-aim-scale: 1;
-      position:absolute; width:13px; height:13px; margin:-6.5px 0 0 -6.5px; border-radius:50%;
-      background:#92400e; color:#fff; font-size:7px; font-weight:800;
+      position:absolute; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%;
+      background:transparent; color:transparent; font-size:0; font-weight:800;
       display:grid; place-items:center; z-index:70; cursor:crosshair; line-height:1;
-      box-shadow:0 1px 2px rgba(0,0,0,.35);
+      box-shadow:none; border:0 solid transparent;
       pointer-events:auto;
       box-sizing:border-box;
     }
-    .term.l2 { background:#111111; }
-    .term.l3 { background:#9ca3af; color:#111; }
-    .term.neu { background:#0088ce; }
-    .term.dcplus { background:#dc2626; }
-    .term.dcminus { background:#111; color:#fff; }
+    .term.l2,
+    .term.l3,
+    .term.neu,
+    .term.dcplus,
+    .term.dcminus,
     .term.pe {
-      background:repeating-linear-gradient(-45deg, #c4d600 0 3px, #008c45 3px 6px);
-      color:#111; font-size:6px;
+      background:transparent; color:transparent; box-shadow:none;
+    }
+    /* Feedback câblage uniquement — la photo de la vis reste visible. */
+    .term.wire-from {
+      box-shadow:0 0 0 2px #f59e0b, 0 0 0 4px rgba(245,158,11,.35);
+      background:rgba(245,158,11,.18);
+    }
+    .term.snap-aim {
+      box-shadow:0 0 0 2px #92400e, 0 0 0 4px rgba(146,64,14,.28);
+      background:rgba(146,64,14,.14);
+    }
+    .term.hot {
+      box-shadow:0 0 0 2px #fecaca;
+      background:rgba(254,202,202,.16);
     }
     /* Connecteur bus KNX : rectangle rouge/noir (pas cercle vert) */
     .term.knxbus {
@@ -3477,7 +3489,6 @@
       font-size:6px; font-weight:800; color:#fff; line-height:1;
       text-shadow:0 0 2px #000, 0 1px 2px #000; white-space:nowrap; pointer-events:none;
     }
-    .term.hot { box-shadow:0 0 0 2px #fecaca, 0 1px 2px rgba(0,0,0,.25); }
     /* Barrettes de couplage (laiton) : sous les vis-bornes, au-dessus de la photo */
     .motor-bar {
       position:absolute; z-index:8; pointer-events:auto; cursor:pointer;
@@ -3567,29 +3578,28 @@
     .term.knxbus.hot .knx-pair {
       box-shadow:0 0 0 2px rgba(225,29,46,.55), 0 1px 3px rgba(0,0,0,.35);
     }
-    /* Câblage semi-auto : départ + aimant borne cible */
+    /* Câblage : anneau sur la vis (pas de pastille opaque qui cache la photo). */
     .term.wire-from {
-      box-shadow:0 0 0 3px #fff, 0 0 0 6px rgba(59,130,246,.9);
+      box-shadow:0 0 0 2px #3b82f6, 0 0 0 4px rgba(59,130,246,.35);
+      background:rgba(59,130,246,.16);
       z-index:72;
     }
-    /* v50 : borne cible = même taille, brun (indique laquelle détecte le fil). */
     .term.snap-aim {
-      background:#92400e;
-      box-shadow:0 0 0 1px #fff, 0 0 0 2px #92400e;
+      background:rgba(146,64,14,.16);
+      box-shadow:0 0 0 2px #92400e, 0 0 0 4px rgba(146,64,14,.28);
       transform:none;
       z-index:73;
     }
-    /* Accroché : même taille, brun un peu plus marqué (pas de gros halo vert). */
     .term.snap-ok {
-      background:#92400e;
-      box-shadow:0 0 0 1px #fff, 0 0 0 2px #78350f;
+      background:rgba(146,64,14,.2);
+      box-shadow:0 0 0 2px #78350f;
       transform:none;
       z-index:74;
       animation:none;
     }
     .term.snap-miss {
-      box-shadow:0 0 0 3px #fff, 0 0 0 8px rgba(220,38,38,.95);
-      transform:scale(1.4);
+      box-shadow:0 0 0 2px #dc2626, 0 0 0 4px rgba(220,38,38,.35);
+      transform:none;
       z-index:74;
       animation: snapMissPulse .45s ease-out 1;
     }
@@ -7232,7 +7242,7 @@
       disj4p: {name:"Disj. 4P SwissDz",prefix:"QF",cat:"Disjoncteurs modulaires",hideFromLib:true,w:169,h:172,din:true,image:"assets/disj-4p-on.png",imageOff:"assets/disj-4p-off.png",badge:"4P",iec:"QF",terminals:[{id:"1",nx:0.1263,ny:0.025,direction:"top"},{id:"2",nx:0.1263,ny:0.975,direction:"bottom"},{id:"3",nx:0.3702,ny:0.025,direction:"top"},{id:"4",nx:0.3702,ny:0.975,direction:"bottom"},{id:"5",nx:0.614,ny:0.025,direction:"top"},{id:"6",nx:0.614,ny:0.975,direction:"bottom"},{id:"7",nx:0.8375,ny:0.025,direction:"top"},{id:"8",nx:0.8375,ny:0.975,direction:"bottom"}],pair:["1","2"],pairs:[["1","2"],["3","4"],["5","6"],["7","8"]]},
       spd: {name:"Parafoudre SPD SwissDz",prefix:"FV",cat:"Parafoudres",w:84,h:172,din:true,image:"assets/spd-swissdz.png",badge:"SPD",iec:"FV",terminals:[{id:"1",nx:0.3422,ny:0.025,direction:"top"},{id:"2",nx:0.7421,ny:0.025,direction:"top"},{id:"PE",nx:0.5155,ny:0.975,direction:"bottom"}]},
       /* swissdz-rev v54-dehn-spd : DEHN face 2D — clamp L/N→PE à la surtension, voyant vert→rouge (notice). */
-      edz_dehn_dsh_tns_255: {name:"DEHNshield DSH TNS 255",nameEn:"DEHNshield DSH TNS 255",prefix:"FV",cat:"Parafoudres",w:144,h:172,din:true,spd:true,startOpen:true,image:"assets/electrodz/dehn_dsh_tns_255.png?v=dehn54",imageOff:"assets/electrodz/dehn_dsh_tns_255_off.png?v=dehn54",badge:"T1+T2",iec:"FV",terminals:[{id:"L1",nx:0.14,ny:0.025,direction:"top"},{id:"L2",nx:0.38,ny:0.025,direction:"top"},{id:"L3",nx:0.62,ny:0.025,direction:"top"},{id:"N",nx:0.86,ny:0.025,direction:"top"},{id:"PE2",nx:0.58,ny:0.975,direction:"bottom"},{id:"PE",nx:0.78,ny:0.975,direction:"bottom"}],bridges:[["PE","PE2"]],pairs:[["L1","PE"],["L2","PE"],["L3","PE"],["N","PE"]],pair:["L1","PE"]},
+      edz_dehn_dsh_tns_255: {name:"DEHNshield DSH TNS 255",nameEn:"DEHNshield DSH TNS 255",prefix:"FV",cat:"Parafoudres",w:144,h:172,din:true,spd:true,startOpen:true,image:"assets/electrodz/dehn_dsh_tns_255.png?v=dehn54",imageOff:"assets/electrodz/dehn_dsh_tns_255_off.png?v=dehn54",badge:"T1+T2",iec:"FV",terminals:[{id:"L1",nx:0.149,ny:0.110,direction:"top"},{id:"L2",nx:0.382,ny:0.113,direction:"top"},{id:"L3",nx:0.625,ny:0.113,direction:"top"},{id:"N",nx:0.867,ny:0.112,direction:"top"},{id:"PE2",nx:0.623,ny:0.884,direction:"bottom"},{id:"PE",nx:0.853,ny:0.884,direction:"bottom"}],bridges:[["PE","PE2"]],pairs:[["L1","PE"],["L2","PE"],["L3","PE"],["N","PE"]],pair:["L1","PE"]},
       edz_dehn_dsh_b_tn_255: {name:"DEHNshield Basic DSH B TN 255 FM",nameEn:"DEHNshield Basic DSH B TN 255 FM",prefix:"FV",cat:"Parafoudres",w:66,h:172,din:true,spd:true,startOpen:true,image:"assets/electrodz/dehn_dsh_b_tn_255.png?v=dehn54",imageOff:"assets/electrodz/dehn_dsh_b_tn_255_off.png?v=dehn54",badge:"T1+T2",iec:"FV",terminals:[{id:"L",nx:0.32,ny:0.025,direction:"top"},{id:"N",nx:0.68,ny:0.025,direction:"top"},{id:"PE",nx:0.72,ny:0.975,direction:"bottom"},{id:"11",nx:0.22,ny:0.96,direction:"bottom"},{id:"12",nx:0.4,ny:0.96,direction:"bottom"},{id:"14",nx:0.58,ny:0.96,direction:"bottom"}],pairs:[["L","PE"],["N","PE"]],pair:["L","PE"],pairsNc:[["11","12"]],pairsFm:[["11","14"]]},
       edz_dehn_ventil: {name:"DEHNventil DV TNS 255",nameEn:"DEHNventil DV TNS 255",prefix:"FV",cat:"Parafoudres",w:260,h:190,din:true,spd:true,startOpen:true,image:"assets/electrodz/dehn_ventil.png?v=dehn54",imageOff:"assets/electrodz/dehn_ventil_off.png?v=dehn54",badge:"T1",iec:"FV",terminals:[{id:"L1",nx:0.07,ny:0.025,direction:"top"},{id:"L1'",nx:0.18,ny:0.025,direction:"top"},{id:"L2",nx:0.3,ny:0.025,direction:"top"},{id:"L2'",nx:0.41,ny:0.025,direction:"top"},{id:"L3",nx:0.53,ny:0.025,direction:"top"},{id:"L3'",nx:0.64,ny:0.025,direction:"top"},{id:"N",nx:0.76,ny:0.025,direction:"top"},{id:"N'",nx:0.87,ny:0.025,direction:"top"},{id:"PE",nx:0.82,ny:0.975,direction:"bottom"},{id:"PE2",nx:0.9,ny:0.975,direction:"bottom"},{id:"11",nx:0.1,ny:0.96,direction:"bottom"},{id:"12",nx:0.18,ny:0.96,direction:"bottom"},{id:"14",nx:0.26,ny:0.96,direction:"bottom"}],bridges:[["L1","L1'"],["L2","L2'"],["L3","L3'"],["N","N'"],["PE","PE2"]],pairs:[["L1","PE"],["L2","PE"],["L3","PE"],["N","PE"]],pair:["L1","PE"],pairsNc:[["11","12"]],pairsFm:[["11","14"]]},
       sectionneur3p: {name:"Sectionneur 3P SwissDz",prefix:"QS",cat:"Sectionneurs",w:123,h:172,din:true,image:"assets/sectionneur-3p-on.png",imageOff:"assets/sectionneur-3p-off.png",badge:"3P",iec:"QS",terminals:[{id:"1",nx:0.1463,ny:0.1081,direction:"top"},{id:"2",nx:0.1782,ny:0.9038,direction:"bottom"},{id:"3",nx:0.5075,ny:0.1081,direction:"top"},{id:"4",nx:0.4756,ny:0.8937,direction:"bottom"},{id:"5",nx:0.8475,ny:0.1081,direction:"top"},{id:"6",nx:0.8156,ny:0.9038,direction:"bottom"}],pair:["1","2"],pairs:[["1","2"],["3","4"],["5","6"]]},
@@ -7246,7 +7256,7 @@
       jour_nuit: {name:"Contact jour/nuit SwissDz",prefix:"KT",cat:"Commande",w:45,h:172,din:true,image:"assets/jour-nuit-swissdz.png",badge:"J/N",iec:"KT",terminals:[{id:"1",nx:0.5,ny:0.1079,direction:"top"},{id:"2",nx:0.5,ny:0.882,direction:"bottom"}],pair:["1","2"],pairs:[["1","2"]]},
       inter_horaire: {name:"Interrupteur horaire SwissDz",prefix:"KT",cat:"Commande",w:45,h:172,din:true,image:"assets/inter-horaire-swissdz.png",badge:"7j",iec:"KT",terminals:[{id:"1",nx:0.2036,ny:0.1101,direction:"top"},{id:"2",nx:0.6697,ny:0.1101,direction:"top"},{id:"3",nx:0.2348,ny:0.8808,direction:"bottom"},{id:"4",nx:0.6387,ny:0.8808,direction:"bottom"}],pair:["1","3"],pairs:[["1","3"],["2","4"]]},
       /* swissdz-rev v55-hager-ee180 : face 2D + sim astro (notice EE180 — 1 voie inverseur, auto/forçage, jour/nuit). */
-      edz_hager_ee180: {name:"Hager EE180 horloge astronomique",nameEn:"Hager EE180 astronomical time switch",prefix:"KT",cat:"Commande",w:72,h:172,din:true,astro:true,startOpen:true,image:"assets/electrodz/hager_ee180.png?v=ee180",imageOff:"assets/electrodz/hager_ee180_off.png?v=ee180",badge:"Astro",iec:"KT",terminals:[{id:"1",nx:0.14,ny:0.055,direction:"top"},{id:"3",nx:0.38,ny:0.055,direction:"top"},{id:"5",nx:0.62,ny:0.055,direction:"top"},{id:"7",nx:0.86,ny:0.055,direction:"top"},{id:"2",nx:0.14,ny:0.945,direction:"bottom"},{id:"4",nx:0.38,ny:0.945,direction:"bottom"},{id:"6",nx:0.62,ny:0.945,direction:"bottom"},{id:"8",nx:0.86,ny:0.945,direction:"bottom"}],pair:["5","6"],pairs:[["5","6"]],pairsNc:[["5","4"]]},
+      edz_hager_ee180: {name:"Hager EE180 horloge astronomique",nameEn:"Hager EE180 astronomical time switch",prefix:"KT",cat:"Commande",w:72,h:172,din:true,astro:true,startOpen:true,image:"assets/electrodz/hager_ee180.png?v=ee180",imageOff:"assets/electrodz/hager_ee180_off.png?v=ee180",badge:"Astro",iec:"KT",terminals:[{id:"1",nx:0.164,ny:0.095,direction:"top"},{id:"3",nx:0.391,ny:0.097,direction:"top"},{id:"5",nx:0.607,ny:0.098,direction:"top"},{id:"7",nx:0.828,ny:0.092,direction:"top"},{id:"2",nx:0.162,ny:0.890,direction:"bottom"},{id:"4",nx:0.386,ny:0.889,direction:"bottom"},{id:"6",nx:0.601,ny:0.892,direction:"bottom"},{id:"8",nx:0.818,ny:0.890,direction:"bottom"}],pair:["5","6"],pairs:[["5","6"]],pairsNc:[["5","4"]]},
       va_et_vient: {name:"Va-et-vient SwissDz",prefix:"S",cat:"Prises / Interrupteurs",w:97,h:100,image:"assets/va-et-vient-swissdz.png",badge:"VV",iec:"S",vv:true,terminals:[{id:"L",nx:0.2383,ny:0.7833,direction:"bottom"},{id:"1",nx:0.4995,ny:0.7833,direction:"bottom"},{id:"2",nx:0.7607,ny:0.7833,direction:"bottom"}],pair:["L","1"],pairs:[["L","1"]]},
       poussoir: {name:"Poussoir mur SwissDz",prefix:"S",cat:"Prises / Interrupteurs",w:100,h:100,image:"assets/poussoir-swissdz.png",badge:"NO",iec:"S",push:true,terminals:[{id:"1",nx:0.3491,ny:0.7817,direction:"bottom"},{id:"2",nx:0.6509,ny:0.7817,direction:"bottom"}],pair:["1","2"],pairs:[["1","2"]]},
       bp: {name:"BP NO SwissDz",prefix:"S",cat:"Boutonnerie",w:90,h:99,image:"assets/bp-swissdz.png",badge:"NO",iec:"S",push:true,terminals:[{id:"3",nx:0.0677,ny:0.4521,direction:"left"},{id:"4",nx:0.9431,ny:0.4521,direction:"right"}],pair:["3","4"],pairs:[["3","4"]]},
@@ -9767,12 +9777,17 @@
       if (!Number.isFinite(s) || s <= 0) return 1;
       return Math.max(0.5, Math.min(3.2, s));
     }
-    /** Diamètre / hitbox pastille (px) : suit le scale composant. */
+    /** Diamètre hitbox borne (px) ≈ vis sur la photo ; suit le resize composant. */
     function termPadSize(item, opts) {
       const knx = !!(opts && opts.knxbus);
-      const base = knx ? 20 : 13;
-      const px = Math.round(base * termVisualScale(item));
-      return Math.max(knx ? 12 : 8, Math.min(knx ? 48 : 36, px));
+      if (knx) {
+        const px = Math.round(20 * termVisualScale(item));
+        return Math.max(12, Math.min(48, px));
+      }
+      const sz = itemSize(item);
+      /* Vis DIN typique ≈ 11–14 % du côté le plus étroit du composant. */
+      const diam = Math.round(Math.min(sz.w, sz.h) * 0.125);
+      return Math.max(14, Math.min(42, diam));
     }
     /** Taille visuelle connecteur bus KNX (rectangle rouge/noir). */
     function knxBusPadSize(item) {
@@ -26562,12 +26577,9 @@
         t.style.width = pad + "px";
         t.style.height = pad + "px";
         t.style.margin = (-half) + "px 0 0 " + (-half) + "px";
-        const baseFs = pe ? 6 : 7;
-        const fs = Math.max(5, Math.min(14, Math.round(baseFs * termVisualScale(item))));
-        t.style.fontSize = fs + "px";
-        const sym = mark && mark.sym;
-        t.textContent = pe ? "PE"
-          : (sym || (dcplus ? "+" : dcminus ? "−" : (mark && mark.motorPlate ? id : (id.length > 2 ? id.slice(0, 2) : id))));
+        /* Pas d’icône sur la vis : hitbox seule (label via title). */
+        t.textContent = "";
+        t.setAttribute("aria-label", String(id || "borne"));
       }
       const sym = mark && mark.sym;
       let tip = pe ? "PE — mise à la terre"
