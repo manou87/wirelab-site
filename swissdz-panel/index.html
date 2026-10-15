@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v157-bord-abb-all" />
+  <meta name="swissdz-rev" content="native-shell-8777-v159-eduvolt-toggle" />
+  <!-- v159: interrupteur EduVolt (grille 50 + stubs sortie) — OFF = système classique 100% inchangé -->
   <!-- v157: technique bord ABB sur TOUTES les bornes LIB (top/bottom/left/right → 0.025/0.975) -->
   <!-- v147: badge 🔒 Lecture vraiment masqué (CSS body.sim-lecture le réaffichait) -->
   <!-- v146: test — cadenas Lecture désactivé (Play ne verrouille plus le layout) -->
@@ -4893,6 +4894,22 @@
     #btnGrid.grid-toggle .grid-ico-off { display:none; }
     #btnGrid.grid-toggle.is-off .grid-ico-on { display:none; }
     #btnGrid.grid-toggle.is-off .grid-ico-off { display:block; }
+    #btnEduVolt.btn-ico { font-size:10px; font-weight:800; letter-spacing:.02em; }
+    #btnEduVolt.btn-ico.active {
+      background:rgba(239,68,68,.14); color:#b91c1c; border-color:rgba(239,68,68,.35);
+    }
+    html[data-theme="dark"] #btnEduVolt.btn-ico.active {
+      background:rgba(248,113,113,.16); color:#fecaca; border-color:rgba(248,113,113,.4);
+    }
+    svg.eduvolt-stubs { position:absolute; left:0; top:0; overflow:visible; pointer-events:none; z-index:54; }
+    svg.eduvolt-stubs .ev-stub {
+      fill:none; stroke:rgba(248,113,113,.72); stroke-width:2.2; stroke-linecap:round;
+    }
+    svg.eduvolt-stubs .ev-dot {
+      fill:rgba(248,113,113,.55); stroke:rgba(185,28,28,.75); stroke-width:0.8;
+    }
+    svg.eduvolt-stubs .ev-arrow { fill:rgba(248,113,113,.85); }
+
     #btnGrid.grid-toggle.is-off {
       opacity:.55;
     }
@@ -5647,6 +5664,9 @@
             <svg class="grid-ico-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 10h16M4 14h16M10 4v16M14 4v16"/></svg>
             <svg class="grid-ico-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 12h16M12 4v16"/><path d="m7 7 10 10"/></svg>
           </button>
+          <button id="btnEduVolt" class="btn-ico" type="button"
+            title="EduVolt OFF — câblage classique (cliquer pour activer grille 50 + stubs)"
+            aria-label="Mode EduVolt" aria-pressed="false">EV</button>
           <button id="btnMute" class="btn-ico sound-toggle" type="button"
             data-i18n-title="btnSoundOnTitle" data-i18n-aria="btnSoundAria"
             title="Sons activés — cliquer pour couper" aria-label="Sons" aria-pressed="false">
@@ -6285,6 +6305,9 @@
     const SOUNDS_MUTE_KEY = "panelwire-sounds-muted";
     /* swissdz-rev v44-grid-toggle : grille plan ON/OFF (défaut ON). */
     const BOARD_GRID_KEY = "panelwire-board-grid";
+    /* v159 : EduVolt optionnel — OFF par défaut = comportement historique inchangé. */
+    const EDUVOLT_ROUTE_KEY = "panelwire-eduvolt-route";
+    let eduVoltRouteOn = false;
     /* muted=true → silence. Défaut : sons ON (pas de mute). */
     let soundsMuted = false;
     let boardGridOn = true;
@@ -6329,6 +6352,32 @@
       try { localStorage.setItem(BOARD_GRID_KEY, boardGridOn ? "1" : "0"); } catch (_) {}
       syncGridButton();
     }
+    function isEduVoltRoute() { return !!eduVoltRouteOn; }
+    function boardCoordsStep() { return isEduVoltRoute() ? 50 : BOARD_COORDS_STEP; }
+    /** Longueur stub sortie : EduVolt = 1 carré de grille ; classique = STUB historique. */
+    function wireStubLen() {
+      if (!isEduVoltRoute()) return (typeof STUB !== "undefined" ? STUB : 70);
+      return boardCoordsStep();
+    }
+    function syncEduVoltButton() {
+      const btn = document.getElementById("btnEduVolt");
+      if (!btn) return;
+      const on = isEduVoltRoute();
+      btn.classList.toggle("active", on);
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.title = on
+        ? "EduVolt ON — grille 50 + stubs sortie (cliquer = classique)"
+        : "EduVolt OFF — câblage classique (cliquer = grille 50 + stubs)";
+      try { document.body.classList.toggle("eduvolt-route", on); } catch (_) {}
+    }
+    function setEduVoltRoute(on) {
+      eduVoltRouteOn = !!on;
+      try { localStorage.setItem(EDUVOLT_ROUTE_KEY, eduVoltRouteOn ? "1" : "0"); } catch (_) {}
+      syncEduVoltButton();
+      try { boardCoordsExtentKey = ""; } catch (_) {}
+      try { syncBoardCoords(); } catch (_) {}
+      try { render(); } catch (_) {}
+    }
     function setSoundsMuted(muted) {
       soundsMuted = !!muted;
       try { localStorage.setItem(SOUNDS_MUTE_KEY, soundsMuted ? "1" : "0"); } catch (_) {}
@@ -6372,6 +6421,12 @@
       const btnGrid = document.getElementById("btnGrid");
       if (btnGrid) {
         btnGrid.onclick = () => setBoardGridOn(!boardGridOn);
+      }
+      try { eduVoltRouteOn = localStorage.getItem(EDUVOLT_ROUTE_KEY) === "1"; } catch (_) { eduVoltRouteOn = false; }
+      syncEduVoltButton();
+      const btnEv = document.getElementById("btnEduVolt");
+      if (btnEv) {
+        btnEv.onclick = () => setEduVoltRoute(!eduVoltRouteOn);
       }
     }
     function libDisplayName(id, def) {
@@ -10832,7 +10887,7 @@
        * Cause « rectangle + vide » : grille limitée à 2600×1800 + cadre stroke.
        * Monde utile reste 2600×1800 ; le dessin déborde pour remplir l’écran.
        */
-      const gridStep = BOARD_COORDS_STEP;
+      const gridStep = (typeof boardCoordsStep === "function") ? boardCoordsStep() : BOARD_COORDS_STEP;
       const z = Math.max(1e-6, boardZoom());
       const pad = boardPad();
       const vw = Math.max(0, board.clientWidth || 0);
@@ -22362,25 +22417,104 @@
      * U voisins (1a–1d) : [A, A2, B2, B] inchangé. Pas de piqué diagonal dans le pad.
      * v85-cabling-ref-20261001 : stubs figés = pointes de virage (poignées bleues).
      */
+    /** EduVolt : projette un point sur le bord de grille le plus proche (jamais hors côtés). */
+    function snapPointToGridEdge(x, y) {
+      const step = (typeof boardCoordsStep === "function") ? boardCoordsStep() : 50;
+      if (!(step > 0)) return { x: x, y: y };
+      const gx = Math.round(x / step) * step;
+      const gy = Math.round(y / step) * step;
+      const dx = Math.abs(x - gx);
+      const dy = Math.abs(y - gy);
+      if (dx <= dy) return { x: gx, y: y }; /* collé au côté vertical */
+      return { x: x, y: gy }; /* collé au côté horizontal */
+    }
+    function snapRouteToGridEdges(pts) {
+      if (!pts || pts.length < 2) return pts;
+      const out = pts.map((p, i) => {
+        if (i === 0 || i === pts.length - 1) return { x: p.x, y: p.y };
+        return snapPointToGridEdge(p.x, p.y);
+      });
+      return forceOrtho(dedupePts(out));
+    }
+    /** Guides rouge clair : point borne + direction + stub (= 1 carré). */
+    function appendEduVoltExitGuides(world, NS) {
+      if (!world || !NS) return;
+      if (typeof isEduVoltRoute !== "function" || !isEduVoltRoute()) return;
+      if (!state || state.mode !== "wire") return;
+      const stubLen = (typeof wireStubLen === "function") ? wireStubLen() : 50;
+      const svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("class", "eduvolt-stubs");
+      svg.setAttribute("aria-hidden", "true");
+      try { sizeBoardSvg(svg); } catch (_) {}
+      (state.items || []).forEach((item) => {
+        const def = LIB[item.type];
+        if (!def || def.flukeMeter) return;
+        (termsOf(item) || []).forEach((t) => {
+          try {
+            if (typeof kmFrHiddenTerm === "function" && kmFrHiddenTerm(item, t.id)) return;
+            const p = termAbs(item, t);
+            const d = DIR[t.direction] || [0, -1];
+            const x2 = p.x + d[0] * stubLen;
+            const y2 = p.y + d[1] * stubLen;
+            const line = document.createElementNS(NS, "line");
+            line.setAttribute("class", "ev-stub");
+            line.setAttribute("x1", String(p.x));
+            line.setAttribute("y1", String(p.y));
+            line.setAttribute("x2", String(x2));
+            line.setAttribute("y2", String(y2));
+            svg.appendChild(line);
+            const dot = document.createElementNS(NS, "circle");
+            dot.setAttribute("class", "ev-dot");
+            dot.setAttribute("cx", String(p.x));
+            dot.setAttribute("cy", String(p.y));
+            dot.setAttribute("r", "3.2");
+            svg.appendChild(dot);
+            /* Petite flèche directionnelle */
+            const ax = x2 - d[0] * 7;
+            const ay = y2 - d[1] * 7;
+            const px = -d[1] * 3.2, py = d[0] * 3.2;
+            const tri = document.createElementNS(NS, "polygon");
+            tri.setAttribute("class", "ev-arrow");
+            tri.setAttribute("points",
+              x2 + "," + y2 + " " + (ax + px) + "," + (ay + py) + " " + (ax - px) + "," + (ay - py));
+            svg.appendChild(tri);
+          } catch (_) {}
+        });
+      });
+      world.appendChild(svg);
+    }
+
     function withCardinalStubs(pts, A, B) {
       const da = padUnit(A), db = padUnit(B);
       let raw = (pts || []).slice(1, -1).map((p) => ({ x: p.x, y: p.y }));
       raw = raw.filter((p) => !onRevRay(A, da, p) && !onRevRay(B, db, p));
       /* Min 28 : assez pour bandelette + congé. Autoriser < STUB pour un couloir parallèle. */
       const STUB_MIN = 28;
-      let aLen = STUB;
+      const stubBase = (typeof wireStubLen === "function") ? wireStubLen() : STUB;
+      let aLen = stubBase;
       if (raw.length && onOutRay(A, da, raw[0])) {
         aLen = Math.max(STUB_MIN, rayAlong(A, da, raw[0]));
         raw.shift();
       }
-      let bLen = STUB;
+      let bLen = stubBase;
       if (raw.length && onOutRay(B, db, raw[raw.length - 1])) {
         bLen = Math.max(STUB_MIN, rayAlong(B, db, raw[raw.length - 1]));
         raw.pop();
       }
+      /* EduVolt : stub minimum = 1 carré, jamais de point sur le ray inverse (traverse le module). */
+      if (typeof isEduVoltRoute === "function" && isEduVoltRoute()) {
+        const step = (typeof boardCoordsStep === "function") ? boardCoordsStep() : 50;
+        aLen = Math.max(step, aLen);
+        bLen = Math.max(step, bLen);
+        raw = raw.filter((p) => rayAlong(A, da, p) > step * 0.35 && rayAlong(B, db, p) > step * 0.35);
+      }
       const A2 = stubOf(A, aLen);
       const B2 = stubOf(B, bLen);
-      return forceOrtho(dedupePts([{ x: A.x, y: A.y }, A2, ...raw, B2, { x: B.x, y: B.y }]));
+      let routed = forceOrtho(dedupePts([{ x: A.x, y: A.y }, A2, ...raw, B2, { x: B.x, y: B.y }]));
+      if (typeof isEduVoltRoute === "function" && isEduVoltRoute() && typeof snapRouteToGridEdges === "function") {
+        routed = snapRouteToGridEdges(routed);
+      }
+      return routed;
     }
 
     /* Couloir parallèle : assez large pour un congé (R 24), sans jog carré. */
@@ -22475,31 +22609,32 @@
       const da = padUnit(a);
       const db = padUnit(b);
       const cands = [];
+      const stub0 = (typeof wireStubLen === "function") ? wireStubLen() : STUB;
       if (db && da[0] === db[0] && da[1] === db[1]) {
         const span = Math.abs(da[0] ? (b.y - a.y) : (b.x - a.x));
         const along = da[0] * (b.x - a.x) + da[1] * (b.y - a.y);
         if (span > 16 && span < 480 && Math.abs(along) < 40) {
           for (let k = 0; k <= WIRE_LANE_MAX; k++) {
-            cands.push(sameEdgeURoute(a, b, STUB + k * WIRE_LANE));
+            cands.push(sameEdgeURoute(a, b, stub0 + k * WIRE_LANE));
           }
         }
       }
       /* k=0 = L isolé (inchangé). Ensuite : profondeur d’entrée/sortie en couloirs. */
-      cands.push(manhattanRoute(a, b, STUB, STUB));
+      cands.push(manhattanRoute(a, b, stub0, stub0));
       for (let k = 1; k <= WIRE_LANE_MAX; k++) {
         const extra = k * WIRE_LANE;
         /* Stub dest plus court (min 28) : horizontal plus près de la cible = couloir au-dessus. */
-        const bShort = Math.max(28, STUB - extra);
-        cands.push(manhattanRoute(a, b, STUB + extra, STUB));
-        cands.push(manhattanRoute(a, b, STUB, bShort));
-        cands.push(manhattanRoute(a, b, STUB + extra, bShort));
-        cands.push(manhattanRoute(a, b, STUB + extra, STUB + extra));
+        const bShort = Math.max(28, stub0 - extra);
+        cands.push(manhattanRoute(a, b, stub0 + extra, stub0));
+        cands.push(manhattanRoute(a, b, stub0, bShort));
+        cands.push(manhattanRoute(a, b, stub0 + extra, bShort));
+        cands.push(manhattanRoute(a, b, stub0 + extra, stub0 + extra));
       }
       for (let i = 0; i < cands.length; i++) {
         const routed = withCardinalStubs(cands[i], a, b);
         if (!pathHitsOtherWires(routed)) return routed;
       }
-      return withCardinalStubs(cands[0] || manhattanRoute(a, b, STUB, STUB), a, b);
+      return withCardinalStubs(cands[0] || manhattanRoute(a, b, stub0, stub0), a, b);
     }
     function route(a, b) { return autoRoute(a, b); }
     /** Direction du stub au curseur : vers le départ (évite les U moches). */
@@ -22537,15 +22672,22 @@
     function addWireDraftCorner(x, y) {
       if (!state.wireFrom) return false;
       const last = wireDraftLastNode();
-      const dx = x - last.x;
-      const dy = y - last.y;
+      let cx = x, cy = y;
+      /* EduVolt : coller le clic au bord de grille avant de verrouiller H/V. */
+      if (typeof isEduVoltRoute === "function" && isEduVoltRoute()
+          && typeof snapPointToGridEdge === "function") {
+        const sn = snapPointToGridEdge(x, y);
+        cx = sn.x; cy = sn.y;
+      }
+      const dx = cx - last.x;
+      const dy = cy - last.y;
       if (Math.hypot(dx, dy) < 12) return false;
       /* Verrouille H ou V depuis le dernier point (garde le L, sans changer autoRoute). */
       let corner;
       if (Math.abs(dx) >= Math.abs(dy)) {
-        corner = { x: x, y: last.y, direction: dx >= 0 ? "left" : "right" };
+        corner = { x: cx, y: last.y, direction: dx >= 0 ? "left" : "right" };
       } else {
-        corner = { x: last.x, y: y, direction: dy >= 0 ? "top" : "bottom" };
+        corner = { x: last.x, y: cy, direction: dy >= 0 ? "top" : "bottom" };
       }
       if (!state.wireDraftPts) state.wireDraftPts = [];
       const prev = state.wireDraftPts[state.wireDraftPts.length - 1];
@@ -22642,7 +22784,15 @@
       const ref = w[end];
       if (!ref) return { dx: 0, dy: 0, side: "top" };
       const fan = termSiblingFan(w, end);
-      const side = fan.side;
+      let side = fan.side;
+      /* EduVolt : décalage selon la direction de la borne (sortie), pas l’approche —
+         évite fil qui remonte dans le module quand la borne est en bas. */
+      if (typeof isEduVoltRoute === "function" && isEduVoltRoute()) {
+        try {
+          const ep = endpoint(ref);
+          if (ep && ep.direction) side = ep.direction;
+        } catch (_) {}
+      }
       const r = termPadRadius(ref);
       const u = side === "left" ? [-1, 0]
         : side === "right" ? [1, 0]
@@ -26397,6 +26547,7 @@
       sizeBoardSvg(svgClips);
       world.appendChild(svgClips);
       try { appendTerminalClips(svgClips, NS); } catch (_) {}
+      try { appendEduVoltExitGuides(world, NS); } catch (_) {}
 
       /* 4) Effet court-circuit : bannière + arc / étincelles */
       if (state.short) {
