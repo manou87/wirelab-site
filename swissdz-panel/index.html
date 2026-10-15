@@ -22544,11 +22544,19 @@
           ])));
         });
       }
-      /* Hints utilisateur (coudes clic) : snappés aux coins, réinsérés entre Ag et Bg. */
+      /* Hints = coudes intérieurs seulement (pas les stubs A2/B2 — sinon jog multi-points). */
       if (hintPts && hintPts.length) {
         const hints = hintPts
           .map((p) => snapPointToGridCorner(p.x, p.y))
-          .filter((p) => rayAlong(A, da, p) > step * 0.4 && rayAlong(B, db, p) > step * 0.4);
+          .filter((p) => {
+            const alongA = rayAlong(A, da, p);
+            const alongB = rayAlong(B, db, p);
+            if (alongA < step * 1.15 || alongB < step * 1.15) return false;
+            /* Écarter les points quasi-alignés sur le stub (évite double raccord). */
+            if (rayLat(A, da, p) < 8 && alongA < step * 1.6) return false;
+            if (rayLat(B, db, p) < 8 && alongB < step * 1.6) return false;
+            return true;
+          });
         if (hints.length) {
           cands.unshift(forceOrtho(dedupePts([
             { x: A.x, y: A.y }, A2, Ag, ...hints, Bg, B2, { x: B.x, y: B.y }
@@ -22883,6 +22891,14 @@
       }
       const A = endpoint(w.a);
       const B = endpoint(w.b);
+      /* v160 EduVolt : toujours reconstruire (stubs frais) — waypoints = hints intérieurs. */
+      if (typeof isEduVoltRoute === "function" && isEduVoltRoute()
+          && typeof eduVoltRebuildRoute === "function") {
+        const hints = (w.waypoints && w.waypoints.length)
+          ? w.waypoints.map((p) => ({ x: p.x, y: p.y }))
+          : null;
+        return eduVoltRebuildRoute(A, B, hints);
+      }
       if (w.waypoints && w.waypoints.length) {
         const mids = w.waypoints.map((p) => ({ x: p.x, y: p.y }));
         /* v85: pointes de virage via withCardinalStubs (réf. 2026-10-01).
@@ -22985,7 +23001,24 @@
     }
     function bakeWaypoints(w, pts) {
       const cleaned = simplifyOrtho(pts);
-      w.waypoints = cleaned.slice(1, -1).map((p) => ({ x: p.x, y: p.y }));
+      let mids = cleaned.slice(1, -1).map((p) => ({ x: p.x, y: p.y }));
+      /* v160 EduVolt : ne pas figer les stubs (A2/B2) — seulement les coudes grille intérieurs. */
+      if (typeof isEduVoltRoute === "function" && isEduVoltRoute() && w && w.a && w.b) {
+        try {
+          const step = (typeof boardCoordsStep === "function") ? boardCoordsStep() : 50;
+          const A = endpoint(w.a), B = endpoint(w.b);
+          const da = padUnit(A), db = padUnit(B);
+          mids = mids.filter((p) => {
+            const alongA = rayAlong(A, da, p);
+            const alongB = rayAlong(B, db, p);
+            if (alongA < step * 1.15 || alongB < step * 1.15) return false;
+            if (rayLat(A, da, p) < 8 && alongA < step * 1.6) return false;
+            if (rayLat(B, db, p) < 8 && alongB < step * 1.6) return false;
+            return true;
+          }).map((p) => snapPointToGridCorner(p.x, p.y));
+        } catch (_) {}
+      }
+      w.waypoints = mids;
     }
     /** Snapshot positions de bornes (resize / follow fils). */
     function snapshotItemTermEps(uid) {
