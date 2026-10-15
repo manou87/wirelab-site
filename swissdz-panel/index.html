@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v159-eduvolt-toggle" />
+  <meta name="swissdz-rev" content="native-shell-8777-v160-eduvolt-route-fix" />
+  <!-- v160: EduVolt — sortie flèche sans U-turn, coudes sur côtés grille, raccord direct, flèches 25% -->
   <!-- v159: interrupteur EduVolt (grille 50 + stubs sortie) — OFF = système classique 100% inchangé -->
   <!-- v157: technique bord ABB sur TOUTES les bornes LIB (top/bottom/left/right → 0.025/0.975) -->
   <!-- v147: badge 🔒 Lecture vraiment masqué (CSS body.sim-lecture le réaffichait) -->
@@ -4901,14 +4902,15 @@
     html[data-theme="dark"] #btnEduVolt.btn-ico.active {
       background:rgba(248,113,113,.16); color:#fecaca; border-color:rgba(248,113,113,.4);
     }
+    /* v160 : flèches ~25 % taille, ~50 % plus claires (alpha ÷ 2). */
     svg.eduvolt-stubs { position:absolute; left:0; top:0; overflow:visible; pointer-events:none; z-index:54; }
     svg.eduvolt-stubs .ev-stub {
-      fill:none; stroke:rgba(248,113,113,.72); stroke-width:2.2; stroke-linecap:round;
+      fill:none; stroke:rgba(248,113,113,.36); stroke-width:1.1; stroke-linecap:round;
     }
     svg.eduvolt-stubs .ev-dot {
-      fill:rgba(248,113,113,.55); stroke:rgba(185,28,28,.75); stroke-width:0.8;
+      fill:rgba(248,113,113,.28); stroke:rgba(185,28,28,.38); stroke-width:0.5;
     }
-    svg.eduvolt-stubs .ev-arrow { fill:rgba(248,113,113,.85); }
+    svg.eduvolt-stubs .ev-arrow { fill:rgba(248,113,113,.42); }
 
     #btnGrid.grid-toggle.is-off {
       opacity:.55;
@@ -22417,7 +22419,7 @@
      * U voisins (1a–1d) : [A, A2, B2, B] inchangé. Pas de piqué diagonal dans le pad.
      * v85-cabling-ref-20261001 : stubs figés = pointes de virage (poignées bleues).
      */
-    /** EduVolt : projette un point sur le bord de grille le plus proche (jamais hors côtés). */
+    /** EduVolt : projette un point sur le côté de grille le plus proche. */
     function snapPointToGridEdge(x, y) {
       const step = (typeof boardCoordsStep === "function") ? boardCoordsStep() : 50;
       if (!(step > 0)) return { x: x, y: y };
@@ -22425,23 +22427,161 @@
       const gy = Math.round(y / step) * step;
       const dx = Math.abs(x - gx);
       const dy = Math.abs(y - gy);
-      if (dx <= dy) return { x: gx, y: y }; /* collé au côté vertical */
-      return { x: x, y: gy }; /* collé au côté horizontal */
+      if (dx <= dy) return { x: gx, y: y };
+      return { x: x, y: gy };
+    }
+    /** EduVolt : coin de coude = intersection de côtés de grille (n×step). */
+    function snapPointToGridCorner(x, y) {
+      const step = (typeof boardCoordsStep === "function") ? boardCoordsStep() : 50;
+      if (!(step > 0)) return { x: x, y: y };
+      return { x: Math.round(x / step) * step, y: Math.round(y / step) * step };
     }
     function snapRouteToGridEdges(pts) {
       if (!pts || pts.length < 2) return pts;
       const out = pts.map((p, i) => {
         if (i === 0 || i === pts.length - 1) return { x: p.x, y: p.y };
-        return snapPointToGridEdge(p.x, p.y);
+        return snapPointToGridCorner(p.x, p.y);
       });
       return forceOrtho(dedupePts(out));
     }
-    /** Guides rouge clair : point borne + direction + stub (= 1 carré). */
+    /**
+     * v160 EduVolt — stub exact 1 carré dans le sens de la flèche, puis 1er mouvement
+     * perpendiculaire (jamais retour inverse sur le même fil). Coudes = coins de grille.
+     */
+    function eduVoltStubEnd(pad, step) {
+      const d = padUnit(pad);
+      return { x: pad.x + d[0] * step, y: pad.y + d[1] * step };
+    }
+    /** Après le stub : rejoindre le côté de grille (coin) sans revenir vers la borne. */
+    function eduVoltJoinGrid(stub, pad, step) {
+      const d = padUnit(pad);
+      const g = snapPointToGridCorner(stub.x, stub.y);
+      /* Si déjà sur un coin et toujours « devant » la borne : OK. */
+      if (Math.hypot(g.x - stub.x, g.y - stub.y) < 0.5
+          && (g.x - pad.x) * d[0] + (g.y - pad.y) * d[1] >= step * 0.45) {
+        return g;
+      }
+      /* Déplacement latéral seul (coude 90°) vers le côté de grille — jamais −d. */
+      if (Math.abs(d[0]) > 0.5) {
+        const gy = Math.round(stub.y / step) * step;
+        let gx = Math.round(stub.x / step) * step;
+        if ((gx - pad.x) * d[0] < step * 0.45) gx = pad.x + d[0] * step;
+        gx = Math.round(gx / step) * step;
+        if ((gx - pad.x) * d[0] < step * 0.45) {
+          gx = (d[0] > 0 ? Math.ceil : Math.floor)((pad.x + d[0] * step) / step) * step;
+        }
+        return { x: gx, y: gy };
+      }
+      const gx = Math.round(stub.x / step) * step;
+      let gy = Math.round(stub.y / step) * step;
+      if ((gy - pad.y) * d[1] < step * 0.45) gy = pad.y + d[1] * step;
+      gy = Math.round(gy / step) * step;
+      if ((gy - pad.y) * d[1] < step * 0.45) {
+        gy = (d[1] > 0 ? Math.ceil : Math.floor)((pad.y + d[1] * step) / step) * step;
+      }
+      return { x: gx, y: gy };
+    }
+    function eduVoltSegDot(a, b, c) {
+      const ix = b.x - a.x, iy = b.y - a.y;
+      const ox = c.x - b.x, oy = c.y - b.y;
+      return ix * ox + iy * oy;
+    }
+    /** True si un segment revient en arrière (U-turn 180°) ou si sortie/entrée viole la flèche. */
+    function eduVoltHasIllegalReverse(pts, A, B, da, db) {
+      if (!pts || pts.length < 3) return false;
+      /* 1er mouvement après A (= pts[0])→pts[1] doit suivre da ; pts[1]→pts[2] ne doit pas être −da. */
+      const s1x = pts[1].x - pts[0].x, s1y = pts[1].y - pts[0].y;
+      if (s1x * da[0] + s1y * da[1] < -1) return true;
+      if (pts.length >= 3) {
+        const s2x = pts[2].x - pts[1].x, s2y = pts[2].y - pts[1].y;
+        if (s2x * da[0] + s2y * da[1] < -1 && Math.abs(s2x * da[0] + s2y * da[1]) > Math.hypot(s2x, s2y) * 0.85) {
+          return true; /* retour inverse sur le stub */
+        }
+      }
+      const n = pts.length;
+      const t1x = pts[n - 1].x - pts[n - 2].x, t1y = pts[n - 1].y - pts[n - 2].y;
+      /* Dernier segment = vers la borne = −db ; l’avant-dernier ne doit pas déjà aller vers −db depuis l’intérieur. */
+      if (n >= 3) {
+        const t0x = pts[n - 2].x - pts[n - 3].x, t0y = pts[n - 2].y - pts[n - 3].y;
+        if (t0x * (-db[0]) + t0y * (-db[1]) > 1
+            && t1x * (-db[0]) + t1y * (-db[1]) > 1
+            && eduVoltSegDot(pts[n - 3], pts[n - 2], pts[n - 1]) < -1) {
+          return true;
+        }
+      }
+      for (let i = 1; i < n - 1; i++) {
+        if (eduVoltSegDot(pts[i - 1], pts[i], pts[i + 1]) < -1) return true;
+      }
+      return false;
+    }
+    function eduVoltGridManhattan(P, Q, step, laneK) {
+      const k = laneK || 0;
+      const cands = [];
+      const px = P.x, py = P.y, qx = Q.x, qy = Q.y;
+      cands.push([{ x: qx, y: py }, { x: qx, y: qy }]);
+      cands.push([{ x: px, y: qy }, { x: qx, y: qy }]);
+      if (k > 0) {
+        const o = k * step;
+        cands.push([{ x: px, y: py + o }, { x: qx, y: py + o }, { x: qx, y: qy }]);
+        cands.push([{ x: px, y: py - o }, { x: qx, y: py - o }, { x: qx, y: qy }]);
+        cands.push([{ x: px + o, y: py }, { x: px + o, y: qy }, { x: qx, y: qy }]);
+        cands.push([{ x: px - o, y: py }, { x: px - o, y: qy }, { x: qx, y: qy }]);
+      }
+      return cands.map((mid) => mid.map((p) => snapPointToGridCorner(p.x, p.y)));
+    }
+    function eduVoltRebuildRoute(A, B, hintPts) {
+      const step = (typeof boardCoordsStep === "function") ? boardCoordsStep() : 50;
+      const da = padUnit(A), db = padUnit(B);
+      const A2 = eduVoltStubEnd(A, step);
+      const B2 = eduVoltStubEnd(B, step);
+      const Ag = eduVoltJoinGrid(A2, A, step);
+      const Bg = eduVoltJoinGrid(B2, B, step);
+      const cands = [];
+      for (let k = 0; k <= 8; k++) {
+        eduVoltGridManhattan(Ag, Bg, step, k).forEach((mid) => {
+          cands.push(forceOrtho(dedupePts([
+            { x: A.x, y: A.y }, A2, Ag, ...mid, Bg, B2, { x: B.x, y: B.y }
+          ])));
+        });
+      }
+      /* Hints = coudes intérieurs seulement (pas les stubs A2/B2 — sinon jog multi-points). */
+      if (hintPts && hintPts.length) {
+        const hints = hintPts
+          .map((p) => snapPointToGridCorner(p.x, p.y))
+          .filter((p) => {
+            const alongA = rayAlong(A, da, p);
+            const alongB = rayAlong(B, db, p);
+            if (alongA < step * 1.15 || alongB < step * 1.15) return false;
+            /* Écarter les points quasi-alignés sur le stub (évite double raccord). */
+            if (rayLat(A, da, p) < 8 && alongA < step * 1.6) return false;
+            if (rayLat(B, db, p) < 8 && alongB < step * 1.6) return false;
+            return true;
+          });
+        if (hints.length) {
+          cands.unshift(forceOrtho(dedupePts([
+            { x: A.x, y: A.y }, A2, Ag, ...hints, Bg, B2, { x: B.x, y: B.y }
+          ])));
+        }
+      }
+      for (let i = 0; i < cands.length; i++) {
+        if (!eduVoltHasIllegalReverse(cands[i], A, B, da, db)) return cands[i];
+      }
+      /* Fallback forcé : stub → coude latéral 1 case → Manhattan. */
+      const latA = { x: A2.x + (-da[1]) * step, y: A2.y + da[0] * step };
+      const latB = { x: B2.x + (-db[1]) * step, y: B2.y + db[0] * step };
+      const La = snapPointToGridCorner(latA.x, latA.y);
+      const Lb = snapPointToGridCorner(latB.x, latB.y);
+      return forceOrtho(dedupePts([
+        { x: A.x, y: A.y }, A2, La, { x: Lb.x, y: La.y }, Lb, B2, { x: B.x, y: B.y }
+      ]));
+    }
+    /** Guides rouge clair : 25 % longueur stub, flèche légère (repère direction seulement). */
     function appendEduVoltExitGuides(world, NS) {
       if (!world || !NS) return;
       if (typeof isEduVoltRoute !== "function" || !isEduVoltRoute()) return;
       if (!state || state.mode !== "wire") return;
-      const stubLen = (typeof wireStubLen === "function") ? wireStubLen() : 50;
+      const step = (typeof boardCoordsStep === "function") ? boardCoordsStep() : 50;
+      const stubLen = step * 0.25; /* v160 : flèche à 25 % */
       const svg = document.createElementNS(NS, "svg");
       svg.setAttribute("class", "eduvolt-stubs");
       svg.setAttribute("aria-hidden", "true");
@@ -22467,12 +22607,12 @@
             dot.setAttribute("class", "ev-dot");
             dot.setAttribute("cx", String(p.x));
             dot.setAttribute("cy", String(p.y));
-            dot.setAttribute("r", "3.2");
+            dot.setAttribute("r", "1.6");
             svg.appendChild(dot);
-            /* Petite flèche directionnelle */
-            const ax = x2 - d[0] * 7;
-            const ay = y2 - d[1] * 7;
-            const px = -d[1] * 3.2, py = d[0] * 3.2;
+            const head = Math.max(2.2, stubLen * 0.35);
+            const ax = x2 - d[0] * head;
+            const ay = y2 - d[1] * head;
+            const px = -d[1] * (head * 0.45), py = d[0] * (head * 0.45);
             const tri = document.createElementNS(NS, "polygon");
             tri.setAttribute("class", "ev-arrow");
             tri.setAttribute("points",
@@ -22485,6 +22625,12 @@
     }
 
     function withCardinalStubs(pts, A, B) {
+      /* v160 : mode EduVolt = routeur dédié (flèche, anti-U-turn, coins grille). */
+      if (typeof isEduVoltRoute === "function" && isEduVoltRoute()
+          && typeof eduVoltRebuildRoute === "function") {
+        const hint = (pts || []).slice(1, -1).map((p) => ({ x: p.x, y: p.y }));
+        return eduVoltRebuildRoute(A, B, hint);
+      }
       const da = padUnit(A), db = padUnit(B);
       let raw = (pts || []).slice(1, -1).map((p) => ({ x: p.x, y: p.y }));
       raw = raw.filter((p) => !onRevRay(A, da, p) && !onRevRay(B, db, p));
@@ -22501,20 +22647,9 @@
         bLen = Math.max(STUB_MIN, rayAlong(B, db, raw[raw.length - 1]));
         raw.pop();
       }
-      /* EduVolt : stub minimum = 1 carré, jamais de point sur le ray inverse (traverse le module). */
-      if (typeof isEduVoltRoute === "function" && isEduVoltRoute()) {
-        const step = (typeof boardCoordsStep === "function") ? boardCoordsStep() : 50;
-        aLen = Math.max(step, aLen);
-        bLen = Math.max(step, bLen);
-        raw = raw.filter((p) => rayAlong(A, da, p) > step * 0.35 && rayAlong(B, db, p) > step * 0.35);
-      }
       const A2 = stubOf(A, aLen);
       const B2 = stubOf(B, bLen);
-      let routed = forceOrtho(dedupePts([{ x: A.x, y: A.y }, A2, ...raw, B2, { x: B.x, y: B.y }]));
-      if (typeof isEduVoltRoute === "function" && isEduVoltRoute() && typeof snapRouteToGridEdges === "function") {
-        routed = snapRouteToGridEdges(routed);
-      }
-      return routed;
+      return forceOrtho(dedupePts([{ x: A.x, y: A.y }, A2, ...raw, B2, { x: B.x, y: B.y }]));
     }
 
     /* Couloir parallèle : assez large pour un congé (R 24), sans jog carré. */
@@ -22606,6 +22741,29 @@
     /* Stub directionnel + Manhattan. Voisins : même U/L arrondi, couloir décalé (pas de tronc partagé).
      * v113 : restauration pathHitsOtherWires (annule v111 — user « annule dernier changement câblage »). */
     function autoRoute(a, b) {
+      /* v160 : EduVolt — ne passe plus par les candidats Manhattan classiques (U-turns). */
+      if (typeof isEduVoltRoute === "function" && isEduVoltRoute()
+          && typeof eduVoltRebuildRoute === "function") {
+        const routed = eduVoltRebuildRoute(a, b, null);
+        if (!pathHitsOtherWires(routed)) return routed;
+        /* Essais couloirs grille si collision. */
+        const step = (typeof boardCoordsStep === "function") ? boardCoordsStep() : 50;
+        for (let k = 1; k <= 8; k++) {
+          const da = padUnit(a), db = padUnit(b);
+          const A2 = eduVoltStubEnd(a, step);
+          const B2 = eduVoltStubEnd(b, step);
+          const Ag = eduVoltJoinGrid(A2, a, step);
+          const Bg = eduVoltJoinGrid(B2, b, step);
+          const mids = eduVoltGridManhattan(Ag, Bg, step, k);
+          for (let m = 0; m < mids.length; m++) {
+            const cand = forceOrtho(dedupePts([
+              { x: a.x, y: a.y }, A2, Ag, ...mids[m], Bg, B2, { x: b.x, y: b.y }
+            ]));
+            if (!eduVoltHasIllegalReverse(cand, a, b, da, db) && !pathHitsOtherWires(cand)) return cand;
+          }
+        }
+        return routed;
+      }
       const da = padUnit(a);
       const db = padUnit(b);
       const cands = [];
@@ -22673,10 +22831,10 @@
       if (!state.wireFrom) return false;
       const last = wireDraftLastNode();
       let cx = x, cy = y;
-      /* EduVolt : coller le clic au bord de grille avant de verrouiller H/V. */
+      /* EduVolt : coude sur coin de grille (côtés des carrés). */
       if (typeof isEduVoltRoute === "function" && isEduVoltRoute()
-          && typeof snapPointToGridEdge === "function") {
-        const sn = snapPointToGridEdge(x, y);
+          && typeof snapPointToGridCorner === "function") {
+        const sn = snapPointToGridCorner(x, y);
         cx = sn.x; cy = sn.y;
       }
       const dx = cx - last.x;
@@ -22733,6 +22891,14 @@
       }
       const A = endpoint(w.a);
       const B = endpoint(w.b);
+      /* v160 EduVolt : toujours reconstruire (stubs frais) — waypoints = hints intérieurs. */
+      if (typeof isEduVoltRoute === "function" && isEduVoltRoute()
+          && typeof eduVoltRebuildRoute === "function") {
+        const hints = (w.waypoints && w.waypoints.length)
+          ? w.waypoints.map((p) => ({ x: p.x, y: p.y }))
+          : null;
+        return eduVoltRebuildRoute(A, B, hints);
+      }
       if (w.waypoints && w.waypoints.length) {
         const mids = w.waypoints.map((p) => ({ x: p.x, y: p.y }));
         /* v85: pointes de virage via withCardinalStubs (réf. 2026-10-01).
@@ -22783,16 +22949,17 @@
     function termDrawDelta(w, end) {
       const ref = w[end];
       if (!ref) return { dx: 0, dy: 0, side: "top" };
-      const fan = termSiblingFan(w, end);
-      let side = fan.side;
-      /* EduVolt : décalage selon la direction de la borne (sortie), pas l’approche —
-         évite fil qui remonte dans le module quand la borne est en bas. */
+      /* v160 EduVolt : raccord DIRECT sur la borne (pas de double point / jog pastille). */
       if (typeof isEduVoltRoute === "function" && isEduVoltRoute()) {
+        let side = "top";
         try {
           const ep = endpoint(ref);
           if (ep && ep.direction) side = ep.direction;
         } catch (_) {}
+        return { dx: 0, dy: 0, lx: 0, ly: 0, side };
       }
+      const fan = termSiblingFan(w, end);
+      let side = fan.side;
       const r = termPadRadius(ref);
       const u = side === "left" ? [-1, 0]
         : side === "right" ? [1, 0]
@@ -22834,7 +23001,24 @@
     }
     function bakeWaypoints(w, pts) {
       const cleaned = simplifyOrtho(pts);
-      w.waypoints = cleaned.slice(1, -1).map((p) => ({ x: p.x, y: p.y }));
+      let mids = cleaned.slice(1, -1).map((p) => ({ x: p.x, y: p.y }));
+      /* v160 EduVolt : ne pas figer les stubs (A2/B2) — seulement les coudes grille intérieurs. */
+      if (typeof isEduVoltRoute === "function" && isEduVoltRoute() && w && w.a && w.b) {
+        try {
+          const step = (typeof boardCoordsStep === "function") ? boardCoordsStep() : 50;
+          const A = endpoint(w.a), B = endpoint(w.b);
+          const da = padUnit(A), db = padUnit(B);
+          mids = mids.filter((p) => {
+            const alongA = rayAlong(A, da, p);
+            const alongB = rayAlong(B, db, p);
+            if (alongA < step * 1.15 || alongB < step * 1.15) return false;
+            if (rayLat(A, da, p) < 8 && alongA < step * 1.6) return false;
+            if (rayLat(B, db, p) < 8 && alongB < step * 1.6) return false;
+            return true;
+          }).map((p) => snapPointToGridCorner(p.x, p.y));
+        } catch (_) {}
+      }
+      w.waypoints = mids;
     }
     /** Snapshot positions de bornes (resize / follow fils). */
     function snapshotItemTermEps(uid) {
