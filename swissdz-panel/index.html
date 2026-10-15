@@ -8,7 +8,8 @@
   <link rel="apple-touch-icon" href="brand/logo-wirelab-pro-icon.png?v=official-gemini" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="swissdz-rev" content="native-shell-8777-v159-eduvolt-toggle" />
+  <meta name="swissdz-rev" content="native-shell-8777-v162-wire-show-terms" />
+  <!-- v162: mode Câblage = affiche toutes les bornes (repères), sans changer le routage -->
   <!-- v159: interrupteur EduVolt (grille 50 + stubs sortie) — OFF = système classique 100% inchangé -->
   <!-- v157: technique bord ABB sur TOUTES les bornes LIB (top/bottom/left/right → 0.025/0.975) -->
   <!-- v147: badge 🔒 Lecture vraiment masqué (CSS body.sim-lecture le réaffichait) -->
@@ -4901,14 +4902,19 @@
     html[data-theme="dark"] #btnEduVolt.btn-ico.active {
       background:rgba(248,113,113,.16); color:#fecaca; border-color:rgba(248,113,113,.4);
     }
+    /* v162 : repères bornes en mode Câblage (légers) — indépendant du routage EduVolt. */
+    svg.wire-term-guides,
     svg.eduvolt-stubs { position:absolute; left:0; top:0; overflow:visible; pointer-events:none; z-index:54; }
+    svg.wire-term-guides .wt-stub,
     svg.eduvolt-stubs .ev-stub {
-      fill:none; stroke:rgba(248,113,113,.72); stroke-width:2.2; stroke-linecap:round;
+      fill:none; stroke:rgba(248,113,113,.40); stroke-width:1.2; stroke-linecap:round;
     }
+    svg.wire-term-guides .wt-dot,
     svg.eduvolt-stubs .ev-dot {
-      fill:rgba(248,113,113,.55); stroke:rgba(185,28,28,.75); stroke-width:0.8;
+      fill:rgba(248,113,113,.32); stroke:rgba(185,28,28,.42); stroke-width:0.55;
     }
-    svg.eduvolt-stubs .ev-arrow { fill:rgba(248,113,113,.85); }
+    svg.wire-term-guides .wt-arrow,
+    svg.eduvolt-stubs .ev-arrow { fill:rgba(248,113,113,.45); }
 
     #btnGrid.grid-toggle.is-off {
       opacity:.55;
@@ -22436,14 +22442,16 @@
       });
       return forceOrtho(dedupePts(out));
     }
-    /** Guides rouge clair : point borne + direction + stub (= 1 carré). */
-    function appendEduVoltExitGuides(world, NS) {
+    /**
+     * v162 : en mode Câblage, montrer toutes les bornes disponibles (point + petite flèche sens).
+     * Affichage seul — ne change pas le routage (classique ou EduVolt).
+     */
+    function appendWireTermGuides(world, NS) {
       if (!world || !NS) return;
-      if (typeof isEduVoltRoute !== "function" || !isEduVoltRoute()) return;
       if (!state || state.mode !== "wire") return;
-      const stubLen = (typeof wireStubLen === "function") ? wireStubLen() : 50;
+      const stubLen = 12; /* repère court, juste pour voir la borne + sens */
       const svg = document.createElementNS(NS, "svg");
-      svg.setAttribute("class", "eduvolt-stubs");
+      svg.setAttribute("class", "wire-term-guides");
       svg.setAttribute("aria-hidden", "true");
       try { sizeBoardSvg(svg); } catch (_) {}
       (state.items || []).forEach((item) => {
@@ -22457,24 +22465,24 @@
             const x2 = p.x + d[0] * stubLen;
             const y2 = p.y + d[1] * stubLen;
             const line = document.createElementNS(NS, "line");
-            line.setAttribute("class", "ev-stub");
+            line.setAttribute("class", "wt-stub");
             line.setAttribute("x1", String(p.x));
             line.setAttribute("y1", String(p.y));
             line.setAttribute("x2", String(x2));
             line.setAttribute("y2", String(y2));
             svg.appendChild(line);
             const dot = document.createElementNS(NS, "circle");
-            dot.setAttribute("class", "ev-dot");
+            dot.setAttribute("class", "wt-dot");
             dot.setAttribute("cx", String(p.x));
             dot.setAttribute("cy", String(p.y));
-            dot.setAttribute("r", "3.2");
+            dot.setAttribute("r", "2.4");
             svg.appendChild(dot);
-            /* Petite flèche directionnelle */
-            const ax = x2 - d[0] * 7;
-            const ay = y2 - d[1] * 7;
-            const px = -d[1] * 3.2, py = d[0] * 3.2;
+            const head = 4.2;
+            const ax = x2 - d[0] * head;
+            const ay = y2 - d[1] * head;
+            const px = -d[1] * 2.2, py = d[0] * 2.2;
             const tri = document.createElementNS(NS, "polygon");
-            tri.setAttribute("class", "ev-arrow");
+            tri.setAttribute("class", "wt-arrow");
             tri.setAttribute("points",
               x2 + "," + y2 + " " + (ax + px) + "," + (ay + py) + " " + (ax - px) + "," + (ay - py));
             svg.appendChild(tri);
@@ -22482,6 +22490,10 @@
         });
       });
       world.appendChild(svg);
+    }
+    /** Compat : ancien nom EduVolt → même affichage bornes en mode câblage. */
+    function appendEduVoltExitGuides(world, NS) {
+      return appendWireTermGuides(world, NS);
     }
 
     function withCardinalStubs(pts, A, B) {
@@ -26547,7 +26559,7 @@
       sizeBoardSvg(svgClips);
       world.appendChild(svgClips);
       try { appendTerminalClips(svgClips, NS); } catch (_) {}
-      try { appendEduVoltExitGuides(world, NS); } catch (_) {}
+      try { appendWireTermGuides(world, NS); } catch (_) {}
 
       /* 4) Effet court-circuit : bannière + arc / étincelles */
       if (state.short) {
